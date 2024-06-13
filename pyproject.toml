@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "randorm-api"
+version = "0.0.0"
+description = "Server-side of Randorm"
+authors = [
+    "Anton Kudryavtsev <antonkudryavtsevdoem@gmail.com>",
+    "Egor Machnev <egorikhelp@gmail.com>",
+]
+readme = "readme.md"
+keywords = ["api", "graphql", "telegram", "randorm"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"   # formatter
+ruff = "^0.4.8"     # linter
+isort = "^5.13.2"   # imports sorter
+ipython = "^8.25.0" # interactive shell
+bandit = "^1.7.9"   # security checker
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+venvPath = "." # pyright lsp support
+venv = ".venv"
+
+[tool.ruff]
+exclude = [".mypy_cache", ".ruff_cache", ".venv", "venv", "build", "dist"]
+line-length = 88
+indent-width = 4
+target-version = "py311"
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "Q", "B", "I", "UP", "C"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+force-single-line = false
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = []

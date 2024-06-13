@@ -1,0 +1,3 @@
+[virtualenvs]
+in-project = true # uv, pipenv, poetry & virtualenvs competability
+path = ".venv"
