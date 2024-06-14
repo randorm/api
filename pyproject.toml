@@ -8,16 +8,18 @@ authors = [
 ]
 readme = "readme.md"
 keywords = ["api", "graphql", "telegram", "randorm"]
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"   # formatter
-ruff = "^0.4.8"     # linter
-isort = "^5.13.2"   # imports sorter
-ipython = "^8.25.0" # interactive shell
-bandit = "^1.7.9"   # security checker
+black = "^24.4.2"     # formatter
+ruff = "^0.4.8"       # linter
+isort = "^5.13.2"     # imports sorter
+ipython = "^8.25.0"   # interactive shell
+bandit = "^1.7.9"     # security checker
+pre-commit = "^3.7.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -31,7 +33,7 @@ venv = ".venv"
 exclude = [".mypy_cache", ".ruff_cache", ".venv", "venv", "build", "dist"]
 line-length = 88
 indent-width = 4
-target-version = "py311"
+target-version = "py312"
 fix = true
 
 [tool.ruff.lint]
