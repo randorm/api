@@ -2,6 +2,7 @@ from enum import StrEnum
 
 import strawberry as sb
 
+from src.adapter.external.graphql import scalar
 from src.domain.model.user import Gender, LanguageCode, Profile, User
 
 
@@ -22,14 +23,14 @@ class ProfileType:
     first_name: sb.auto
     last_name: sb.auto
     username: sb.auto
-    language_code: sb.auto
+    language_code: LanguageCodeType
     gender: GenderType
     birthdate: sb.auto
 
 
 @sb.experimental.pydantic.type(model=User)
 class UserType:
-    id: sb.auto
+    id: scalar.ObjectID
     tid: sb.auto
     created_at: sb.auto
     updated_at: sb.auto

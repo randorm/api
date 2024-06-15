@@ -3,6 +3,7 @@ from typing import Annotated
 
 import strawberry as sb
 
+from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.type.format_entity import FormatEntityType
 from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.form_field import (
@@ -25,7 +26,7 @@ class FormFieldKindType(StrEnum):
 
 @sb.experimental.pydantic.type(model=BaseFormField)
 class BaseFormFieldType:
-    id: sb.auto
+    id: scalar.ObjectID
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
@@ -37,7 +38,7 @@ class BaseFormFieldType:
 
     respondent_count: sb.auto
 
-    creator_id: sb.auto
+    creator: UserType
     editors: list[UserType]
 
 
@@ -70,7 +71,7 @@ type FormFieldType = Annotated[
 
 @sb.experimental.pydantic.type(model=BaseAnswer)
 class BaseAnswerType:
-    id: sb.auto
+    id: scalar.ObjectID
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto

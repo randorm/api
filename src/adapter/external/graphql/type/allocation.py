@@ -3,6 +3,7 @@ from typing import Annotated
 
 import strawberry as sb
 
+from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.type.form_field import FormFieldType
 from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.allocation import (
@@ -31,7 +32,7 @@ class AllocationStateType(StrEnum):
 
 @sb.experimental.pydantic.type(model=BaseAllocation)
 class BaseAllocationType:
-    id: sb.auto
+    id: scalar.ObjectID
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
