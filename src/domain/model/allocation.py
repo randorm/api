@@ -26,7 +26,7 @@ class BaseAllocation(pydantic.BaseModel):
     due: datetime.datetime | None
     state: AllocationState
 
-    field_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    form_field_ids: set[ObjectID] = pydantic.Field(default_factory=set)
 
     creator_id: ObjectID
     editor_ids: set[ObjectID] = pydantic.Field(default_factory=set)
@@ -61,6 +61,10 @@ class ClosedAllocation(BaseAllocation):
     participant_ids: set[ObjectID]
 
 
+class FailedAllocation(BaseAllocation):
+    state: AllocationState = AllocationState.FAILED
+
+
 type Allocation = (
     CreatingAllocation
     | CreatedAllocation
@@ -68,4 +72,5 @@ type Allocation = (
     | RoomingAllocation
     | RoomedAllocation
     | ClosedAllocation
+    | FailedAllocation
 )

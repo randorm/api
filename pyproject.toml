@@ -12,17 +12,21 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic = "^2.7.4"
-pydantic-extra-types = "^2.8.1"
-beanie = "^1.26.0"
+pydantic = "^2.7.4"             # main data modeling library
+pydantic-extra-types = "^2.8.1" # extra types for pydantic, added for future use
+beanie = "^1.26.0"              # mongodb orm + pydantic object id provider
+strawberry-graphql = "^0.235.0" # graphql server
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"     # formatter
-ruff = "^0.4.8"       # linter
-isort = "^5.13.2"     # imports sorter
-ipython = "^8.25.0"   # interactive shell
-bandit = "^1.7.9"     # security checker
-pre-commit = "^3.7.1"
+black = "^24.4.2" # formatter
+ruff = "^0.4.8" # linter
+isort = "^5.13.2" # imports sorter
+ipython = "^8.25.0" # interactive shell
+bandit = "^1.7.9" # security checker
+pre-commit = "^3.7.1" # precommit hooks
+strawberry-graphql = { extras = [
+    "debug-sever",
+], version = "^0.235.0" } # debug server strawberry
 
 [build-system]
 requires = ["poetry-core"]
