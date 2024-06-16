@@ -1,6 +1,6 @@
 import datetime
 import re
-from enum import Enum
+from enum import StrEnum
 
 import pydantic
 
@@ -8,7 +8,7 @@ from src.domain.model.format_entity import FormatEntity
 from src.domain.model.scalar.object_id import ObjectID
 
 
-class FormFieldKind(str, Enum):
+class FormFieldKind(StrEnum):
     TEXT = "text"
     CHOICE = "choice"
 
