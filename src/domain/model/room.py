@@ -7,6 +7,8 @@ from src.domain.model.user import Gender
 
 
 class Room(pydantic.BaseModel):
+    id: ObjectID = pydantic.Field(alias="_id")
+
     created_at: datetime.datetime
     updated_at: datetime.datetime
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
