@@ -48,7 +48,7 @@ class ChoiceField(BaseFormField):
     multiple: bool
 
 
-type Field = TextFormField | ChoiceField
+type FormField = TextFormField | ChoiceField
 
 
 class BaseAnswer(pydantic.BaseModel):
