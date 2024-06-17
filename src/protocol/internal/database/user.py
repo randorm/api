@@ -1,8 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, Field
-from pydantic.config import SkipJsonSchema
+from pydantic import BaseModel, Field, SkipJsonSchema
 
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Gender, LanguageCode, Profile, User
