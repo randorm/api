@@ -1,0 +1,53 @@
+from abc import ABC, abstractmethod
+
+from src.domain.model.form_field import Answer, FormField
+
+
+class CreateFormField: ...
+
+
+class ReadFormField: ...
+
+
+class UpdateFormField: ...
+
+
+class DeleteFormField: ...
+
+
+class CreateAnswer: ...
+
+
+class ReadAnswer: ...
+
+
+class UpdateAnswer: ...
+
+
+class DeleteAnswer: ...
+
+
+class FormFieldDatabaseProtocol(ABC):
+    @abstractmethod
+    async def create_form_field(self, form_field: CreateFormField) -> FormField: ...
+
+    @abstractmethod
+    async def read_form_field(self, form_field: ReadFormField) -> FormField: ...
+
+    @abstractmethod
+    async def update_form_field(self, form_field: UpdateFormField) -> FormField: ...
+
+    @abstractmethod
+    async def delete_form_field(self, form_field: DeleteFormField) -> FormField: ...
+
+    @abstractmethod
+    async def create_answer(self, answer: CreateAnswer) -> Answer: ...
+
+    @abstractmethod
+    async def read_answer(self, answer: ReadAnswer) -> Answer: ...
+
+    @abstractmethod
+    async def update_answer(self, answer: UpdateAnswer) -> Answer: ...
+
+    @abstractmethod
+    async def delete_answer(self, answer: DeleteAnswer) -> Answer: ...
