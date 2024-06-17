@@ -1,18 +1,80 @@
+import datetime
 from abc import ABC, abstractmethod
+from re import Pattern
 
-from src.domain.model.form_field import Answer, FormField
+from pydantic import BaseModel, Field, SkipJsonSchema
+
+from src.domain.model.form_field import (
+    Answer,
+    ChoiceField,
+    ChoiceOption,
+    FormField,
+    TextFormField,
+)
+from src.domain.model.format_entity import FormatEntity
+from src.domain.model.scalar.object_id import ObjectID
 
 
-class CreateFormField: ...
+class CreateTextFormField(TextFormField):
+    # excluded fields
+    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
 
 
-class ReadFormField: ...
+class CreateChoiceFormField(ChoiceField):
+    # excluded fields
+    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
 
 
-class UpdateFormField: ...
+type CreateFormField = CreateTextFormField | CreateChoiceFormField
 
 
-class DeleteFormField: ...
+class ReadFormField(BaseModel):
+    id: ObjectID = Field(alias="_id")
+
+
+class UpdateTextFormField(TextFormField):
+    # optional fields
+    required: bool | None = Field(default=None)
+    question: str | None = Field(default=None)
+    question_entities: set[FormatEntity] | None = Field(default=None)
+    respondent_count: int | None = Field(default=None)
+    editor_ids: set[ObjectID] | None = Field(default=None)
+    re: Pattern[str] | None = Field(default=None)
+    ex: str | None = Field(default=None)
+    # creator_id: ObjectID | None = Field(default=None)
+
+    # excluded fields
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+
+
+class UpdateChoiceOption(ChoiceOption):
+    text: str | None = Field(default=None)
+    respondent_count: int | None = Field(default=None)
+
+
+class UpdateChoiceFormField(ChoiceField):
+    options: list[UpdateChoiceOption] | None = Field(default=None)
+    multiple: bool | None = Field(default=None)
+
+    # excluded fields
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+
+
+type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField
+
+
+class DeleteFormField(BaseModel):
+    id: ObjectID = Field(alias="_id")
 
 
 class CreateAnswer: ...
