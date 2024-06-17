@@ -6,9 +6,12 @@ from pydantic import BaseModel, Field, SkipJsonSchema
 
 from src.domain.model.form_field import (
     Answer,
+    ChoiceAnswer,
     ChoiceField,
     ChoiceOption,
     FormField,
+    FormFieldKind,
+    TextAnswer,
     TextFormField,
 )
 from src.domain.model.format_entity import FormatEntity
@@ -77,16 +80,59 @@ class DeleteFormField(BaseModel):
     id: ObjectID = Field(alias="_id")
 
 
-class CreateAnswer: ...
+class CreateTextAnswer(TextAnswer):
+    # excluded fields
+    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
 
 
-class ReadAnswer: ...
+class CreateChoiseAnswer(ChoiceAnswer):
+    # excluded fields
+    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
 
 
-class UpdateAnswer: ...
+type CreateAnswer = CreateTextAnswer | CreateChoiseAnswer
 
 
-class DeleteAnswer: ...
+class ReadAnswer(BaseModel):
+    id: ObjectID = Field(alias="_id")
+
+
+class UpdateTextAnswer(TextAnswer):
+    text: str | None = Field(default=None)
+    text_entities: set[FormatEntity] | None = Field(default=None)
+    field_id: ObjectID | None = Field(default=None)
+    field_kind: FormFieldKind | None = Field(default=None)
+    # respondent_id: ObjectID | None = Field(default=None)
+
+    # excluded fields
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+
+
+class UpdateChoiseAnswer(ChoiceAnswer):
+    option_ids: set[ObjectID] | None = Field(default=None)
+    field_id: ObjectID | None = Field(default=None)
+    field_kind: FormFieldKind | None = Field(default=None)
+    # respondent_id: ObjectID | None = Field(default=None)
+
+    # excluded fields
+    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+
+
+type UpdateAnswer = UpdateTextAnswer | UpdateChoiseAnswer
+
+
+class DeleteAnswer(BaseModel):
+    id: ObjectID = Field(alias="_id")
 
 
 class FormFieldDatabaseProtocol(ABC):
