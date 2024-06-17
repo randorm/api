@@ -1,6 +1,7 @@
 import strawberry as sb
 
-from src.adapter.external.graphql.type.user import GenderType
+from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.type.user import GenderType, UserType
 from src.domain.model.room import Room
 
 
@@ -15,5 +16,8 @@ class RoomType:
     occupied: sb.auto
     gender_restriction: GenderType
 
-    creator_id: sb.auto
-    editor_ids: sb.auto
+    creator_id: scalar.ObjectID
+    creator: sb.Private[UserType]
+
+    editors_ids: list[scalar.ObjectID]
+    editors: sb.Private[list[UserType]]

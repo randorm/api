@@ -38,8 +38,11 @@ class BaseFormFieldType:
 
     respondent_count: sb.auto
 
-    creator: UserType
-    editors: list[UserType]
+    creator_id: scalar.ObjectID
+    creator: sb.Private[UserType]
+
+    editors_ids: list[scalar.ObjectID]
+    editors: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=TextFormField)
@@ -52,6 +55,7 @@ class TextFormFieldType(BaseFormFieldType):
 
 @sb.experimental.pydantic.type(model=ChoiceOption)
 class ChoiceOptionType:
+    id: scalar.ObjectID
     text: sb.auto
     respondent_count: sb.auto
 
@@ -59,7 +63,9 @@ class ChoiceOptionType:
 @sb.experimental.pydantic.type(model=ChoiceField)
 class ChoiceFormFieldType(BaseFormFieldType):
     kind: FormFieldKindType = FormFieldKindType.CHOICE
-    options: list[ChoiceOptionType]
+
+    options_ids: list[scalar.ObjectID]
+    options: sb.Private[list[ChoiceOptionType]]
     multiple: sb.auto
 
 
@@ -79,7 +85,8 @@ class BaseAnswerType:
     field_id: sb.auto
     field_kind: FormFieldKindType
 
-    respondent: UserType
+    respondent_id: scalar.ObjectID
+    respondent: sb.Private[UserType]
 
 
 @sb.experimental.pydantic.type(model=TextAnswer)
@@ -92,7 +99,9 @@ class TextAnswerType(BaseAnswerType):
 @sb.experimental.pydantic.type(model=ChoiceAnswer)
 class ChoiceAnswerType(BaseAnswerType):
     kind: FormFieldKindType = FormFieldKindType.CHOICE
-    choices: list[ChoiceOptionType]
+
+    choices_ids: list[scalar.ObjectID]
+    choices: sb.Private[list[ChoiceOptionType]]
 
 
 type AnswerType = Annotated[

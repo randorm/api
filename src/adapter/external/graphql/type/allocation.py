@@ -41,10 +41,14 @@ class BaseAllocationType:
     due: sb.auto
     state: AllocationStateType
 
-    form_fields: list[FormFieldType]
+    form_fields_ids: list[scalar.ObjectID]
+    form_fields: sb.Private[list[FormFieldType]]
 
-    creator: UserType
-    editors: list[UserType]
+    creator_id: scalar.ObjectID
+    creator: sb.Private[UserType]
+
+    editors_ids: list[scalar.ObjectID]
+    editors: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=CreatingAllocation)
@@ -55,31 +59,41 @@ class CreatingAllocationType(BaseAllocationType):
 @sb.experimental.pydantic.type(model=CreatedAllocation)
 class CreatedAllocationType(BaseAllocationType):
     state: AllocationStateType = AllocationStateType.CREATED
-    participants: list[UserType]
+
+    participants_ids: list[scalar.ObjectID]
+    participants: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=OpenAllocation)
 class OpenAllocationType(BaseAllocationType):
     state: AllocationStateType = AllocationStateType.OPEN
-    participants: list[UserType]
+
+    participants_ids: list[scalar.ObjectID]
+    participants: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=RoomingAllocation)
 class RoomingAllocationType(BaseAllocationType):
     state: AllocationStateType = AllocationStateType.ROOMING
-    participants: list[UserType]
+
+    participants_ids: list[scalar.ObjectID]
+    participants: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=RoomedAllocation)
 class RoomedAllocationType(BaseAllocationType):
     state: AllocationStateType = AllocationStateType.ROOMED
-    participants: list[UserType]
+
+    participants_ids: list[scalar.ObjectID]
+    participants: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=ClosedAllocation)
 class ClosedAllocationType(BaseAllocationType):
     state: AllocationStateType = AllocationStateType.CLOSED
-    participants: list[UserType]
+
+    participants_ids: list[scalar.ObjectID]
+    participants: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=FailedAllocation)
