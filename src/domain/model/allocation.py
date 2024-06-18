@@ -61,6 +61,10 @@ class ClosedAllocation(BaseAllocation):
     participant_ids: set[ObjectID]
 
 
+class FailedAllocation(BaseAllocation):
+    state: AllocationState = AllocationState.FAILED
+
+
 type Allocation = (
     CreatingAllocation
     | CreatedAllocation
@@ -68,4 +72,5 @@ type Allocation = (
     | RoomingAllocation
     | RoomedAllocation
     | ClosedAllocation
+    | FailedAllocation
 )
