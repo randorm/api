@@ -5,4 +5,6 @@ All internal (infrastructure) protocols (ports) should be defined here.
 Example of such protocols are databases, caches, workers etc.
 """
 
-__all__ = []
+from src.protocol.internal import database
+
+__all__ = [database]
