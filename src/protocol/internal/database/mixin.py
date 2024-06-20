@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, SkipJsonSchema
+from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 
 class ExcludeFieldMixin(BaseModel):
