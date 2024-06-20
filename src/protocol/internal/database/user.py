@@ -1,21 +1,17 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, Field, SkipJsonSchema
+from pydantic import BaseModel, Field
 
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Gender, LanguageCode, Profile, User
+from src.protocol.internal.database.mixin import ExcludeFieldMixin
 
 # todo: pydantic v2 has no ability to generate DTO types
 # todo: tracking issue https://github.com/pydantic/pydantic/issues/9573
 
 
-class CreateUser(User):
-    # excluded fields
-    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
-    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+class CreateUser(ExcludeFieldMixin, User): ...
 
 
 class ReadUser(BaseModel):
@@ -32,15 +28,11 @@ class UpdateProfile(Profile):
     birthdate: datetime.date | None = Field(default=None)
 
 
-class UpdateUser(User):
+class UpdateUser(ExcludeFieldMixin, User):
+    id: ObjectID = Field(alias="_id")
     # optional fields
     views: int | None = Field(default=None)
     profile: UpdateProfile | None = Field(default=None)
-
-    # excluded fields
-    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
 
 
 class DeleteUser(BaseModel):
