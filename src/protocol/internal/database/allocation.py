@@ -1,37 +1,62 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, Field, SkipJsonSchema
+from pydantic import BaseModel, Field
 
-from src.domain.model.allocation import Allocation, AllocationState, BaseAllocation
+from src.domain.model.allocation import (
+    Allocation,
+    AllocationState,
+    BaseAllocation,
+    ClosedAllocation,
+    CreatedAllocation,
+    CreatingAllocation,
+    FailedAllocation,
+    OpenAllocation,
+    RoomedAllocation,
+    RoomingAllocation,
+)
 from src.domain.model.scalar.object_id import ObjectID
+from src.protocol.internal.database.mixin import ExcludeFieldMixin
 
 
-class CreateAllocationWithParticipands(BaseAllocation):
-    participant_ids: set[ObjectID]
-    # excluded fields
-    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
-    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+class CreateCreatingAllocation(ExcludeFieldMixin, CreatingAllocation): ...
 
 
-class CreateAllocationWithoutParticipands(BaseAllocation):
-    # excluded fields
-    id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)  # type: ignore
-    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
+class CreateCreatedAllocation(ExcludeFieldMixin, CreatedAllocation): ...
 
 
-type CreateAllocation = CreateAllocationWithParticipands | CreateAllocationWithoutParticipands
+class CreateOpenAllocation(ExcludeFieldMixin, OpenAllocation): ...
+
+
+class CreateRoomingAllocation(ExcludeFieldMixin, RoomingAllocation): ...
+
+
+class CreateRoomedAllocation(ExcludeFieldMixin, RoomedAllocation): ...
+
+
+class CreateClosedAllocation(ExcludeFieldMixin, ClosedAllocation): ...
+
+
+class CreateFailedAllocation(ExcludeFieldMixin, FailedAllocation): ...
+
+
+type CreateAllocation = (
+    CreateCreatingAllocation
+    | CreateCreatedAllocation
+    | CreateOpenAllocation
+    | CreateRoomingAllocation
+    | CreateRoomedAllocation
+    | CreateClosedAllocation
+    | CreateFailedAllocation
+)
 
 
 class ReadAllocation(BaseModel):
     id: ObjectID = Field(alias="_id")
 
 
-class UpdateAllocation(BaseAllocation):
+class UpdateAllocation(ExcludeFieldMixin, BaseAllocation):
+    id: ObjectID = Field(alias="_id")
     # optinal fields
     name: str | None = Field(default=None)
     due: datetime.datetime | None = Field(default=None)
@@ -41,11 +66,6 @@ class UpdateAllocation(BaseAllocation):
     participant_ids: set[ObjectID] | None = Field(default=None)
     # creator_id: ObjectID | None = Field(default=None)
 
-    # excluded fields
-    created_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    updated_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-    deleted_at: SkipJsonSchema[datetime.datetime | None] = Field(default=None, exclude=True)  # type: ignore
-
 
 class DeleteAllocation(BaseModel):
     id: ObjectID = Field(alias="_id")
@@ -53,13 +73,13 @@ class DeleteAllocation(BaseModel):
 
 class AllocationDatabaseProtocol(ABC):
     @abstractmethod
-    def create_allocation(self, allocation: CreateAllocation) -> Allocation: ...
+    async def create_allocation(self, allocation: CreateAllocation) -> Allocation: ...
 
     @abstractmethod
-    def read_allocation(self, allocation: ReadAllocation) -> Allocation: ...
+    async def read_allocation(self, allocation: ReadAllocation) -> Allocation: ...
 
     @abstractmethod
-    def update_allocation(self, allocation: UpdateAllocation) -> Allocation: ...
+    async def update_allocation(self, allocation: UpdateAllocation) -> Allocation: ...
 
     @abstractmethod
-    def delete_allocation(self, allocation: DeleteAllocation) -> Allocation: ...
+    async def delete_allocation(self, allocation: DeleteAllocation) -> Allocation: ...
