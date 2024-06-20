@@ -25,7 +25,7 @@ class MongoDBAdapter(
         self._client = AsyncIOMotorClient(dsn, **client_args)
 
         await bn.init_beanie(
-            self._client,
+            self._client.db_name,
             document_models=[
                 models.User,
                 models.Room,
@@ -85,7 +85,8 @@ class MongoDBAdapter(
         allocation: proto.ReadAllocation,
     ) -> domain.Allocation:
         document = await models.AllocationDocument.get(
-            allocation.id, with_children=True
+            allocation.id,
+            with_children=True,
         )
         if document is None:
             raise  # todo: raise exception
@@ -123,8 +124,9 @@ class MongoDBAdapter(
         self,
         allocation: proto.UpdateAllocation,
     ) -> domain.Allocation:
-        document: models.Allocation | None = await models.AllocationDocument.get(
-            allocation.id, with_children=True
+        document = await models.AllocationDocument.get(
+            allocation.id,
+            with_children=True,
         )
 
         if document is None:
@@ -189,8 +191,9 @@ class MongoDBAdapter(
         self,
         allocation: proto.DeleteAllocation,
     ) -> domain.Allocation:
-        document: models.Allocation | None = await models.AllocationDocument.get(
-            allocation.id, with_children=True
+        document = await models.AllocationDocument.get(
+            allocation.id,
+            with_children=True,
         )
         if document is None:
             raise  # todo: raise exception
@@ -253,8 +256,9 @@ class MongoDBAdapter(
         self,
         form_field: proto.ReadFormField,
     ) -> domain.FormField:
-        document: models.FormField | None = await models.FormFieldDocument.get(
-            form_field.id, with_children=True
+        document = await models.FormFieldDocument.get(
+            form_field.id,
+            with_children=True,
         )
 
         if document is None:
@@ -276,7 +280,10 @@ class MongoDBAdapter(
         self,
         form_field: proto.UpdateFormField,
     ) -> domain.FormField:
-        document = await models.FormFieldDocument.get(form_field.id, with_children=True)
+        document = await models.FormFieldDocument.get(
+            form_field.id,
+            with_children=True,
+        )
 
         if document is None:
             raise  # todo: raise exception
@@ -297,9 +304,7 @@ class MongoDBAdapter(
             case _:
                 raise  # todo: raise exception
 
-        document: models.TextFormField | models.ChoiceFormField = (
-            await document.update()
-        )
+        document = await document.update()
 
         return reflected_type.model_validate(document)
 
@@ -337,7 +342,15 @@ class MongoDBAdapter(
         source: proto.UpdateChoiceFormField,
     ) -> models.ChoiceFormField:
         if source.options is not None:
-            document.options = source.options
+            for index, option in enumerate(source.options):
+                if option is None:
+                    continue
+
+                if option.text is not None:
+                    document.options[index].text = option.text
+
+                if option.respondent_count is not None:
+                    document.options[index].respondent_count = option.respondent_count
 
         if source.multiple is not None:
             document.multiple = source.multiple
@@ -348,8 +361,9 @@ class MongoDBAdapter(
         self,
         form_field: proto.DeleteFormField,
     ) -> domain.FormField:
-        document: models.FormField | None = await models.FormFieldDocument.get(
-            form_field.id
+        document = await models.FormFieldDocument.get(
+            form_field.id,
+            with_children=True,
         )
 
         if document is None:
@@ -381,7 +395,7 @@ class MongoDBAdapter(
                 reflected_type = models.TextAnswer
                 domain_reflected_type = domain.TextAnswer
 
-            case proto.CreateChoiceAnswer():
+            case proto.CreateChoiseAnswer():
                 reflected_type = models.ChoiceAnswer
                 domain_reflected_type = domain.ChoiceAnswer
 
@@ -399,7 +413,10 @@ class MongoDBAdapter(
         self,
         answer: proto.ReadAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(answer.id, with_children=True)
+        document = await models.AnswerDocument.get(
+            answer.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -419,7 +436,10 @@ class MongoDBAdapter(
         self,
         answer: proto.UpdateAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(answer.id, with_children=True)
+        document = await models.AnswerDocument.get(
+            answer.id,
+            with_children=True,
+        )
 
         if document is None:
             raise  # todo: raise exception
@@ -431,7 +451,7 @@ class MongoDBAdapter(
 
                 document = self.__update_text_answer(document, answer)
                 reflected_type = domain.TextAnswer
-            case proto.UpdateChoiceAnswer():
+            case proto.UpdateChoiseAnswer():
                 if not isinstance(document, models.ChoiceAnswer):
                     raise  # todo: raise exception
 
@@ -440,7 +460,7 @@ class MongoDBAdapter(
             case _:
                 raise  # todo: raise exception
 
-        document: models.TextAnswer | models.ChoiceAnswer = await document.update()
+        document = await document.update()
 
         return reflected_type.model_validate(document, from_attributes=True)
 
@@ -477,7 +497,10 @@ class MongoDBAdapter(
         self,
         answer: proto.DeleteAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(answer.id, with_children=True)
+        document = await models.AnswerDocument.get(
+            answer.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -512,7 +535,10 @@ class MongoDBAdapter(
         self,
         user: proto.ReadUser,
     ) -> domain.User:
-        document = await models.User.get(user.id, with_children=True)
+        document = await models.User.get(
+            user.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -522,7 +548,10 @@ class MongoDBAdapter(
         self,
         user: proto.UpdateUser,
     ) -> domain.User:
-        document = await models.User.get(user.id, with_children=True)
+        document = await models.User.get(
+            user.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -567,7 +596,10 @@ class MongoDBAdapter(
         self,
         user: proto.DeleteUser,
     ) -> domain.User:
-        document = await models.User.get(user.id, with_children=True)
+        document = await models.User.get(
+            user.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -592,7 +624,10 @@ class MongoDBAdapter(
         self,
         room: proto.ReadRoom,
     ) -> domain.Room:
-        document = await models.Room.get(room.id, with_children=True)
+        document = await models.Room.get(
+            room.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -602,7 +637,10 @@ class MongoDBAdapter(
         self,
         room: proto.UpdateRoom,
     ) -> domain.Room:
-        document = await models.Room.get(room.id, with_children=True)
+        document = await models.Room.get(
+            room.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 
@@ -638,7 +676,10 @@ class MongoDBAdapter(
         self,
         room: proto.DeleteRoom,
     ) -> domain.Room:
-        document = await models.Room.get(room.id, with_children=True)
+        document = await models.Room.get(
+            room.id,
+            with_children=True,
+        )
         if document is None:
             raise  # todo: raise exception
 

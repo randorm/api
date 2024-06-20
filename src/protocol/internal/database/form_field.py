@@ -50,7 +50,7 @@ class UpdateChoiceOption(ChoiceOption):
 
 class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
     id: ObjectID = Field(alias="_id")
-    options: list[UpdateChoiceOption] | None = Field(default=None)
+    options: list[UpdateChoiceOption | None] | None = Field(default=None)
     multiple: bool | None = Field(default=None)
 
 
