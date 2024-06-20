@@ -500,39 +500,150 @@ class MongoDBAdapter(
     async def create_user(
         self,
         user: proto.CreateUser,
-    ) -> domain.User: ...
+    ) -> domain.User:
+        model = models.User.model_validate(user, from_attributes=True)
+        document = await models.User.insert_one(model)
+        if document is None:
+            raise  # todo: raise exception
+
+        return domain.User.model_validate(document)
 
     async def read_user(
         self,
         user: proto.ReadUser,
-    ) -> domain.User: ...
+    ) -> domain.User:
+        document = await models.User.get(user.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        return domain.User.model_validate(document)
 
     async def update_user(
         self,
         user: proto.UpdateUser,
-    ) -> domain.User: ...
+    ) -> domain.User:
+        document = await models.User.get(user.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        document = self.__update_user(document, user)
+
+        document = await document.update()
+
+        return domain.User.model_validate(document, from_attributes=True)
+
+    def __update_user(
+        self,
+        document: models.User,
+        source: proto.UpdateUser,
+    ) -> models.User:
+        if source.views is not None:
+            document.views = source.views
+
+        if source.profile is None:
+            return document
+
+        if source.profile.first_name is not None:
+            document.profile.first_name = source.profile.first_name
+
+        if source.profile.last_name is not None:
+            document.profile.last_name = source.profile.last_name
+
+        if source.profile.username is not None:
+            document.profile.username = source.profile.username
+
+        if source.profile.language_code is not None:
+            document.profile.language_code = source.profile.language_code
+
+        if source.profile.gender is not None:
+            document.profile.gender = source.profile.gender
+
+        if source.profile.birthdate is not None:
+            document.profile.birthdate = source.profile.birthdate
+
+        return document
 
     async def delete_user(
         self,
         user: proto.DeleteUser,
-    ) -> domain.User: ...
+    ) -> domain.User:
+        document = await models.User.get(user.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        delete_result = await document.delete()
+        if delete_result is None:
+            raise  # todo: raise exception
+
+        return domain.User.model_validate(document, from_attributes=True)
 
     async def create_room(
         self,
         room: proto.CreateRoom,
-    ) -> domain.Room: ...
+    ) -> domain.Room:
+        model = models.Room.model_validate(room, from_attributes=True)
+        document = await models.Room.insert_one(model)
+        if document is None:
+            raise  # todo: raise exception
+
+        return domain.Room.model_validate(document)
 
     async def read_room(
         self,
         room: proto.ReadRoom,
-    ) -> domain.Room: ...
+    ) -> domain.Room:
+        document = await models.Room.get(room.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        return domain.Room.model_validate(document)
 
     async def update_room(
         self,
         room: proto.UpdateRoom,
-    ) -> domain.Room: ...
+    ) -> domain.Room:
+        document = await models.Room.get(room.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        document = self.__update_room(document, room)
+
+        document = await document.update()
+
+        return domain.Room.model_validate(document, from_attributes=True)
+
+    def __update_room(
+        self,
+        document: models.Room,
+        source: proto.UpdateRoom,
+    ) -> models.Room:
+        if source.name is not None:
+            document.name = source.name
+
+        if source.capacity is not None:
+            document.capacity = source.capacity
+
+        if source.occupied is not None:
+            document.occupied = source.occupied
+
+        if source.gender_restriction is not None:
+            document.gender_restriction = source.gender_restriction
+
+        if source.editor_ids is not None:
+            document.editor_ids = source.editor_ids
+
+        return document
 
     async def delete_room(
         self,
         room: proto.DeleteRoom,
-    ) -> domain.Room: ...
+    ) -> domain.Room:
+        document = await models.Room.get(room.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        delete_result = await document.delete()
+        if delete_result is None:
+            raise  # todo: raise exception
+
+        return domain.Room.model_validate(document, from_attributes=True)
