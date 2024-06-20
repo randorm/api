@@ -29,7 +29,7 @@ class FormatOptionType(StrEnum):
     CODE = FormatOption.CODE.value
 
 
-@sb.experimental.pydantic.type(model=BaseFormatEntity)
+@sb.experimental.pydantic.interface(model=BaseFormatEntity)
 class BaseFormatEntityType:
     option: FormatOptionType
     offset: sb.auto

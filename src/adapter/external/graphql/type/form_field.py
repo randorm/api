@@ -24,7 +24,7 @@ class FormFieldKindType(StrEnum):
     CHOICE = FormFieldKind.CHOICE.value
 
 
-@sb.experimental.pydantic.type(model=BaseFormField)
+@sb.experimental.pydantic.interface(model=BaseFormField)
 class BaseFormFieldType:
     id: scalar.ObjectID
     created_at: sb.auto
@@ -75,7 +75,7 @@ type FormFieldType = Annotated[
 ]
 
 
-@sb.experimental.pydantic.type(model=BaseAnswer)
+@sb.experimental.pydantic.interface(model=BaseAnswer)
 class BaseAnswerType:
     id: scalar.ObjectID
     created_at: sb.auto

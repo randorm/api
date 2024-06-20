@@ -30,7 +30,7 @@ class AllocationStateType(StrEnum):
     FAILED = AllocationState.FAILED.value
 
 
-@sb.experimental.pydantic.type(model=BaseAllocation)
+@sb.experimental.pydantic.interface(model=BaseAllocation)
 class BaseAllocationType:
     id: scalar.ObjectID
     created_at: sb.auto
