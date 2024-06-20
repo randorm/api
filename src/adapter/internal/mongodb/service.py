@@ -375,22 +375,127 @@ class MongoDBAdapter(
     async def create_answer(
         self,
         answer: proto.CreateAnswer,
-    ) -> domain.Answer: ...
+    ) -> domain.Answer:
+        match answer:
+            case proto.CreateTextAnswer():
+                reflected_type = models.TextAnswer
+                domain_reflected_type = domain.TextAnswer
+
+            case proto.CreateChoiceAnswer():
+                reflected_type = models.ChoiceAnswer
+                domain_reflected_type = domain.ChoiceAnswer
+
+            case _:
+                raise  # todo: raise exception
+
+        model = reflected_type.model_validate(answer, from_attributes=True)
+        document = await reflected_type.insert_one(model)
+        if document is None:
+            raise  # todo: raise exception
+
+        return domain_reflected_type.model_validate(document)
 
     async def read_answer(
         self,
         answer: proto.ReadAnswer,
-    ) -> domain.Answer: ...
+    ) -> domain.Answer:
+        document = await models.AnswerDocument.get(answer.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        match document:
+            case models.TextAnswer():
+                reflected_type = domain.TextAnswer
+
+            case models.ChoiceAnswer():
+                reflected_type = domain.ChoiceAnswer
+
+            case _:
+                raise  # todo: raise exception
+
+        return reflected_type.model_validate(document)
 
     async def update_answer(
         self,
         answer: proto.UpdateAnswer,
-    ) -> domain.Answer: ...
+    ) -> domain.Answer:
+        document = await models.AnswerDocument.get(answer.id, with_children=True)
+
+        if document is None:
+            raise  # todo: raise exception
+
+        match answer:
+            case proto.UpdateTextAnswer():
+                if not isinstance(document, models.TextAnswer):
+                    raise  # todo: raise exception
+
+                document = self.__update_text_answer(document, answer)
+                reflected_type = domain.TextAnswer
+            case proto.UpdateChoiceAnswer():
+                if not isinstance(document, models.ChoiceAnswer):
+                    raise  # todo: raise exception
+
+                document = self.__update_choice_answer(document, answer)
+                reflected_type = domain.ChoiceAnswer
+            case _:
+                raise  # todo: raise exception
+
+        document: models.TextAnswer | models.ChoiceAnswer = await document.update()
+
+        return reflected_type.model_validate(document, from_attributes=True)
+
+    def __update_text_answer(
+        self,
+        document: models.TextAnswer,
+        source: proto.UpdateTextAnswer,
+    ) -> models.TextAnswer:
+        if source.text is not None:
+            document.text = source.text
+
+        if source.text_entities is not None:
+            document.text_entities = source.text_entities
+
+        if source.field_id is not None:
+            document.field_id = source.field_id
+
+        return document
+
+    def __update_choice_answer(
+        self,
+        document: models.ChoiceAnswer,
+        source: proto.UpdateChoiseAnswer,
+    ) -> models.ChoiceAnswer:
+        if source.option_ids is not None:
+            document.option_ids = source.option_ids
+
+        if source.field_id is not None:
+            document.field_id = source.field_id
+
+        return document
 
     async def delete_answer(
         self,
         answer: proto.DeleteAnswer,
-    ) -> domain.Answer: ...
+    ) -> domain.Answer:
+        document = await models.AnswerDocument.get(answer.id, with_children=True)
+        if document is None:
+            raise  # todo: raise exception
+
+        delete_result = await document.delete()
+        if delete_result is None:
+            raise  # todo: raise exception
+
+        match document:
+            case models.TextAnswer():
+                reflected_type = domain.TextAnswer
+
+            case models.ChoiceAnswer():
+                reflected_type = domain.ChoiceAnswer
+
+            case _:
+                raise  # todo: raise exception
+
+        return reflected_type.model_validate(document, from_attributes=True)
 
     async def create_user(
         self,
