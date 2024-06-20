@@ -5,4 +5,6 @@ All internal adapters should should be defined here.
 Example of such adapters are databases, caches, workers etc.
 """
 
-__all__ = []
+from src.adapter.internal import mongodb
+
+__all__ = [mongodb]

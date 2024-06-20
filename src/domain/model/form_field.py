@@ -49,7 +49,7 @@ class ChoiceField(BaseFormField):
     multiple: bool
 
 
-type Field = TextFormField | ChoiceField
+type FormField = TextFormField | ChoiceField
 
 
 class BaseAnswer(pydantic.BaseModel):
@@ -59,7 +59,7 @@ class BaseAnswer(pydantic.BaseModel):
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
 
     field_id: ObjectID
-    field_kind: FormFieldKind
+    kind: FormFieldKind
 
     respondent_id: ObjectID
 

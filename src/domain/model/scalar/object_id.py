@@ -4,4 +4,4 @@ from beanie import PydanticObjectId
 # todo: PR: https://github.com/pydantic/pydantic-extra-types/pull/151
 # todo: should we contribute?
 
-type ObjectID = PydanticObjectId
+ObjectID = PydanticObjectId
