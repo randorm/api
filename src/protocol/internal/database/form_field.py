@@ -9,7 +9,6 @@ from src.domain.model.form_field import (
     ChoiceField,
     ChoiceOption,
     FormField,
-    FormFieldKind,
     TextAnswer,
     TextFormField,
 )
@@ -80,7 +79,6 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
     text: str | None = Field(default=None)
     text_entities: set[FormatEntity] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    field_kind: FormFieldKind | None = Field(default=None)
     # respondent_id: ObjectID | None = Field(default=None)
 
 
@@ -88,7 +86,6 @@ class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")
     option_ids: set[ObjectID] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    field_kind: FormFieldKind | None = Field(default=None)
     # respondent_id: ObjectID | None = Field(default=None)
 
 
