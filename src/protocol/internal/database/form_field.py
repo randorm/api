@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from re import Pattern
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from src.domain.model.form_field import (
     Answer,
@@ -24,6 +24,11 @@ class CreateChoiceFormField(ExcludeFieldMixin, ChoiceField): ...
 
 
 type CreateFormField = CreateTextFormField | CreateChoiceFormField
+
+CreateFormFieldResolver = TypeAdapter(
+    type=CreateFormField,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class ReadFormField(BaseModel):
@@ -56,6 +61,11 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
 
 type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField
 
+UpdateFormFieldResolver = TypeAdapter(
+    type=UpdateFormField,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
+
 
 class DeleteFormField(BaseModel):
     id: ObjectID = Field(alias="_id")
@@ -68,6 +78,12 @@ class CreateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer): ...
 
 
 type CreateAnswer = CreateTextAnswer | CreateChoiseAnswer
+
+
+CreateAnswerResolver = TypeAdapter(
+    type=CreateAnswer,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class ReadAnswer(BaseModel):
@@ -90,6 +106,11 @@ class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
 
 
 type UpdateAnswer = UpdateTextAnswer | UpdateChoiseAnswer
+
+UpdateAnswerResolver = TypeAdapter(
+    type=UpdateAnswer,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class DeleteAnswer(BaseModel):

@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from src.domain.model.allocation import (
     Allocation,
@@ -48,6 +48,11 @@ type CreateAllocation = (
     | CreateRoomedAllocation
     | CreateClosedAllocation
     | CreateFailedAllocation
+)
+
+CreateAllocationResolver = TypeAdapter(
+    type=CreateAllocation,
+    config=ConfigDict(extra="ignore", from_attributes=True),
 )
 
 
