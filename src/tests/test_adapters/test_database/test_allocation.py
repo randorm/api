@@ -29,6 +29,7 @@ class TestAllocation:
 
         response = await actor.create_allocation(data)
 
+        assert isinstance(response, domain.CreatingAllocation)
         assert isinstance(response.id, domain.ObjectID)
         assert response.name == "test"
         assert response.due == date
