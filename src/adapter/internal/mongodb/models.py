@@ -1,4 +1,5 @@
 import beanie as bn
+from pydantic import TypeAdapter
 
 import src.domain.model as domain
 
@@ -30,6 +31,8 @@ class ChoiceFormField(FormFieldDocument, domain.ChoiceField): ...
 
 type FormField = TextFormField | ChoiceFormField
 
+FormFieldResolver = TypeAdapter(FormField)
+
 
 class AnswerDocument(bn.Document):
     class Settings:
@@ -42,6 +45,11 @@ class TextAnswer(AnswerDocument, domain.TextAnswer): ...
 
 
 class ChoiceAnswer(AnswerDocument, domain.ChoiceAnswer): ...
+
+
+type Answer = TextAnswer | ChoiceAnswer
+
+AnswerResolver = TypeAdapter(Answer)
 
 
 class AllocationDocument(bn.Document):
@@ -81,3 +89,5 @@ type Allocation = (
     | ClosedAllocation
     | FailedAllocation
 )
+
+AllocationResolver = TypeAdapter(Allocation)
