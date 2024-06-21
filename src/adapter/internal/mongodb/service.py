@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 import beanie as bn
@@ -35,50 +36,27 @@ class MongoDBAdapter(
             ],
         )
 
+        return self
+
     async def create_allocation(
         self,
         allocation: proto.CreateAllocation,
     ) -> domain.Allocation:
-        match allocation:
-            case proto.CreateCreatingAllocation():
-                reflected_type = models.CreatingAllocation
-                domain_reflected_type = domain.CreatingAllocation
 
-            case proto.CreateCreatedAllocation():
-                reflected_type = models.CreatedAllocation
-                domain_reflected_type = domain.CreatedAllocation
+        timestamp = datetime.now()
+        allocation.created_at = timestamp
+        allocation.updated_at = timestamp
 
-            case proto.CreateOpenAllocation():
-                reflected_type = models.OpenAllocation
-                domain_reflected_type = domain.OpenAllocation
+        model: models.Allocation = models.AllocationResolver.validate_python(
+            allocation,
+            from_attributes=True,
+        )
 
-            case proto.CreateRoomingAllocation():
-                reflected_type = models.RoomingAllocation
-                domain_reflected_type = domain.RoomingAllocation
-
-            case proto.CreateRoomedAllocation():
-                reflected_type = models.RoomedAllocation
-                domain_reflected_type = domain.RoomedAllocation
-
-            case proto.CreateClosedAllocation():
-                reflected_type = models.ClosedAllocation
-                domain_reflected_type = domain.ClosedAllocation
-
-            case proto.CreateFailedAllocation():
-                reflected_type = models.FailedAllocation
-                domain_reflected_type = domain.FailedAllocation
-
-            case _:
-                reflected_type = None
-
-                raise  # todo: raise exception
-
-        model = reflected_type.model_validate(allocation, from_attributes=True)
-        document = await reflected_type.insert_one(model)
+        document: models.Allocation = await model.insert()
         if document is None:
             raise  # todo: raise exception
 
-        return domain_reflected_type.model_validate(document)
+        return domain.AllocationResolver.validate_python(document)
 
     async def read_allocation(
         self,
