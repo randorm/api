@@ -16,6 +16,7 @@ pydantic = "^2.7.4"
 pydantic-extra-types = "^2.8.1"
 beanie = "^1.26.0"
 pymongo = "^4.7.3"
+pytest-aio = "^1.8.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"     # formatter
@@ -26,9 +27,19 @@ bandit = "^1.7.9"     # security checker
 pre-commit = "^3.7.1"
 mypy = "^1.10.0"
 
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2.2"
+pytest-sugar = "^1.0.0"
+pytest-cov = "^5.0.0"
+pytest-async = "^0.1.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
 
 [tool.pyright]
 venvPath = "." # pyright lsp support
