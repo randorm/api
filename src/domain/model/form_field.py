@@ -1,6 +1,7 @@
 import datetime
 import re
 from enum import Enum
+from typing import Literal
 
 import pydantic
 
@@ -31,7 +32,7 @@ class BaseFormField(pydantic.BaseModel):
 
 
 class TextFormField(BaseFormField):
-    kind: FormFieldKind = FormFieldKind.TEXT
+    kind: Literal[FormFieldKind.TEXT] = FormFieldKind.TEXT
 
     re: re.Pattern[str] | None  # answer regex
     ex: str | None  # answer example
@@ -43,12 +44,17 @@ class ChoiceOption(pydantic.BaseModel):
 
 
 class ChoiceField(BaseFormField):
-    kind: FormFieldKind = FormFieldKind.CHOICE
+    kind: Literal[FormFieldKind.CHOICE] = FormFieldKind.CHOICE
     options: list[ChoiceOption] = pydantic.Field(min_length=1)
     multiple: bool
 
 
 type FormField = TextFormField | ChoiceField
+
+FormFieldResolver = pydantic.TypeAdapter(
+    type=FormField,
+    config=pydantic.ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class BaseAnswer(pydantic.BaseModel):
@@ -64,14 +70,19 @@ class BaseAnswer(pydantic.BaseModel):
 
 
 class TextAnswer(BaseAnswer):
-    kind: FormFieldKind = FormFieldKind.TEXT
+    kind: Literal[FormFieldKind.TEXT] = FormFieldKind.TEXT
     text: str = pydantic.Field(min_length=1)
     text_entities: set[FormatEntity] = pydantic.Field(default_factory=set)
 
 
 class ChoiceAnswer(BaseAnswer):
-    kind: FormFieldKind = FormFieldKind.CHOICE
+    kind: Literal[FormFieldKind.CHOICE] = FormFieldKind.CHOICE
     option_ids: set[ObjectID]
 
 
 type Answer = TextAnswer | ChoiceAnswer
+
+AnswerResolver = pydantic.TypeAdapter(
+    type=Answer,
+    config=pydantic.ConfigDict(extra="ignore", from_attributes=True),
+)
