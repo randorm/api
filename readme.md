@@ -28,3 +28,25 @@ just setup
 ```bash
 poetry shell
 ```
+
+## Development
+
+### Formatting
+
+To sort imports and format code run:
+```basg
+just tidy
+```
+
+### Linting
+
+To lint code run:
+```bash
+just check
+```
+
+
+### Testing
+```bash
+just test
+```
