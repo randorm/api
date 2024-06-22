@@ -47,7 +47,10 @@ class MongoDBAdapter(
         allocation.created_at = timestamp
         allocation.updated_at = timestamp
 
-        model: models.Allocation = models.AllocationResolver.validate_python(allocation)
+        model: models.Allocation = models.AllocationResolver.validate_python(
+            allocation,
+            from_attributes=True,
+        )
 
         document: models.Allocation = await model.insert()
         if document is None:
@@ -257,7 +260,10 @@ class MongoDBAdapter(
         answer.created_at = timestamp
         answer.updated_at = timestamp
 
-        model = models.AnswerResolver.validate_python(answer)
+        model = models.AnswerResolver.validate_python(
+            answer,
+            from_attributes=True,
+        )
         document = await model.insert()
         if document is None:
             raise  # todo: raise exception

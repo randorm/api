@@ -58,7 +58,7 @@ AnswerResolver = TypeAdapter(
 )
 
 
-class AllocationDocument(bn.Document, domain.BaseAllocation):
+class AllocationDocument(bn.Document):
     class Settings:
         indexes = ["id"]
         name = "allocations"
