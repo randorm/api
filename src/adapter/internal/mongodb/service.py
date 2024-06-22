@@ -47,10 +47,7 @@ class MongoDBAdapter(
         allocation.created_at = timestamp
         allocation.updated_at = timestamp
 
-        model: models.Allocation = models.AllocationResolver.validate_python(
-            allocation,
-            from_attributes=True,
-        )
+        model: models.Allocation = models.AllocationResolver.validate_python(allocation)
 
         document: models.Allocation = await model.insert()
         if document is None:
@@ -69,77 +66,24 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        match document:
-            case models.CreatedAllocation():
-                reflected_type = domain.CreatingAllocation
-
-            case models.CreatingAllocation():
-                reflected_type = domain.CreatingAllocation
-
-            case models.CreatedAllocation():
-                reflected_type = domain.CreatedAllocation
-
-            case models.OpenAllocation():
-                reflected_type = domain.OpenAllocation
-
-            case models.RoomingAllocation():
-                reflected_type = domain.RoomingAllocation
-
-            case models.RoomedAllocation():
-                reflected_type = domain.RoomedAllocation
-
-            case models.ClosedAllocation():
-                reflected_type = domain.ClosedAllocation
-
-            case models.FailedAllocation():
-                reflected_type = domain.FailedAllocation
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document)
+        return domain.AllocationResolver.validate_python(document)
 
     async def update_allocation(
         self,
         allocation: proto.UpdateAllocation,
     ) -> domain.Allocation:
-        document = await models.AllocationDocument.get(
+        document: models.Allocation | None = await models.AllocationDocument.get(
             allocation.id,
             with_children=True,
-        )
-
+        )  # type: ignore
         if document is None:
             raise  # todo: raise exception
 
         document = self.__update_allocation(document, allocation)
-
+        document.updated_at = datetime.now()
         document = await document.update()
 
-        match document.state:
-            case domain.AllocationState.CREATING:
-                reflected_type = domain.CreatingAllocation
-
-            case domain.AllocationState.CREATED:
-                reflected_type = domain.CreatedAllocation
-
-            case domain.AllocationState.OPEN:
-                reflected_type = domain.OpenAllocation
-
-            case domain.AllocationState.ROOMING:
-                reflected_type = domain.RoomingAllocation
-
-            case domain.AllocationState.ROOMED:
-                reflected_type = domain.RoomedAllocation
-
-            case domain.AllocationState.CLOSED:
-                reflected_type = domain.ClosedAllocation
-
-            case domain.AllocationState.FAILED:
-                reflected_type = domain.FailedAllocation
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document, from_attributes=True)
+        return domain.AllocationResolver.validate_python(document)
 
     def __update_allocation(
         self, document: models.Allocation, source: proto.UpdateAllocation
@@ -152,7 +96,7 @@ class MongoDBAdapter(
             document.due = source.due
 
         if source.state is not None:
-            document.state = source.state
+            document.state = source.state  # type: ignore
 
         if source.field_ids is not None:
             document.field_ids = source.field_ids
@@ -161,7 +105,7 @@ class MongoDBAdapter(
             document.editor_ids = source.editor_ids
 
         if source.participant_ids is not None:
-            document.participant_ids = source.participant_ids
+            document.participant_ids = source.participant_ids  # type: ignore
 
         return document
 
@@ -169,66 +113,34 @@ class MongoDBAdapter(
         self,
         allocation: proto.DeleteAllocation,
     ) -> domain.Allocation:
-        document = await models.AllocationDocument.get(
+        document: models.Allocation | None = await models.AllocationDocument.get(
             allocation.id,
             with_children=True,
-        )
+        )  # type: ignore
         if document is None:
             raise  # todo: raise exception
 
-        delete_result = await document.delete()
-        if delete_result is None:
-            raise  # todo: raise exception
+        document.deleted_at = datetime.now()
+        document = await document.update()
 
-        match document:
-            case models.CreatingAllocation():
-                reflected_type = domain.CreatingAllocation
-
-            case models.CreatedAllocation():
-                reflected_type = domain.CreatedAllocation
-
-            case models.OpenAllocation():
-                reflected_type = domain.OpenAllocation
-
-            case models.RoomingAllocation():
-                reflected_type = domain.RoomingAllocation
-
-            case models.RoomedAllocation():
-                reflected_type = domain.RoomedAllocation
-
-            case models.ClosedAllocation():
-                reflected_type = domain.ClosedAllocation
-
-            case models.FailedAllocation():
-                reflected_type = domain.FailedAllocation
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document, from_attributes=True)
+        return domain.AllocationResolver.validate_python(document)
 
     async def create_form_field(
         self,
         form_field: proto.CreateFormField,
     ) -> domain.FormField:
-        match form_field:
-            case proto.CreateTextFormField:
-                reflected_type = models.TextFormField
-                domain_reflected_type = domain.TextFormField
 
-            case proto.CreateChoiceFormField:
-                reflected_type = models.ChoiceFormField
-                domain_reflected_type = domain.ChoiceField
+        timestamp = datetime.now()
+        form_field.created_at = timestamp
+        form_field.updated_at = timestamp
 
-            case _:
-                raise  # todo: raise exception
+        model: models.FormField = models.FormFieldResolver.validate_python(form_field)
 
-        model = reflected_type.model_validate(form_field, from_attributes=True)
-        document = await reflected_type.insert_one(model)
+        document = await model.insert()
         if document is None:
             raise  # todo: raise exception
 
-        return domain_reflected_type.model_validate(document)
+        return domain.FormFieldResolver.validate_python(document)
 
     async def read_form_field(
         self,
@@ -242,49 +154,34 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        match document:
-            case models.TextFormField():
-                reflected_type = domain.TextFormField
-
-            case models.ChoiceFormField():
-                reflected_type = domain.ChoiceField
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document)
+        return domain.FormFieldResolver.validate_python(document)
 
     async def update_form_field(
         self,
         form_field: proto.UpdateFormField,
     ) -> domain.FormField:
-        document = await models.FormFieldDocument.get(
+        document: models.FormField | None = await models.FormFieldDocument.get(
             form_field.id,
             with_children=True,
-        )
+        )  # type: ignore
 
         if document is None:
             raise  # todo: raise exception
 
-        match form_field:
-            case proto.UpdateTextFormField():
-                if not isinstance(document, models.TextFormField):
-                    raise  # todo: raise exception
-
-                document = self.__update_text_form_field(document, form_field)
-                reflected_type = domain.TextFormField
-            case proto.UpdateChoiceFormField():
-                if not isinstance(document, models.ChoiceFormField):
-                    raise  # todo: raise exception
-
-                document = self.__update_choice_form_field(document, form_field)
-                reflected_type = domain.ChoiceField
-            case _:
+        if isinstance(form_field, proto.UpdateTextFormField):
+            if not isinstance(document, models.TextFormField):
                 raise  # todo: raise exception
 
+            document = self.__update_text_form_field(document, form_field)
+        elif isinstance(form_field, proto.UpdateChoiceFormField):
+            if not isinstance(document, models.ChoiceFormField):
+                raise  # todo: raise exception
+
+            document = self.__update_choice_form_field(document, form_field)
+        document.updated_at = datetime.now()
         document = await document.update()
 
-        return reflected_type.model_validate(document)
+        return domain.FormatEntityResolver.validate_python(document)
 
     def __update_text_form_field(
         self,
@@ -339,53 +236,33 @@ class MongoDBAdapter(
         self,
         form_field: proto.DeleteFormField,
     ) -> domain.FormField:
-        document = await models.FormFieldDocument.get(
+        document: models.FormField | None = await models.FormFieldDocument.get(
             form_field.id,
             with_children=True,
-        )
+        )  # type: ignore
 
         if document is None:
             raise  # todo: raise exception
 
-        delete_result = await document.delete()
+        document.updated_at = datetime.now()
+        document = await document.update()
 
-        if delete_result is None:
-            raise  # todo: raise exception
-
-        match document:
-            case models.TextFormField():
-                reflected_type = domain.TextFormField
-
-            case models.ChoiceFormField():
-                reflected_type = domain.ChoiceField
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document, from_attributes=True)
+        return domain.FormFieldResolver.validate_python(document)
 
     async def create_answer(
         self,
         answer: proto.CreateAnswer,
     ) -> domain.Answer:
-        match answer:
-            case proto.CreateTextAnswer():
-                reflected_type = models.TextAnswer
-                domain_reflected_type = domain.TextAnswer
+        timestamp = datetime.now()
+        answer.created_at = timestamp
+        answer.updated_at = timestamp
 
-            case proto.CreateChoiseAnswer():
-                reflected_type = models.ChoiceAnswer
-                domain_reflected_type = domain.ChoiceAnswer
-
-            case _:
-                raise  # todo: raise exception
-
-        model = reflected_type.model_validate(answer, from_attributes=True)
-        document = await reflected_type.insert_one(model)
+        model = models.AnswerResolver.validate_python(answer)
+        document = await model.insert()
         if document is None:
             raise  # todo: raise exception
 
-        return domain_reflected_type.model_validate(document)
+        return domain.AnswerResolver.validate_python(document)
 
     async def read_answer(
         self,
@@ -398,49 +275,35 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        match document:
-            case models.TextAnswer():
-                reflected_type = domain.TextAnswer
-
-            case models.ChoiceAnswer():
-                reflected_type = domain.ChoiceAnswer
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document)
+        return domain.AnswerResolver.validate_python(document)
 
     async def update_answer(
         self,
         answer: proto.UpdateAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(
+        document: models.Answer | None = await models.AnswerDocument.get(
             answer.id,
             with_children=True,
-        )
+        )  # type: ignore
 
         if document is None:
             raise  # todo: raise exception
 
-        match answer:
-            case proto.UpdateTextAnswer():
-                if not isinstance(document, models.TextAnswer):
-                    raise  # todo: raise exception
-
-                document = self.__update_text_answer(document, answer)
-                reflected_type = domain.TextAnswer
-            case proto.UpdateChoiseAnswer():
-                if not isinstance(document, models.ChoiceAnswer):
-                    raise  # todo: raise exception
-
-                document = self.__update_choice_answer(document, answer)
-                reflected_type = domain.ChoiceAnswer
-            case _:
+        if isinstance(answer, proto.UpdateTextAnswer):
+            if not isinstance(document, models.TextAnswer):
                 raise  # todo: raise exception
 
+            document = self.__update_text_answer(document, answer)
+        elif isinstance(answer, proto.UpdateChoiseAnswer):
+            if not isinstance(document, models.ChoiceAnswer):
+                raise  # todo: raise exception
+
+            document = self.__update_choice_answer(document, answer)
+
+        document.updated_at = datetime.now()
         document = await document.update()
 
-        return reflected_type.model_validate(document, from_attributes=True)
+        return domain.AnswerResolver.validate_python(document)
 
     def __update_text_answer(
         self,
@@ -475,33 +338,26 @@ class MongoDBAdapter(
         self,
         answer: proto.DeleteAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(
+        document: models.Answer | None = await models.AnswerDocument.get(
             answer.id,
             with_children=True,
-        )
+        )  # type: ignore
         if document is None:
             raise  # todo: raise exception
 
-        delete_result = await document.delete()
-        if delete_result is None:
-            raise  # todo: raise exception
+        document.deleted_at = datetime.now()
+        document = await document.update()
 
-        match document:
-            case models.TextAnswer():
-                reflected_type = domain.TextAnswer
-
-            case models.ChoiceAnswer():
-                reflected_type = domain.ChoiceAnswer
-
-            case _:
-                raise  # todo: raise exception
-
-        return reflected_type.model_validate(document, from_attributes=True)
+        return domain.AnswerResolver.validate_python(document)
 
     async def create_user(
         self,
         user: proto.CreateUser,
     ) -> domain.User:
+        timestamp = datetime.now()
+        user.created_at = timestamp
+        user.updated_at = timestamp
+
         model = models.User.model_validate(user, from_attributes=True)
         document = await models.User.insert_one(model)
         if document is None:
@@ -534,7 +390,7 @@ class MongoDBAdapter(
             raise  # todo: raise exception
 
         document = self.__update_user(document, user)
-
+        document.updated_at = datetime.now()
         document = await document.update()
 
         return domain.User.model_validate(document, from_attributes=True)
@@ -581,9 +437,8 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        delete_result = await document.delete()
-        if delete_result is None:
-            raise  # todo: raise exception
+        document.deleted_at = datetime.now()
+        document = await document.update()
 
         return domain.User.model_validate(document, from_attributes=True)
 
@@ -591,6 +446,10 @@ class MongoDBAdapter(
         self,
         room: proto.CreateRoom,
     ) -> domain.Room:
+        timestamp = datetime.now()
+        room.created_at = timestamp
+        room.updated_at = timestamp
+
         model = models.Room.model_validate(room, from_attributes=True)
         document = await models.Room.insert_one(model)
         if document is None:
@@ -623,7 +482,7 @@ class MongoDBAdapter(
             raise  # todo: raise exception
 
         document = self.__update_room(document, room)
-
+        document.updated_at = datetime.now()
         document = await document.update()
 
         return domain.Room.model_validate(document, from_attributes=True)
@@ -661,8 +520,7 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        delete_result = await document.delete()
-        if delete_result is None:
-            raise  # todo: raise exception
+        document.deleted_at = datetime.now()
+        document = await document.update()
 
         return domain.Room.model_validate(document, from_attributes=True)
