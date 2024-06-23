@@ -54,7 +54,7 @@ class MongoDBAdapter(
         allocation: proto.CreateAllocation,
     ) -> domain.Allocation:
 
-        timestamp = datetime.now()
+        timestamp = datetime.now().replace(microsecond=0)
         allocation.created_at = timestamp
         allocation.updated_at = timestamp
 
@@ -94,8 +94,8 @@ class MongoDBAdapter(
             raise  # todo: raise exception
 
         document = self.__update_allocation(document, allocation)
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.AllocationResolver.validate_python(document)
 
@@ -134,8 +134,8 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        document.deleted_at = datetime.now()
-        document = await document.update()
+        document.deleted_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.AllocationResolver.validate_python(document)
 
@@ -144,7 +144,7 @@ class MongoDBAdapter(
         form_field: proto.CreateFormField,
     ) -> domain.FormField:
 
-        timestamp = datetime.now()
+        timestamp = datetime.now().replace(microsecond=0)
         form_field.created_at = timestamp
         form_field.updated_at = timestamp
 
@@ -192,8 +192,8 @@ class MongoDBAdapter(
                 raise  # todo: raise exception
 
             document = self.__update_choice_form_field(document, form_field)
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.FormatEntityResolver.validate_python(document)
 
@@ -258,8 +258,8 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.FormFieldResolver.validate_python(document)
 
@@ -267,7 +267,7 @@ class MongoDBAdapter(
         self,
         answer: proto.CreateAnswer,
     ) -> domain.Answer:
-        timestamp = datetime.now()
+        timestamp = datetime.now().replace(microsecond=0)
         answer.created_at = timestamp
         answer.updated_at = timestamp
 
@@ -317,8 +317,8 @@ class MongoDBAdapter(
 
             document = self.__update_choice_answer(document, answer)
 
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.AnswerResolver.validate_python(document)
 
@@ -362,8 +362,8 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        document.deleted_at = datetime.now()
-        document = await document.update()
+        document.deleted_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.AnswerResolver.validate_python(document)
 
@@ -371,7 +371,7 @@ class MongoDBAdapter(
         self,
         user: proto.CreateUser,
     ) -> domain.User:
-        timestamp = datetime.now()
+        timestamp = datetime.now().replace(microsecond=0)
         user.created_at = timestamp
         user.updated_at = timestamp
 
@@ -407,8 +407,8 @@ class MongoDBAdapter(
             raise  # todo: raise exception
 
         document = self.__update_user(document, user)
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.User.model_validate(document, from_attributes=True)
 
@@ -454,8 +454,8 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        document.deleted_at = datetime.now()
-        document = await document.update()
+        document.deleted_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.User.model_validate(document, from_attributes=True)
 
@@ -463,7 +463,7 @@ class MongoDBAdapter(
         self,
         room: proto.CreateRoom,
     ) -> domain.Room:
-        timestamp = datetime.now()
+        timestamp = datetime.now().replace(microsecond=0)
         room.created_at = timestamp
         room.updated_at = timestamp
 
@@ -499,8 +499,8 @@ class MongoDBAdapter(
             raise  # todo: raise exception
 
         document = self.__update_room(document, room)
-        document.updated_at = datetime.now()
-        document = await document.update()
+        document.updated_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.Room.model_validate(document, from_attributes=True)
 
@@ -537,7 +537,7 @@ class MongoDBAdapter(
         if document is None:
             raise  # todo: raise exception
 
-        document.deleted_at = datetime.now()
-        document = await document.update()
+        document.deleted_at = datetime.now().replace(microsecond=0)
+        document = await document.replace()
 
         return domain.Room.model_validate(document, from_attributes=True)
