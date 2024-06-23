@@ -11,4 +11,4 @@ check:
     poetry run ruff check
 
 test:
-    poetry run pytest . --cov=./ --cov-report=html
+    poetry run pytest . --cov=./ --cov-report=html --cov-report=term-missing
