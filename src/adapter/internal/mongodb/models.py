@@ -60,7 +60,6 @@ AnswerResolver = TypeAdapter(
 
 class AllocationDocument(bn.Document):
     class Settings:
-        indexes = ["id"]
         name = "allocations"
         is_root = True
 
