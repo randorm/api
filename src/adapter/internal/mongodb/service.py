@@ -3,7 +3,9 @@ from typing import Any
 
 import beanie as bn
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import ValidationError
 
+import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database as proto
 from src.adapter.internal.mongodb import models
@@ -53,56 +55,83 @@ class MongoDBAdapter(
         self,
         allocation: proto.CreateAllocation,
     ) -> domain.Allocation:
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            allocation.created_at = timestamp
+            allocation.updated_at = timestamp
 
-        timestamp = datetime.now().replace(microsecond=0)
-        allocation.created_at = timestamp
-        allocation.updated_at = timestamp
+            model: models.Allocation = models.AllocationResolver.validate_python(
+                allocation,
+                from_attributes=True,
+            )
 
-        model: models.Allocation = models.AllocationResolver.validate_python(
-            allocation,
-            from_attributes=True,
-        )
+            document: models.Allocation = await model.insert()
+            assert document is not None, "insert failed"
 
-        document: models.Allocation = await model.insert()
-        if document is None:
-            raise  # todo: raise exception
+            return domain.AllocationResolver.validate_python(document)
 
-        return domain.AllocationResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectAlloctionException(
+                f"failed to reflect allocation type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateAllocationException(
+                f"failed to save allocation to database with error: {e}"
+            ) from e
 
     async def read_allocation(
         self,
         allocation: proto.ReadAllocation,
     ) -> domain.Allocation:
-        document = await models.AllocationDocument.get(
-            allocation.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.AllocationDocument.get(
+                allocation.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(document)
+
+        except ValidationError as e:
+            raise exception.ReflectAlloctionException(
+                f"failed to reflect allocation type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadAllocationException(
+                f"failed to fetch allocation with id {allocation.id} with error: {e}"
+            ) from e
 
     async def update_allocation(
         self,
         allocation: proto.UpdateAllocation,
     ) -> domain.Allocation:
-        document: models.Allocation | None = await models.AllocationDocument.get(
-            allocation.id,
-            with_children=True,
-        )  # type: ignore
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document: models.Allocation | None = await models.AllocationDocument.get(
+                allocation.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
 
-        document = self.__update_allocation(document, allocation)
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document = self.__update_allocation(document, allocation)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(document)
+
+        except exception.UpdateAllocationException as e:
+            raise e
+        except ValidationError as e:
+            raise exception.ReflectAlloctionException(
+                f"failed to reflect allocation type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateAllocationException(
+                f"failed to update allocation with id {allocation.id} with error: {e}"
+            ) from e
 
     def __update_allocation(
         self, document: models.Allocation, source: proto.UpdateAllocation
     ):
-        # todo: reflect type for compatibility
         if source.name is not None:
             document.name = source.name
 
@@ -119,7 +148,18 @@ class MongoDBAdapter(
             document.editor_ids = source.editor_ids
 
         if source.participant_ids is not None:
-            document.participant_ids = source.participant_ids  # type: ignore
+            if not isinstance(
+                document,
+                models.CreatedAllocation
+                | models.OpenAllocation
+                | models.RoomingAllocation
+                | models.RoomedAllocation
+                | models.ClosedAllocation,
+            ):
+                raise exception.UpdateAllocationException(
+                    f"can not change participant ids for document type {type(document)}"
+                )
+            document.participant_ids = source.participant_ids
 
         return document
 
@@ -127,75 +167,114 @@ class MongoDBAdapter(
         self,
         allocation: proto.DeleteAllocation,
     ) -> domain.Allocation:
-        document: models.Allocation | None = await models.AllocationDocument.get(
-            allocation.id,
-            with_children=True,
-        )  # type: ignore
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document: models.Allocation | None = await models.AllocationDocument.get(
+                allocation.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
 
-        document.deleted_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(document)
+
+        except ValidationError as e:
+            raise exception.ReflectAlloctionException(
+                f"failed to reflect allocation type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteAllocationException(
+                f"failed to delete allocation with id {allocation.id} with error: {e}"
+            ) from e
 
     async def create_form_field(
         self,
         form_field: proto.CreateFormField,
     ) -> domain.FormField:
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            form_field.created_at = timestamp
+            form_field.updated_at = timestamp
 
-        timestamp = datetime.now().replace(microsecond=0)
-        form_field.created_at = timestamp
-        form_field.updated_at = timestamp
+            model: models.FormField = models.FormFieldResolver.validate_python(
+                form_field
+            )
 
-        model: models.FormField = models.FormFieldResolver.validate_python(form_field)
+            document = await model.insert()
+            assert document is not None, "insert failed"
 
-        document = await model.insert()
-        if document is None:
-            raise  # todo: raise exception
+            return domain.FormFieldResolver.validate_python(document)
 
-        return domain.FormFieldResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectFormFieldException(
+                f"failed to reflect form field type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateFormFieldException(
+                f"failed to create form field with error: {e}"
+            ) from e
 
     async def read_form_field(
         self,
         form_field: proto.ReadFormField,
     ) -> domain.FormField:
-        document = await models.FormFieldDocument.get(
-            form_field.id,
-            with_children=True,
-        )
+        try:
+            document = await models.FormFieldDocument.get(
+                form_field.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        if document is None:
-            raise  # todo: raise exception
+            return domain.FormFieldResolver.validate_python(document)
 
-        return domain.FormFieldResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectFormFieldException(
+                f"failed to reflect form field type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadFormFieldException(
+                f"failed to read form field with id {form_field.id} with error: {e}"
+            ) from e
 
     async def update_form_field(
         self,
         form_field: proto.UpdateFormField,
     ) -> domain.FormField:
-        document: models.FormField | None = await models.FormFieldDocument.get(
-            form_field.id,
-            with_children=True,
-        )  # type: ignore
+        try:
+            document: models.FormField | None = await models.FormFieldDocument.get(
+                form_field.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
 
-        if document is None:
-            raise  # todo: raise exception
+            if isinstance(form_field, proto.UpdateTextFormField):
+                assert isinstance(
+                    document, models.TextFormField
+                ), "can not change form field type"
 
-        if isinstance(form_field, proto.UpdateTextFormField):
-            if not isinstance(document, models.TextFormField):
-                raise  # todo: raise exception
+                document = self.__update_text_form_field(document, form_field)
+            elif isinstance(form_field, proto.UpdateChoiceFormField):
+                assert isinstance(
+                    document, models.ChoiceFormField
+                ), "can not change form field type"
 
-            document = self.__update_text_form_field(document, form_field)
-        elif isinstance(form_field, proto.UpdateChoiceFormField):
-            if not isinstance(document, models.ChoiceFormField):
-                raise  # todo: raise exception
+                document = self.__update_choice_form_field(document, form_field)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-            document = self.__update_choice_form_field(document, form_field)
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            return domain.FormatEntityResolver.validate_python(document)
 
-        return domain.FormatEntityResolver.validate_python(document)
+        except exception.UpdateFormFieldException as e:
+            raise e
+        except ValidationError as e:
+            raise exception.ReflectFormFieldException(
+                f"failed to reflect form field type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateFormFieldException(
+                f"failed to update form field with id {form_field.id} with error: {e}"
+            ) from e
 
     def __update_text_form_field(
         self,
@@ -250,77 +329,114 @@ class MongoDBAdapter(
         self,
         form_field: proto.DeleteFormField,
     ) -> domain.FormField:
-        document: models.FormField | None = await models.FormFieldDocument.get(
-            form_field.id,
-            with_children=True,
-        )  # type: ignore
+        try:
+            document: models.FormField | None = await models.FormFieldDocument.get(
+                form_field.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
 
-        if document is None:
-            raise  # todo: raise exception
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            return domain.FormFieldResolver.validate_python(document)
 
-        return domain.FormFieldResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectFormFieldException(
+                f"failed to reflect form field type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteFormFieldException(
+                f"failed to delete form field with id {form_field.id} with error: {e}"
+            ) from e
 
     async def create_answer(
         self,
         answer: proto.CreateAnswer,
     ) -> domain.Answer:
-        timestamp = datetime.now().replace(microsecond=0)
-        answer.created_at = timestamp
-        answer.updated_at = timestamp
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            answer.created_at = timestamp
+            answer.updated_at = timestamp
 
-        model = models.AnswerResolver.validate_python(
-            answer,
-            from_attributes=True,
-        )
-        document = await model.insert()
-        if document is None:
-            raise  # todo: raise exception
+            model = models.AnswerResolver.validate_python(
+                answer,
+                from_attributes=True,
+            )
+            document = await model.insert()
+            assert document is not None, "insert failed"
 
-        return domain.AnswerResolver.validate_python(document)
+            return domain.AnswerResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateAnswerException(
+                f"failed to create answer with error: {e}"
+            ) from e
 
     async def read_answer(
         self,
         answer: proto.ReadAnswer,
     ) -> domain.Answer:
-        document = await models.AnswerDocument.get(
-            answer.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.AnswerDocument.get(
+                answer.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        return domain.AnswerResolver.validate_python(document)
+            return domain.AnswerResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadAnswerException(
+                f"failed to read answer with id {answer.id} with error: {e}"
+            ) from e
 
     async def update_answer(
         self,
         answer: proto.UpdateAnswer,
     ) -> domain.Answer:
-        document: models.Answer | None = await models.AnswerDocument.get(
-            answer.id,
-            with_children=True,
-        )  # type: ignore
+        try:
+            document: models.Answer | None = await models.AnswerDocument.get(
+                answer.id,
+                with_children=True,
+            )  # type: ignore
 
-        if document is None:
-            raise  # todo: raise exception
+            assert document is not None, "document not found"
 
-        if isinstance(answer, proto.UpdateTextAnswer):
-            if not isinstance(document, models.TextAnswer):
-                raise  # todo: raise exception
+            if isinstance(answer, proto.UpdateTextAnswer):
+                assert isinstance(
+                    document, models.TextAnswer
+                ), "can not change answer type"
 
-            document = self.__update_text_answer(document, answer)
-        elif isinstance(answer, proto.UpdateChoiseAnswer):
-            if not isinstance(document, models.ChoiceAnswer):
-                raise  # todo: raise exception
+                document = self.__update_text_answer(document, answer)
+            elif isinstance(answer, proto.UpdateChoiseAnswer):
+                assert isinstance(
+                    document, models.ChoiceAnswer
+                ), "can not change answer type"
 
-            document = self.__update_choice_answer(document, answer)
+                document = self.__update_choice_answer(document, answer)
 
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.AnswerResolver.validate_python(document)
+            return domain.AnswerResolver.validate_python(document)
+
+        except exception.UpdateAnswerException as e:
+            raise e
+        except ValidationError as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateAnswerException(
+                f"failed to update answer with id {answer.id} with error: {e}"
+            ) from e
 
     def __update_text_answer(
         self,
@@ -355,62 +471,97 @@ class MongoDBAdapter(
         self,
         answer: proto.DeleteAnswer,
     ) -> domain.Answer:
-        document: models.Answer | None = await models.AnswerDocument.get(
-            answer.id,
-            with_children=True,
-        )  # type: ignore
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document: models.Answer | None = await models.AnswerDocument.get(
+                answer.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
 
-        document.deleted_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.AnswerResolver.validate_python(document)
+            return domain.AnswerResolver.validate_python(document)
+        except ValidationError as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteAnswerException(
+                f"failed to delete answer with id {answer.id} with error: {e}"
+            ) from e
 
     async def create_user(
         self,
         user: proto.CreateUser,
     ) -> domain.User:
-        timestamp = datetime.now().replace(microsecond=0)
-        user.created_at = timestamp
-        user.updated_at = timestamp
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            user.created_at = timestamp
+            user.updated_at = timestamp
 
-        model = models.User.model_validate(user, from_attributes=True)
-        document = await models.User.insert_one(model)
-        if document is None:
-            raise  # todo: raise exception
+            model = models.User.model_validate(user, from_attributes=True)
+            document = await model.insert()
+            assert document is not None, "insert failed"
 
-        return domain.User.model_validate(document)
+            return domain.User.model_validate(document)
+        except ValidationError as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateUserException(
+                f"failed to create user with error: {e}"
+            ) from e
 
     async def read_user(
         self,
         user: proto.ReadUser,
     ) -> domain.User:
-        document = await models.User.get(
-            user.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.User.get(
+                user.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        return domain.User.model_validate(document)
+            return domain.User.model_validate(document)
+        except ValidationError as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadUserException(
+                f"failed to read user with id {user.id} with error: {e}"
+            ) from e
 
     async def update_user(
         self,
         user: proto.UpdateUser,
     ) -> domain.User:
-        document = await models.User.get(
-            user.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.User.get(
+                user.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        document = self.__update_user(document, user)
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document = self.__update_user(document, user)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.User.model_validate(document, from_attributes=True)
+            return domain.User.model_validate(document, from_attributes=True)
+
+        except exception.UpdateUserException as e:
+            raise e
+        except ValidationError as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateUserException(
+                f"failed to update user with id {user.id} with error: {e}"
+            ) from e
 
     def __update_user(
         self,
@@ -447,62 +598,96 @@ class MongoDBAdapter(
         self,
         user: proto.DeleteUser,
     ) -> domain.User:
-        document = await models.User.get(
-            user.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.User.get(
+                user.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        document.deleted_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.User.model_validate(document, from_attributes=True)
+            return domain.User.model_validate(document, from_attributes=True)
+        except ValidationError as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteUserException(
+                f"failed to delete user with id {user.id} with error: {e}"
+            ) from e
 
     async def create_room(
         self,
         room: proto.CreateRoom,
     ) -> domain.Room:
-        timestamp = datetime.now().replace(microsecond=0)
-        room.created_at = timestamp
-        room.updated_at = timestamp
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            room.created_at = timestamp
+            room.updated_at = timestamp
 
-        model = models.Room.model_validate(room, from_attributes=True)
-        document = await models.Room.insert_one(model)
-        if document is None:
-            raise  # todo: raise exception
+            model = models.Room.model_validate(room, from_attributes=True)
+            document = await model.insert()
+            assert document is not None, "insert failed"
 
-        return domain.Room.model_validate(document)
+            return domain.Room.model_validate(document)
+        except ValidationError as e:
+            raise exception.ReflectRoomException(
+                f"failed to reflect room type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateRoomException(
+                f"failed to create room with error: {e}"
+            ) from e
 
     async def read_room(
         self,
         room: proto.ReadRoom,
     ) -> domain.Room:
-        document = await models.Room.get(
-            room.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.Room.get(
+                room.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        return domain.Room.model_validate(document)
+            return domain.Room.model_validate(document)
+        except ValidationError as e:
+            raise exception.ReflectRoomException(
+                f"failed to reflect room type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadRoomException(
+                f"failed to read room with id {room.id} with error: {e}"
+            ) from e
 
     async def update_room(
         self,
         room: proto.UpdateRoom,
     ) -> domain.Room:
-        document = await models.Room.get(
-            room.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.Room.get(
+                room.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        document = self.__update_room(document, room)
-        document.updated_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document = self.__update_room(document, room)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.Room.model_validate(document, from_attributes=True)
+            return domain.Room.model_validate(document, from_attributes=True)
+        except exception.UpdateRoomException as e:
+            raise e
+        except ValidationError as e:
+            raise exception.ReflectRoomException(
+                f"failed to reflect room type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateRoomException(
+                f"failed to update room with id {room.id} with error: {e}"
+            ) from e
 
     def __update_room(
         self,
@@ -530,14 +715,22 @@ class MongoDBAdapter(
         self,
         room: proto.DeleteRoom,
     ) -> domain.Room:
-        document = await models.Room.get(
-            room.id,
-            with_children=True,
-        )
-        if document is None:
-            raise  # todo: raise exception
+        try:
+            document = await models.Room.get(
+                room.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
 
-        document.deleted_at = datetime.now().replace(microsecond=0)
-        document = await document.replace()
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
 
-        return domain.Room.model_validate(document, from_attributes=True)
+            return domain.Room.model_validate(document, from_attributes=True)
+        except ValidationError as e:
+            raise exception.ReflectRoomException(
+                f"failed to reflect room type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteRoomException(
+                f"failed to delete room with id {room.id} with error: {e}"
+            ) from e
