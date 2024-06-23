@@ -380,7 +380,7 @@ class MongoDBAdapter(
             )  # type: ignore
             assert document is not None, "document not found"
 
-            document.updated_at = datetime.now().replace(microsecond=0)
+            document.deleted_at = datetime.now().replace(microsecond=0)
             document = await document.replace()
 
             return domain.FormFieldResolver.validate_python(document)
