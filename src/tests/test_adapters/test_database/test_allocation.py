@@ -2,7 +2,9 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
 
 import pytest
+from pydantic import BaseModel, ConfigDict
 
+import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database.allocation as proto
 from src.adapter.internal.mongodb.service import MongoDBAdapter
@@ -1025,3 +1027,621 @@ async def test_delete_failed_allocation_ok(actor_fn: ActorFn):
     assert response.deleted_at is not None
     assert len(response.editor_ids) == 1
     assert response.editor_ids == {owner}
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_creating_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_created_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_open_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_rooming_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_roomed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_closed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_failed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_creating_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_created_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_open_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_rooming_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_roomed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_closed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_failed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.read_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_creating_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_created_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_open_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_rooming_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_roomed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_closed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_failed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.update_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_creating_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_created_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_open_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_rooming_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_roomed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_closed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_failed_allocation_reflect_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    class MutableObject(BaseModel):
+        model_config = ConfigDict(extra="allow")
+
+    data = MutableObject()
+    with pytest.raises(exception.ReflectAlloctionException):
+        await actor.delete_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_creating_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_created_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_open_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_rooming_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_roomed_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_closed_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_create_failed_allocation_immutable_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    with pytest.raises(exception.CreateAllocationException):
+        await actor.create_allocation(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_creating_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_created_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_open_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_rooming_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_roomed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_closed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_read_failed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.ReadAllocationException):
+        await actor.read_allocation(proto.ReadAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_creating_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_created_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_open_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_rooming_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_roomed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_closed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_failed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.UpdateAllocationException):
+        await actor.update_allocation(proto.UpdateAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_creating_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_created_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_open_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_rooming_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_roomed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_closed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_delete_failed_allocation_not_exist_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    with pytest.raises(exception.DeleteAllocationException):
+        await actor.delete_allocation(proto.DeleteAllocation(_id=domain.ObjectID()))
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_allocation_change_state_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = proto.CreateCreatingAllocation(
+        name="test",
+        due=datetime.now(),
+        field_ids=set(),
+        creator_id=domain.ObjectID(),
+        editor_ids={
+            domain.ObjectID(),
+        },
+    )
+    document = await actor.create_allocation(data)
+
+    new_data = proto.UpdateAllocation(
+        _id=document.id,
+        state=domain.AllocationState.CREATED,
+        participant_ids={domain.ObjectID() for _ in range(10)},
+    )
+    document = await actor.update_allocation(new_data)
+
+    assert document.id == new_data.id
+    assert document.state == domain.AllocationState.CREATED
+    assert isinstance(document, domain.CreatedAllocation)
+    assert len(document.participant_ids) == 10
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_creating_allocation_change_participant_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = proto.CreateCreatingAllocation(
+        name="test",
+        due=datetime.now(),
+        field_ids=set(),
+        creator_id=domain.ObjectID(),
+        editor_ids={
+            domain.ObjectID(),
+        },
+    )
+    document = await actor.create_allocation(data)
+
+    new_data = proto.UpdateAllocation(
+        _id=document.id,
+        participant_ids={domain.ObjectID() for _ in range(10)},
+    )
+    with pytest.raises(exception.UpdateAllocationException):
+        document = await actor.update_allocation(new_data)
