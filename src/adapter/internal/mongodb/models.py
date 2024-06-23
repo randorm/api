@@ -1,5 +1,9 @@
+import re
+from typing import Any
+
 import beanie as bn
-from pydantic import ConfigDict, TypeAdapter
+import bson
+from pydantic import ConfigDict, TypeAdapter, field_validator
 
 import src.domain.model as domain
 
@@ -22,7 +26,35 @@ class FormFieldDocument(bn.Document):
         is_root = True
 
 
-class TextFormField(FormFieldDocument, domain.TextFormField): ...
+def re_pattern_to_bson_regex(pattern: re.Pattern) -> bson.Regex:
+    regex = bson.Regex.from_native(pattern)
+    regex.flags ^= re.UNICODE
+
+    return regex
+
+
+class TextFormField(FormFieldDocument, domain.TextFormField):
+    class Settings:
+        bson_encoders = {re.Pattern: re_pattern_to_bson_regex}
+
+    @field_validator("re", mode="before")
+    @classmethod
+    def deserialize_re(cls, value: Any) -> re.Pattern | None:
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            return re.compile(value)
+
+        if isinstance(value, re.Pattern):
+            return value
+
+        if isinstance(value, bson.Regex):
+            return value.try_compile()
+
+        raise TypeError(
+            "re must be a string, a compiled regular expression, or a pymongo regex"
+        )
 
 
 class ChoiceFormField(FormFieldDocument, domain.ChoiceField): ...
