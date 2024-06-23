@@ -59,6 +59,8 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
     id: ObjectID = Field(alias="_id")
     options: list[UpdateChoiceOption | None] | None = Field(default=None)
     multiple: bool | None = Field(default=None)
+    # exclude
+    creator_id: Literal[None] = None
 
 
 type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField

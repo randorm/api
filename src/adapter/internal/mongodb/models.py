@@ -18,7 +18,6 @@ class Room(bn.Document, domain.Room):
 
 class FormFieldDocument(bn.Document):
     class Settings:
-        indexes = ["id"]
         name = "form_fields"
         is_root = True
 

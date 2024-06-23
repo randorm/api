@@ -225,7 +225,7 @@ class MongoDBAdapter(
             form_field.updated_at = timestamp
 
             model: models.FormField = models.FormFieldResolver.validate_python(
-                form_field
+                form_field, from_attributes=True
             )
 
             document = await model.insert()
@@ -252,6 +252,7 @@ class MongoDBAdapter(
                 with_children=True,
             )
             assert document is not None, "document not found"
+            print(document.model_dump_json())
 
             return domain.FormFieldResolver.validate_python(document)
 
@@ -289,9 +290,15 @@ class MongoDBAdapter(
                 document = self.__update_choice_form_field(document, form_field)
 
             document.updated_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            await models.FormFieldDocument.find_one(
+                models.FormFieldDocument.id == document.id,
+                with_children=True,
+            ).replace_one(document)
+            await document.sync()
 
-            return domain.FormatEntityResolver.validate_python(document)
+            return domain.FormFieldResolver.validate_python(
+                document, from_attributes=True
+            )
 
         except exception.UpdateFormFieldException as e:
             raise e
@@ -304,11 +311,11 @@ class MongoDBAdapter(
                 f"failed to update form field with id {form_field.id} with error: {e}"
             ) from e
 
-    def __update_text_form_field(
+    def __update_form_field(
         self,
-        document: models.TextFormField,
-        source: proto.UpdateTextFormField,
-    ) -> models.TextFormField:
+        document: models.FormField,
+        source: proto.UpdateFormField,
+    ):
         if source.required is not None:
             document.required = source.required
 
@@ -324,6 +331,13 @@ class MongoDBAdapter(
         if source.editor_ids is not None:
             document.editor_ids = source.editor_ids
 
+    def __update_text_form_field(
+        self,
+        document: models.TextFormField,
+        source: proto.UpdateTextFormField,
+    ) -> models.TextFormField:
+        self.__update_form_field(document, source)
+
         if source.re is not None:
             document.re = source.re
 
@@ -337,6 +351,8 @@ class MongoDBAdapter(
         document: models.ChoiceFormField,
         source: proto.UpdateChoiceFormField,
     ) -> models.ChoiceFormField:
+        self.__update_form_field(document, source)
+
         if source.options is not None:
             for index, option in enumerate(source.options):
                 if option is None:
