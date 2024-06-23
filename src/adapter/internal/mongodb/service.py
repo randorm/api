@@ -116,11 +116,13 @@ class MongoDBAdapter(
             document = self.__update_allocation(document, allocation)
             document.updated_at = datetime.now().replace(microsecond=0)
 
-            # todo: `.insert` CALL GENERATES NEW ID
-            # todo: REPLACE `.insert` with `.replace` ONCE ISSUE IS FIXED
-            # todo: TRACKING: https://github.com/BeanieODM/beanie/issues/955
-            document.id = None
-            document = await models.AllocationDocument.insert(document)
+            # todo: replace with new `.replace` call
+            # todo: tracking issue https://github.com/BeanieODM/beanie/issues/955
+            await models.AllocationDocument.find_one(
+                models.AllocationDocument.id == document.id,
+                with_children=True,
+            ).replace_one(document)
+            await document.sync()
 
             return domain.AllocationResolver.validate_python(document)
 
@@ -285,6 +287,7 @@ class MongoDBAdapter(
                 ), "can not change form field type"
 
                 document = self.__update_choice_form_field(document, form_field)
+
             document.updated_at = datetime.now().replace(microsecond=0)
             document = await document.replace()
 
