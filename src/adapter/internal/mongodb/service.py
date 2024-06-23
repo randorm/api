@@ -459,7 +459,7 @@ class MongoDBAdapter(
                 ), "can not change answer type"
 
                 document = self.__update_text_answer(document, answer)
-            elif isinstance(answer, proto.UpdateChoiseAnswer):
+            elif isinstance(answer, proto.UpdateChoiceAnswer):
                 assert isinstance(
                     document, models.ChoiceAnswer
                 ), "can not change answer type"
@@ -501,7 +501,7 @@ class MongoDBAdapter(
     def __update_choice_answer(
         self,
         document: models.ChoiceAnswer,
-        source: proto.UpdateChoiseAnswer,
+        source: proto.UpdateChoiceAnswer,
     ) -> models.ChoiceAnswer:
         if source.option_ids is not None:
             document.option_ids = source.option_ids

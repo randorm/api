@@ -84,10 +84,10 @@ class DeleteFormField(BaseModel):
 class CreateTextAnswer(ExcludeFieldMixin, TextAnswer): ...
 
 
-class CreateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer): ...
+class CreateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer): ...
 
 
-type CreateAnswer = CreateTextAnswer | CreateChoiseAnswer
+type CreateAnswer = CreateTextAnswer | CreateChoiceAnswer
 
 
 CreateAnswerResolver = TypeAdapter(
@@ -109,7 +109,7 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
     respondent_id: Literal[None] = None
 
 
-class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
+class UpdateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")
     option_ids: set[ObjectID] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
@@ -117,7 +117,7 @@ class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
     respondent_id: Literal[None] = None
 
 
-type UpdateAnswer = UpdateTextAnswer | UpdateChoiseAnswer
+type UpdateAnswer = UpdateTextAnswer | UpdateChoiceAnswer
 
 UpdateAnswerResolver = TypeAdapter(
     type=UpdateAnswer,
