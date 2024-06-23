@@ -1645,3 +1645,32 @@ async def test_update_creating_allocation_change_participant_fail(actor_fn: Acto
     )
     with pytest.raises(exception.UpdateAllocationException):
         document = await actor.update_allocation(new_data)
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_rooming_allocation_change_participant_drop(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = proto.CreateRoomingAllocation(
+        name="test",
+        due=datetime.now(),
+        field_ids=set(),
+        creator_id=domain.ObjectID(),
+        editor_ids={
+            domain.ObjectID(),
+        },
+        participant_ids={domain.ObjectID() for _ in range(10)},
+    )
+    document = await actor.create_allocation(data)
+
+    new_data = proto.UpdateAllocation(
+        _id=document.id,
+        state=domain.AllocationState.CREATING,
+    )
+
+    response = await actor.update_allocation(new_data)
+
+    assert response.state == domain.AllocationState.CREATING
+    assert response.id == document.id
+    assert isinstance(response, domain.CreatingAllocation)
+    assert "participant_ids" not in response.model_fields
