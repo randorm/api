@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Literal
 
 import pydantic
 
@@ -33,36 +34,36 @@ class BaseAllocation(pydantic.BaseModel):
 
 
 class CreatingAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.CREATING
+    state: Literal[AllocationState.CREATING] = AllocationState.CREATING
 
 
 class CreatedAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.CREATED
+    state: Literal[AllocationState.CREATED] = AllocationState.CREATED
     participant_ids: set[ObjectID]
 
 
 class OpenAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.OPEN
+    state: Literal[AllocationState.OPEN] = AllocationState.OPEN
     participant_ids: set[ObjectID]
 
 
 class RoomingAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.ROOMING
+    state: Literal[AllocationState.ROOMING] = AllocationState.ROOMING
     participant_ids: set[ObjectID]
 
 
 class RoomedAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.ROOMED
+    state: Literal[AllocationState.ROOMED] = AllocationState.ROOMED
     participant_ids: set[ObjectID]
 
 
 class ClosedAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.CLOSED
+    state: Literal[AllocationState.CLOSED] = AllocationState.CLOSED
     participant_ids: set[ObjectID]
 
 
 class FailedAllocation(BaseAllocation):
-    state: AllocationState = AllocationState.FAILED
+    state: Literal[AllocationState.FAILED] = AllocationState.FAILED
 
 
 type Allocation = (
@@ -73,4 +74,9 @@ type Allocation = (
     | RoomedAllocation
     | ClosedAllocation
     | FailedAllocation
+)
+
+AllocationResolver = pydantic.TypeAdapter(
+    type=Allocation,
+    config=pydantic.ConfigDict(extra="ignore", from_attributes=True),
 )

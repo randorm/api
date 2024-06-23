@@ -5,6 +5,7 @@ All business logic models and entities should be defined here.
 
 from src.domain.model.allocation import (
     Allocation,
+    AllocationResolver,
     AllocationState,
     BaseAllocation,
     ClosedAllocation,
@@ -17,6 +18,7 @@ from src.domain.model.allocation import (
 )
 from src.domain.model.form_field import (
     Answer,
+    AnswerResolver,
     BaseAnswer,
     BaseFormField,
     ChoiceAnswer,
@@ -24,6 +26,7 @@ from src.domain.model.form_field import (
     ChoiceOption,
     FormField,
     FormFieldKind,
+    FormFieldResolver,
     TextAnswer,
     TextFormField,
 )
@@ -32,6 +35,7 @@ from src.domain.model.format_entity import (
     BoldEntity,
     CodeEntity,
     FormatEntity,
+    FormatEntityResolver,
     FormatOption,
     ItalicEntity,
     LinkEntity,
@@ -59,16 +63,19 @@ __all__ = [
     ClosedAllocation,
     FailedAllocation,
     Allocation,
+    AllocationResolver,
     FormFieldKind,
     BaseFormField,
     TextFormField,
     ChoiceOption,
     ChoiceField,
     FormField,
+    FormFieldResolver,
     BaseAnswer,
     TextAnswer,
     ChoiceAnswer,
     Answer,
+    AnswerResolver,
     FormatOption,
     BaseFormatEntity,
     SpoilerEntity,
@@ -80,6 +87,7 @@ __all__ = [
     UnderlineEntity,
     CodeEntity,
     FormatEntity,
+    FormatEntityResolver,
     Room,
     ObjectID,
 ]

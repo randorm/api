@@ -1,4 +1,9 @@
+import re
+from typing import Any
+
 import beanie as bn
+import bson
+from pydantic import ConfigDict, TypeAdapter, field_validator
 
 import src.domain.model as domain
 
@@ -17,18 +22,50 @@ class Room(bn.Document, domain.Room):
 
 class FormFieldDocument(bn.Document):
     class Settings:
-        indexes = ["id"]
         name = "form_fields"
         is_root = True
 
 
-class TextFormField(FormFieldDocument, domain.TextFormField): ...
+def re_pattern_to_bson_regex(pattern: re.Pattern) -> bson.Regex:
+    regex = bson.Regex.from_native(pattern)
+    regex.flags ^= re.UNICODE
+
+    return regex
+
+
+class TextFormField(FormFieldDocument, domain.TextFormField):
+    class Settings:
+        bson_encoders = {re.Pattern: re_pattern_to_bson_regex}
+
+    @field_validator("re", mode="before")
+    @classmethod
+    def deserialize_re(cls, value: Any) -> re.Pattern | None:
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            return re.compile(value)
+
+        if isinstance(value, re.Pattern):
+            return value
+
+        if isinstance(value, bson.Regex):
+            return value.try_compile()
+
+        raise TypeError(
+            "re must be a string, a compiled regular expression, or a pymongo regex"
+        )
 
 
 class ChoiceFormField(FormFieldDocument, domain.ChoiceField): ...
 
 
 type FormField = TextFormField | ChoiceFormField
+
+FormFieldResolver = TypeAdapter(
+    FormField,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class AnswerDocument(bn.Document):
@@ -44,9 +81,16 @@ class TextAnswer(AnswerDocument, domain.TextAnswer): ...
 class ChoiceAnswer(AnswerDocument, domain.ChoiceAnswer): ...
 
 
+type Answer = TextAnswer | ChoiceAnswer
+
+AnswerResolver = TypeAdapter(
+    Answer,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
+
+
 class AllocationDocument(bn.Document):
     class Settings:
-        indexes = ["id"]
         name = "allocations"
         is_root = True
 
@@ -80,4 +124,9 @@ type Allocation = (
     | RoomedAllocation
     | ClosedAllocation
     | FailedAllocation
+)
+
+AllocationResolver = TypeAdapter(
+    Allocation,
+    config=ConfigDict(extra="ignore", from_attributes=True),
 )
