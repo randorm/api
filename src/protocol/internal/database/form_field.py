@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from re import Pattern
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
@@ -45,7 +46,8 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     editor_ids: set[ObjectID] | None = Field(default=None)
     re: Pattern[str] | None = Field(default=None)
     ex: str | None = Field(default=None)
-    # creator_id: ObjectID | None = Field(default=None)
+    # exclude
+    creator_id: Literal[None] = None
 
 
 class UpdateChoiceOption(ChoiceOption):
@@ -95,14 +97,16 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
     text: str | None = Field(default=None)
     text_entities: set[FormatEntity] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    # respondent_id: ObjectID | None = Field(default=None)
+    # exclude
+    respondent_id: Literal[None] = None
 
 
 class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")
     option_ids: set[ObjectID] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    # respondent_id: ObjectID | None = Field(default=None)
+    # exclude
+    respondent_id: Literal[None] = None
 
 
 type UpdateAnswer = UpdateTextAnswer | UpdateChoiseAnswer

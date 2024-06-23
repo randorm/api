@@ -1,5 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
@@ -69,7 +70,8 @@ class UpdateAllocation(ExcludeFieldMixin, BaseAllocation):
     field_ids: set[ObjectID] | None = Field(default=None)
     editor_ids: set[ObjectID] | None = Field(default=None)
     participant_ids: set[ObjectID] | None = Field(default=None)
-    # creator_id: ObjectID | None = Field(default=None)
+    # exclude
+    creator_id: Literal[None] = None
 
 
 class DeleteAllocation(BaseModel):
