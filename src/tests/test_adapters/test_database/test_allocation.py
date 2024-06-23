@@ -1,5 +1,5 @@
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -480,31 +480,303 @@ async def test_read_failed_allocation_ok(actor_fn: ActorFn):
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_creating_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_creating_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateCreatingAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={owner},
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.CREATING
+    assert response.id == document.id
+    assert isinstance(response, domain.CreatingAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+
+    # todo: test fail with participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_created_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_created_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateCreatedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+    new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+            participant_ids=new_participant_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.CREATED
+    assert response.id == document.id
+    assert isinstance(response, domain.CreatedAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+    assert response.participant_ids == new_participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_open_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_open_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateOpenAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+    new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+            participant_ids=new_participant_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.OPEN
+    assert response.id == document.id
+    assert isinstance(response, domain.OpenAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+    assert response.participant_ids == new_participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_rooming_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_rooming_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateRoomingAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+    new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+            participant_ids=new_participant_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.ROOMING
+    assert response.id == document.id
+    assert isinstance(response, domain.RoomingAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+    assert response.participant_ids == new_participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_roomed_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_roomed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateRoomedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+    new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+            participant_ids=new_participant_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.ROOMED
+    assert response.id == document.id
+    assert isinstance(response, domain.RoomedAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+    assert response.participant_ids == new_participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_closed_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_closed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateClosedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+    new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+            participant_ids=new_participant_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.CLOSED
+    assert response.id == document.id
+    assert isinstance(response, domain.ClosedAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
+    assert response.participant_ids == new_participant_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_update_failed_allocation_ok(actor_fn: ActorFn): ...
+async def test_update_failed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now()
+    owner = domain.ObjectID()
+
+    data = proto.CreateFailedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+    )
+    document = await actor.create_allocation(data)
+
+    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_date = (date + timedelta(days=5)).replace(microsecond=0)
+    new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
+
+    response = await actor.update_allocation(
+        proto.UpdateAllocation(
+            _id=document.id,
+            name="test2",
+            due=new_date,
+            field_ids=new_field_ids,
+            editor_ids=new_editor_ids,
+        )
+    )
+
+    assert response.state == domain.AllocationState.FAILED
+    assert response.id == document.id
+    assert isinstance(response, domain.FailedAllocation)
+    assert response.name == "test2"
+    assert response.due == new_date
+    assert response.field_ids == new_field_ids
+    assert response.editor_ids == new_editor_ids
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
