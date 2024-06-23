@@ -57,6 +57,12 @@ class UpdateChoiceOption(ChoiceOption):
 
 class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
     id: ObjectID = Field(alias="_id")
+    # optional fields
+    required: bool | None = Field(default=None)
+    question: str | None = Field(default=None)
+    question_entities: set[FormatEntity] | None = Field(default=None)
+    respondent_count: int | None = Field(default=None)
+    editor_ids: set[ObjectID] | None = Field(default=None)
     options: list[UpdateChoiceOption | None] | None = Field(default=None)
     multiple: bool | None = Field(default=None)
     # exclude
