@@ -9,6 +9,7 @@ import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database as proto
 from src.adapter.internal.mongodb import models
+from src.domain.model.allocation import AllocationState
 
 
 class MongoDBAdapter(
@@ -70,7 +71,7 @@ class MongoDBAdapter(
 
             return domain.AllocationResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
             ) from e
@@ -92,7 +93,7 @@ class MongoDBAdapter(
 
             return domain.AllocationResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
             ) from e
@@ -114,13 +115,18 @@ class MongoDBAdapter(
 
             document = self.__update_allocation(document, allocation)
             document.updated_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+
+            # todo: `.insert` CALL GENERATES NEW ID
+            # todo: REPLACE `.insert` with `.replace` ONCE ISSUE IS FIXED
+            # todo: TRACKING: https://github.com/BeanieODM/beanie/issues/955
+            document.id = None
+            document = await models.AllocationDocument.insert(document)
 
             return domain.AllocationResolver.validate_python(document)
 
         except exception.UpdateAllocationException as e:
             raise e
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
             ) from e
@@ -138,8 +144,28 @@ class MongoDBAdapter(
         if source.due is not None:
             document.due = source.due
 
-        if source.state is not None:
-            document.state = source.state  # type: ignore
+        match source.state:
+            case None:
+                ...
+
+            case AllocationState.CREATING | AllocationState.FAILED:
+                document.state = source.state  # type: ignore
+                document = models.CreatingAllocation.model_validate(
+                    document, from_attributes=True
+                )
+
+            case (
+                AllocationState.CREATED
+                | AllocationState.OPEN
+                | AllocationState.ROOMING
+                | AllocationState.ROOMED
+                | AllocationState.CLOSED
+            ):
+                document.state = source.state  # type: ignore
+
+                data = document.model_dump()
+                data["participant_ids"] = set()
+                document = models.AllocationResolver.validate_python(data)
 
         if source.field_ids is not None:
             document.field_ids = source.field_ids
@@ -148,18 +174,17 @@ class MongoDBAdapter(
             document.editor_ids = source.editor_ids
 
         if source.participant_ids is not None:
-            if not isinstance(
-                document,
-                models.CreatedAllocation
-                | models.OpenAllocation
-                | models.RoomingAllocation
-                | models.RoomedAllocation
-                | models.ClosedAllocation,
-            ):
+            if document.state not in [
+                AllocationState.CREATED,
+                AllocationState.OPEN,
+                AllocationState.ROOMING,
+                AllocationState.ROOMED,
+                AllocationState.CLOSED,
+            ]:
                 raise exception.UpdateAllocationException(
                     f"can not change participant ids for document type {type(document)}"
                 )
-            document.participant_ids = source.participant_ids
+            document.participant_ids = source.participant_ids  # type: ignore
 
         return document
 
@@ -179,7 +204,7 @@ class MongoDBAdapter(
 
             return domain.AllocationResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
             ) from e
@@ -206,7 +231,7 @@ class MongoDBAdapter(
 
             return domain.FormFieldResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectFormFieldException(
                 f"failed to reflect form field type with error: {e}"
             ) from e
@@ -228,7 +253,7 @@ class MongoDBAdapter(
 
             return domain.FormFieldResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectFormFieldException(
                 f"failed to reflect form field type with error: {e}"
             ) from e
@@ -267,7 +292,7 @@ class MongoDBAdapter(
 
         except exception.UpdateFormFieldException as e:
             raise e
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectFormFieldException(
                 f"failed to reflect form field type with error: {e}"
             ) from e
@@ -341,7 +366,7 @@ class MongoDBAdapter(
 
             return domain.FormFieldResolver.validate_python(document)
 
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectFormFieldException(
                 f"failed to reflect form field type with error: {e}"
             ) from e
@@ -367,7 +392,7 @@ class MongoDBAdapter(
             assert document is not None, "insert failed"
 
             return domain.AnswerResolver.validate_python(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAnswerException(
                 f"failed to reflect answer type with error: {e}"
             ) from e
@@ -388,7 +413,7 @@ class MongoDBAdapter(
             assert document is not None, "document not found"
 
             return domain.AnswerResolver.validate_python(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAnswerException(
                 f"failed to reflect answer type with error: {e}"
             ) from e
@@ -429,7 +454,7 @@ class MongoDBAdapter(
 
         except exception.UpdateAnswerException as e:
             raise e
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAnswerException(
                 f"failed to reflect answer type with error: {e}"
             ) from e
@@ -482,7 +507,7 @@ class MongoDBAdapter(
             document = await document.replace()
 
             return domain.AnswerResolver.validate_python(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectAnswerException(
                 f"failed to reflect answer type with error: {e}"
             ) from e
@@ -505,7 +530,7 @@ class MongoDBAdapter(
             assert document is not None, "insert failed"
 
             return domain.User.model_validate(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectUserException(
                 f"failed to reflect user type with error: {e}"
             ) from e
@@ -526,7 +551,7 @@ class MongoDBAdapter(
             assert document is not None, "document not found"
 
             return domain.User.model_validate(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectUserException(
                 f"failed to reflect user type with error: {e}"
             ) from e
@@ -554,7 +579,7 @@ class MongoDBAdapter(
 
         except exception.UpdateUserException as e:
             raise e
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectUserException(
                 f"failed to reflect user type with error: {e}"
             ) from e
@@ -609,7 +634,7 @@ class MongoDBAdapter(
             document = await document.replace()
 
             return domain.User.model_validate(document, from_attributes=True)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectUserException(
                 f"failed to reflect user type with error: {e}"
             ) from e
@@ -632,7 +657,7 @@ class MongoDBAdapter(
             assert document is not None, "insert failed"
 
             return domain.Room.model_validate(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectRoomException(
                 f"failed to reflect room type with error: {e}"
             ) from e
@@ -653,7 +678,7 @@ class MongoDBAdapter(
             assert document is not None, "document not found"
 
             return domain.Room.model_validate(document)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectRoomException(
                 f"failed to reflect room type with error: {e}"
             ) from e
@@ -680,7 +705,7 @@ class MongoDBAdapter(
             return domain.Room.model_validate(document, from_attributes=True)
         except exception.UpdateRoomException as e:
             raise e
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectRoomException(
                 f"failed to reflect room type with error: {e}"
             ) from e
@@ -726,7 +751,7 @@ class MongoDBAdapter(
             document = await document.replace()
 
             return domain.Room.model_validate(document, from_attributes=True)
-        except ValidationError as e:
+        except (ValidationError, AttributeError) as e:
             raise exception.ReflectRoomException(
                 f"failed to reflect room type with error: {e}"
             ) from e
