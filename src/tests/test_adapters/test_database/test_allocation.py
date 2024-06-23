@@ -508,28 +508,248 @@ async def test_update_failed_allocation_ok(actor_fn: ActorFn): ...
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_creating_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_creating_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateCreatingAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.CREATING
+    assert isinstance(response, domain.CreatingAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_created_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_created_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateCreatedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.CREATED
+    assert isinstance(response, domain.CreatedAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
+    assert len(response.participant_ids) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_open_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_open_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateOpenAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.OPEN
+    assert isinstance(response, domain.OpenAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
+    assert len(response.participant_ids) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_rooming_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_rooming_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateRoomingAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.ROOMING
+    assert isinstance(response, domain.RoomingAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
+    assert len(response.participant_ids) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_roomed_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_roomed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateRoomedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.ROOMED
+    assert isinstance(response, domain.RoomedAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
+    assert len(response.participant_ids) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_closed_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_closed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateClosedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+        participant_ids=set(),
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.CLOSED
+    assert isinstance(response, domain.ClosedAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
+    assert len(response.participant_ids) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
-async def test_delete_failed_allocation_ok(actor_fn: ActorFn): ...
+async def test_delete_failed_allocation_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    date = datetime.now().replace(microsecond=0)
+    owner = domain.ObjectID()
+
+    data = proto.CreateFailedAllocation(
+        name="test",
+        due=date,
+        field_ids=set(),
+        creator_id=owner,
+        editor_ids={
+            owner,
+        },
+    )
+    document = await actor.create_allocation(data)
+
+    response = await actor.delete_allocation(proto.DeleteAllocation(_id=document.id))
+
+    assert response.deleted_at is not None
+    assert response.state == domain.AllocationState.FAILED
+    assert isinstance(response, domain.FailedAllocation)
+    assert isinstance(response.id, domain.ObjectID)
+    assert response.name == "test"
+    assert response.due == date
+    assert len(response.field_ids) == 0
+    assert response.creator_id == owner
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
+    assert response.deleted_at is not None
+    assert len(response.editor_ids) == 1
+    assert response.editor_ids == {owner}
