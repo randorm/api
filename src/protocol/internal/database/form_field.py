@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from re import Pattern
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from src.domain.model.form_field import (
     Answer,
@@ -25,6 +26,11 @@ class CreateChoiceFormField(ExcludeFieldMixin, ChoiceField): ...
 
 type CreateFormField = CreateTextFormField | CreateChoiceFormField
 
+CreateFormFieldResolver = TypeAdapter(
+    type=CreateFormField,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
+
 
 class ReadFormField(BaseModel):
     id: ObjectID = Field(alias="_id")
@@ -40,7 +46,8 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     editor_ids: set[ObjectID] | None = Field(default=None)
     re: Pattern[str] | None = Field(default=None)
     ex: str | None = Field(default=None)
-    # creator_id: ObjectID | None = Field(default=None)
+    # exclude
+    creator_id: Literal[None] = None
 
 
 class UpdateChoiceOption(ChoiceOption):
@@ -50,11 +57,24 @@ class UpdateChoiceOption(ChoiceOption):
 
 class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
     id: ObjectID = Field(alias="_id")
+    # optional fields
+    required: bool | None = Field(default=None)
+    question: str | None = Field(default=None)
+    question_entities: set[FormatEntity] | None = Field(default=None)
+    respondent_count: int | None = Field(default=None)
+    editor_ids: set[ObjectID] | None = Field(default=None)
     options: list[UpdateChoiceOption | None] | None = Field(default=None)
     multiple: bool | None = Field(default=None)
+    # exclude
+    creator_id: Literal[None] = None
 
 
 type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField
+
+UpdateFormFieldResolver = TypeAdapter(
+    type=UpdateFormField,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class DeleteFormField(BaseModel):
@@ -64,10 +84,16 @@ class DeleteFormField(BaseModel):
 class CreateTextAnswer(ExcludeFieldMixin, TextAnswer): ...
 
 
-class CreateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer): ...
+class CreateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer): ...
 
 
-type CreateAnswer = CreateTextAnswer | CreateChoiseAnswer
+type CreateAnswer = CreateTextAnswer | CreateChoiceAnswer
+
+
+CreateAnswerResolver = TypeAdapter(
+    type=CreateAnswer,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class ReadAnswer(BaseModel):
@@ -79,17 +105,24 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
     text: str | None = Field(default=None)
     text_entities: set[FormatEntity] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    # respondent_id: ObjectID | None = Field(default=None)
+    # exclude
+    respondent_id: Literal[None] = None
 
 
-class UpdateChoiseAnswer(ExcludeFieldMixin, ChoiceAnswer):
+class UpdateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")
     option_ids: set[ObjectID] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
-    # respondent_id: ObjectID | None = Field(default=None)
+    # exclude
+    respondent_id: Literal[None] = None
 
 
-type UpdateAnswer = UpdateTextAnswer | UpdateChoiseAnswer
+type UpdateAnswer = UpdateTextAnswer | UpdateChoiceAnswer
+
+UpdateAnswerResolver = TypeAdapter(
+    type=UpdateAnswer,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)
 
 
 class DeleteAnswer(BaseModel):

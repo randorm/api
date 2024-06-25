@@ -1,5 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -33,6 +34,8 @@ class UpdateUser(ExcludeFieldMixin, User):
     # optional fields
     views: int | None = Field(default=None)
     profile: UpdateProfile | None = Field(default=None)
+    # exclude
+    tid: Literal[None] = None
 
 
 class DeleteUser(BaseModel):

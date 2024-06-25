@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Literal
 
 import pydantic
 
@@ -21,36 +22,36 @@ class BaseFormatEntity(pydantic.BaseModel, frozen=True):
 
 
 class SpoilerEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.SPOILER
+    option: Literal[FormatOption.SPOILER] = FormatOption.SPOILER
 
 
 class BoldEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.BOLD
+    option: Literal[FormatOption.BOLD] = FormatOption.BOLD
 
 
 class ItalicEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.ITALIC
+    option: Literal[FormatOption.ITALIC] = FormatOption.ITALIC
 
 
 class MonospaceEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.MONOSPACE
+    option: Literal[FormatOption.MONOSPACE] = FormatOption.MONOSPACE
 
 
 class LinkEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.LINK
+    option: Literal[FormatOption.LINK] = FormatOption.LINK
     url: pydantic.HttpUrl
 
 
 class StrikethroughEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.STRIKETHROUGH
+    option: Literal[FormatOption.STRIKETHROUGH] = FormatOption.STRIKETHROUGH
 
 
 class UnderlineEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.UNDERLINE
+    option: Literal[FormatOption.UNDERLINE] = FormatOption.UNDERLINE
 
 
 class CodeEntity(BaseFormatEntity, frozen=True):
-    option: FormatOption = FormatOption.CODE
+    option: Literal[FormatOption.CODE] = FormatOption.CODE
     language: str
 
 
@@ -63,4 +64,9 @@ type FormatEntity = (
     | StrikethroughEntity
     | UnderlineEntity
     | CodeEntity
+)
+
+FormatEntityResolver = pydantic.TypeAdapter(
+    type=FormatEntity,
+    config=pydantic.ConfigDict(extra="ignore", from_attributes=True),
 )
