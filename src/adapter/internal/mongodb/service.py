@@ -152,8 +152,9 @@ class MongoDBAdapter(
 
             case AllocationState.CREATING | AllocationState.FAILED:
                 document.state = source.state  # type: ignore
-                document = models.CreatingAllocation.model_validate(
-                    document, from_attributes=True
+
+                document = models.AllocationResolver.validate_python(
+                    document.model_dump(by_alias=True)
                 )
 
             case (
