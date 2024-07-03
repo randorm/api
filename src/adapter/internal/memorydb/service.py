@@ -550,6 +550,37 @@ class MemoryDBAdapter(
                 f"failed to create user with error: {e}"
             ) from e
 
+    async def find_users(self, user: proto.FindUsers) -> list[domain.User]:
+        try:
+            match user:
+                case proto.FindUsersByTid():
+                    documents = [
+                        user
+                        for user in self._user_collection.values()
+                        if user.tid == user.tid
+                    ]
+
+                case proto.FindUsersByProfileUsername():
+                    documents = [
+                        user
+                        for user in self._user_collection.values()
+                        if user.profile.username == user.profile.username
+                    ]
+
+                case _:
+                    documents = []
+
+            return [domain.User.model_validate(document) for document in documents]
+
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.FindUsersException(
+                f"failed to find users with error: {e}"
+            ) from e
+
     async def read_user(
         self,
         user: proto.ReadUser,

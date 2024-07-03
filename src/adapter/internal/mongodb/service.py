@@ -559,6 +559,31 @@ class MongoDBAdapter(
                 f"failed to create user with error: {e}"
             ) from e
 
+    async def find_users(self, user: proto.FindUsers) -> list[domain.User]:
+        try:
+            match user:
+                case proto.FindUsersByTid():
+                    documents = await models.User.find_many({"tid": user.tid}).to_list()
+
+                case proto.FindUsersByProfileUsername():
+                    documents = await models.User.find_many(
+                        {"profile.username": user.username}
+                    ).to_list()
+
+                case _:
+                    documents = []
+
+            return [domain.User.model_validate(document) for document in documents]
+
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.FindUsersException(
+                f"failed to find users with error: {e}"
+            ) from e
+
     async def read_user(
         self,
         user: proto.ReadUser,
