@@ -14,10 +14,7 @@ from src.domain.exception import service as service_exception
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Profile, User
 from src.protocol.external.auth.oauth import OAuthContainer, OAuthDTO, OauthProtocol
-from src.protocol.internal.database.user import (
-    CreateUser,
-    ReadUser,
-)
+from src.protocol.internal.database.user import CreateUser, ReadUser
 from src.service.user import UserService
 
 
