@@ -17,7 +17,6 @@ pydantic-extra-types = "^2.8.1"
 beanie = "^1.26.0"
 pymongo = "^4.7.3"
 strawberry-graphql = "^0.235.0"
-pytest-aio = "^1.8.1"
 aiohttp = "^3.9.5"
 pyjwt = "^2.8.0"
 python-dotenv = "^1.0.1"
@@ -37,6 +36,7 @@ pytest = "^8.2.2"
 pytest-sugar = "^1.0.0"
 pytest-cov = "^5.0.0"
 pytest-async = "^0.1.1"
+pytest-aio = "^1.8.1"
 
 [build-system]
 requires = ["poetry-core"]
