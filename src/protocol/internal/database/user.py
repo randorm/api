@@ -15,6 +15,17 @@ from src.protocol.internal.database.mixin import ExcludeFieldMixin
 class CreateUser(ExcludeFieldMixin, User): ...
 
 
+class FindUsersByTid(BaseModel):
+    tid: int
+
+
+class FindUsersByProfileUsername(BaseModel):
+    username: str
+
+
+type FindUsers = FindUsersByTid | FindUsersByProfileUsername
+
+
 class ReadUser(BaseModel):
     id: ObjectID = Field(alias="_id")
 
@@ -45,6 +56,9 @@ class DeleteUser(BaseModel):
 class UserDatabaseProtocol(ABC):
     @abstractmethod
     async def create_user(self, user: CreateUser) -> User: ...
+
+    @abstractmethod
+    async def find_users(self, user: FindUsers) -> list[User]: ...
 
     @abstractmethod
     async def read_user(self, user: ReadUser) -> User: ...

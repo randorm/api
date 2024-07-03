@@ -7,17 +7,25 @@ from pydantic import BaseModel, ConfigDict
 import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database.user as proto
+from src.adapter.internal.memorydb.service import MemoryDBAdapter
 from src.adapter.internal.mongodb.service import MongoDBAdapter
 
 
 async def _get_mongo():
+    adapter = await MongoDBAdapter.create("mongodb://localhost:27017")
+    await adapter._client.drop_database(adapter._client.db_name)
+
     return await MongoDBAdapter.create("mongodb://localhost:27017")
+
+
+async def _get_memory():
+    return MemoryDBAdapter()
 
 
 type ActorFn = Callable[[], Awaitable[proto.UserDatabaseProtocol]]
 
 param_string = "actor_fn"
-param_attrs = [_get_mongo]
+param_attrs = [_get_mongo, _get_memory]
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
@@ -64,6 +72,82 @@ async def test_create_user_reflect_fail(actor_fn: ActorFn):
     data = MutableObject()
     with pytest.raises(exception.ReflectUserException):
         await actor.create_user(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_find_users_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = proto.CreateUser(
+        tid=345,
+        profile=domain.Profile(
+            username="test",
+            first_name="test",
+            last_name="test",
+            gender=domain.Gender.MALE,
+            language_code=domain.LanguageCode.EN,
+            birthdate=datetime.today().date(),
+        ),
+        views=0,
+    )
+
+    document = await actor.create_user(data)
+
+    response = await actor.find_users(proto.FindUsersByTid(tid=document.tid))
+
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert response[0].tid == data.tid
+    assert response[0].profile.username == data.profile.username
+    assert response[0].profile.first_name == data.profile.first_name
+    assert response[0].profile.last_name == data.profile.last_name
+    assert response[0].profile.gender == data.profile.gender
+    assert response[0].profile.language_code == data.profile.language_code
+    assert response[0].profile.birthdate == data.profile.birthdate
+    assert response[0].views == data.views
+    assert isinstance(response[0].id, domain.ObjectID)
+    assert isinstance(response[0].created_at, datetime)
+    assert isinstance(response[0].updated_at, datetime)
+    assert response[0].deleted_at is None
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_find_users_by_username_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = proto.CreateUser(
+        tid=346,
+        profile=domain.Profile(
+            username="test345",
+            first_name="test",
+            last_name="test",
+            gender=domain.Gender.MALE,
+            language_code=domain.LanguageCode.EN,
+            birthdate=datetime.today().date(),
+        ),
+        views=0,
+    )
+
+    document = await actor.create_user(data)
+
+    response = await actor.find_users(
+        proto.FindUsersByProfileUsername(username=document.profile.username or "")
+    )
+
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert response[0].tid == data.tid
+    assert response[0].profile.username == data.profile.username
+    assert response[0].profile.first_name == data.profile.first_name
+    assert response[0].profile.last_name == data.profile.last_name
+    assert response[0].profile.gender == data.profile.gender
+    assert response[0].profile.language_code == data.profile.language_code
+    assert response[0].profile.birthdate == data.profile.birthdate
+    assert response[0].views == data.views
+    assert isinstance(response[0].id, domain.ObjectID)
+    assert isinstance(response[0].created_at, datetime)
+    assert isinstance(response[0].updated_at, datetime)
+    assert response[0].deleted_at is None
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
@@ -256,6 +340,17 @@ async def test_create_user_immutable_fail(actor_fn: ActorFn):
     data = object
     with pytest.raises(exception.CreateUserException):
         await actor.create_user(data)  # type: ignore
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_find_users_immutable_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+
+    data = object
+    results = await actor.find_users(data)  # type: ignore
+
+    assert isinstance(results, list)
+    assert len(results) == 0
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
