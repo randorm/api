@@ -5,5 +5,3 @@ Example of such functions are logging, error handling etc.
 """
 
 from src.utils import logger
-
-__all__ = [logger]

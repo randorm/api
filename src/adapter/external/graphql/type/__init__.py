@@ -10,11 +10,3 @@ from src.adapter.external.graphql.type import (
     room,
     user,
 )
-
-__all__ = [
-    allocation,
-    form_field,
-    format_entity,
-    room,
-    user,
-]

@@ -5,5 +5,3 @@ All protocols should be defined here.
 """
 
 from src.protocol import external, internal
-
-__all__ = [external, internal]

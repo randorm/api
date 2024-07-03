@@ -6,5 +6,3 @@ Example of such adapters are databases, caches, workers etc.
 """
 
 from src.adapter.internal import mongodb
-
-__all__ = [mongodb]

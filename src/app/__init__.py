@@ -7,3 +7,5 @@ Example of application are:
 - a worker, which performs background tasks
 etc
 """
+
+from src.app import http

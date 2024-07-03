@@ -6,5 +6,3 @@ Example of such protocols are databases, caches, workers etc.
 """
 
 from src.protocol.internal import database
-
-__all__ = [database]
