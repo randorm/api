@@ -60,15 +60,20 @@ class TgOauthContainer(BaseModel, OAuthContainer):
     jwt: str
 
     @classmethod
-    def construct(cls, data: TgOauthDTO, secret: str) -> TgOauthContainer:
+    def construct(
+        cls, data: TgOauthDTO, secret: str, *args, **kwargs
+    ) -> TgOauthContainer:
         token = jwt.encode(data.model_dump(mode="json"), secret, algorithm="HS256")
         self = cls(jwt=token)
         return self
 
-    def to_dto(self, secret: str) -> TgOauthDTO:
+    def to_dto(self, secret: str, *args, **kwargs) -> TgOauthDTO:
         return TgOauthDTO.model_validate(
             jwt.decode(self.jwt, secret, algorithms=["HS256"])
         )
+
+    def to_string(self, *args, **kwargs) -> str:
+        return self.jwt
 
 
 class TelegramOauthAdapter(OauthProtocol):

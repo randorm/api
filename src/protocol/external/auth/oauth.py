@@ -19,6 +19,9 @@ class OAuthContainer(ABC):
     @abstractmethod
     def to_dto(self, *args, **kwargs) -> BaseModel: ...
 
+    @abstractmethod
+    def to_string(self, *args, **kwargs) -> str: ...
+
 
 class OauthProtocol(ABC):
     @abstractmethod
