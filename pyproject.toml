@@ -17,6 +17,8 @@ pydantic-extra-types = "^2.8.1"
 beanie = "^1.26.0"
 pymongo = "^4.7.3"
 pytest-aio = "^1.8.1"
+aiohttp = "^3.9.5"
+pyjwt = "^2.8.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"     # formatter
