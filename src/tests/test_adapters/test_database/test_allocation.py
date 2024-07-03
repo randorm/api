@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database.allocation as proto
+from src.adapter.internal.memorydb.service import MemoryDBAdapter
 from src.adapter.internal.mongodb.service import MongoDBAdapter
 
 
@@ -14,10 +15,14 @@ async def _get_mongo():
     return await MongoDBAdapter.create("mongodb://localhost:27017")
 
 
+async def _get_memory():
+    return MemoryDBAdapter()
+
+
 type ActorFn = Callable[[], Awaitable[proto.AllocationDatabaseProtocol]]
 
 param_string = "actor_fn"
-param_attrs = [_get_mongo]
+param_attrs = [_get_mongo, _get_memory]
 
 
 @pytest.mark.parametrize(param_string, param_attrs)

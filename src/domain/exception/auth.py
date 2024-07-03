@@ -1,0 +1,19 @@
+from src.domain.exception.base import DomainException
+
+
+class AuthException(DomainException): ...
+
+
+class InvalidCredentialsException(AuthException): ...
+
+
+class UserNotFoundException(AuthException): ...
+
+
+class UserAlreadyExistsException(AuthException): ...
+
+
+class UserDisabledException(AuthException): ...
+
+
+class UserNotActivatedException(AuthException): ...

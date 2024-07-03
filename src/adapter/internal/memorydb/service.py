@@ -1,56 +1,33 @@
+import json
 from datetime import datetime
-from typing import Any
 
-import beanie as bn
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database as proto
-from src.adapter.internal.mongodb import models
 from src.domain.model.allocation import AllocationState
+from src.domain.model.scalar.object_id import ObjectID
 
 
-class MongoDBAdapter(
+class MemoryDBAdapter(
     proto.AllocationDatabaseProtocol,
     proto.FormFieldDatabaseProtocol,
     proto.RoomDatabaseProtocol,
     proto.UserDatabaseProtocol,
 ):
-    _client: AsyncIOMotorClient
+    _allocation_collection: dict[ObjectID, domain.Allocation]
+    _form_field_collection: dict[ObjectID, domain.FormField]
+    _answer_collection: dict[ObjectID, domain.Answer]
+    _user_collection: dict[ObjectID, domain.User]
+    _room_collection: dict[ObjectID, domain.Room]
 
     def __init__(self):
-        pass
-
-    @classmethod
-    async def create(cls, dsn: str, **client_args: Any):
-        self = cls()
-        self._client = AsyncIOMotorClient(dsn, **client_args)
-
-        await bn.init_beanie(
-            self._client.db_name,
-            document_models=[
-                models.User,
-                models.Room,
-                models.FormFieldDocument,
-                models.TextFormField,
-                models.ChoiceFormField,
-                models.AnswerDocument,
-                models.TextAnswer,
-                models.ChoiceAnswer,
-                models.AllocationDocument,
-                models.CreatingAllocation,
-                models.CreatedAllocation,
-                models.OpenAllocation,
-                models.RoomingAllocation,
-                models.RoomedAllocation,
-                models.ClosedAllocation,
-                models.FailedAllocation,
-            ],
-        )
-
-        return self
+        self._allocation_collection = {}
+        self._form_field_collection = {}
+        self._answer_collection = {}
+        self._user_collection = {}
+        self._room_collection = {}
 
     async def create_allocation(
         self,
@@ -58,19 +35,22 @@ class MongoDBAdapter(
     ) -> domain.Allocation:
         try:
             timestamp = datetime.now().replace(microsecond=0)
-            allocation.created_at = timestamp
-            allocation.updated_at = timestamp
 
-            model: models.Allocation = models.AllocationResolver.validate_python(
-                allocation,
-                from_attributes=True,
-            )
+            if not isinstance(allocation, BaseModel):
+                raise TypeError("allocation must be a pydantic model")
 
-            document: models.Allocation = await model.insert()
+            data = json.loads(allocation.model_dump_json())
+            data["_id"] = str(ObjectID())
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model: domain.Allocation = domain.AllocationResolver.validate_python(data)
+
+            self._allocation_collection[model.id] = model
+            document = self._allocation_collection.get(model.id)
             assert document is not None, "insert failed"
 
             return domain.AllocationResolver.validate_python(document)
-
         except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
@@ -85,10 +65,10 @@ class MongoDBAdapter(
         allocation: proto.ReadAllocation,
     ) -> domain.Allocation:
         try:
-            document = await models.AllocationDocument.get(
-                allocation.id,
-                with_children=True,
-            )
+            if not isinstance(allocation, BaseModel):
+                raise TypeError("allocation must be a pydantic model")
+
+            document = self._allocation_collection.get(allocation.id)
             assert document is not None, "document not found"
 
             return domain.AllocationResolver.validate_python(document)
@@ -107,22 +87,15 @@ class MongoDBAdapter(
         allocation: proto.UpdateAllocation,
     ) -> domain.Allocation:
         try:
-            document: models.Allocation | None = await models.AllocationDocument.get(
-                allocation.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(allocation, BaseModel):
+                raise TypeError("allocation must be a pydantic model")
+
+            document = self._allocation_collection.get(allocation.id)
             assert document is not None, "document not found"
 
             document = self.__update_allocation(document, allocation)
-            document.updated_at = datetime.now().replace(microsecond=0)
-
-            # todo: replace with new `.replace` call
-            # todo: tracking issue https://github.com/BeanieODM/beanie/issues/955
-            await models.AllocationDocument.find_one(
-                models.AllocationDocument.id == document.id,
-                with_children=True,
-            ).replace_one(document)
-            await document.sync()
+            self._allocation_collection[allocation.id] = document
+            document = self._allocation_collection.get(allocation.id)
 
             return domain.AllocationResolver.validate_python(document)
 
@@ -138,7 +111,7 @@ class MongoDBAdapter(
             ) from e
 
     def __update_allocation(
-        self, document: models.Allocation, source: proto.UpdateAllocation
+        self, document: domain.Allocation, source: proto.UpdateAllocation
     ):
         if source.name is not None:
             document.name = source.name
@@ -152,8 +125,7 @@ class MongoDBAdapter(
 
             case AllocationState.CREATING | AllocationState.FAILED:
                 document.state = source.state  # type: ignore
-
-                document = models.AllocationResolver.validate_python(
+                document = domain.AllocationResolver.validate_python(
                     document.model_dump(by_alias=True)
                 )
 
@@ -166,9 +138,11 @@ class MongoDBAdapter(
             ):
                 document.state = source.state  # type: ignore
 
-                data = document.model_dump()
+                data = document.model_dump(by_alias=True)
                 data["participant_ids"] = set()
-                document = models.AllocationResolver.validate_python(data)
+                document = domain.AllocationResolver.validate_python(
+                    data, from_attributes=True
+                )
 
         if source.field_ids is not None:
             document.field_ids = source.field_ids
@@ -196,14 +170,14 @@ class MongoDBAdapter(
         allocation: proto.DeleteAllocation,
     ) -> domain.Allocation:
         try:
-            document: models.Allocation | None = await models.AllocationDocument.get(
-                allocation.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(allocation, BaseModel):
+                raise TypeError("allocation must be a pydantic model")
+
+            document = self._allocation_collection.get(allocation.id)
             assert document is not None, "document not found"
 
             document.deleted_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._allocation_collection[allocation.id] = document
 
             return domain.AllocationResolver.validate_python(document)
 
@@ -221,15 +195,21 @@ class MongoDBAdapter(
         form_field: proto.CreateFormField,
     ) -> domain.FormField:
         try:
+            if not isinstance(form_field, BaseModel):
+                raise TypeError("form_field must be a pydantic model")
+
             timestamp = datetime.now().replace(microsecond=0)
-            form_field.created_at = timestamp
-            form_field.updated_at = timestamp
 
-            model: models.FormField = models.FormFieldResolver.validate_python(
-                form_field, from_attributes=True
-            )
+            # todo: https://github.com/pydantic/pydantic/issues/4186
+            data = json.loads(form_field.model_dump_json())
+            data["_id"] = ObjectID()
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
 
-            document = await model.insert()
+            model: domain.FormField = domain.FormFieldResolver.validate_python(data)
+
+            self._form_field_collection[model.id] = model
+            document = self._form_field_collection.get(model.id)
             assert document is not None, "insert failed"
 
             return domain.FormFieldResolver.validate_python(document)
@@ -248,12 +228,11 @@ class MongoDBAdapter(
         form_field: proto.ReadFormField,
     ) -> domain.FormField:
         try:
-            document = await models.FormFieldDocument.get(
-                form_field.id,
-                with_children=True,
-            )
+            if not isinstance(form_field, BaseModel):
+                raise AttributeError("form_field must be a pydantic model")
+
+            document = self._form_field_collection.get(form_field.id)
             assert document is not None, "document not found"
-            print(document.model_dump_json())
 
             return domain.FormFieldResolver.validate_python(document)
 
@@ -271,31 +250,29 @@ class MongoDBAdapter(
         form_field: proto.UpdateFormField,
     ) -> domain.FormField:
         try:
-            document: models.FormField | None = await models.FormFieldDocument.get(
-                form_field.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(form_field, BaseModel):
+                raise AttributeError("form_field must be a pydantic model")
+
+            document = self._form_field_collection.get(form_field.id)
             assert document is not None, "document not found"
 
             if isinstance(form_field, proto.UpdateTextFormField):
                 assert isinstance(
-                    document, models.TextFormField
+                    document, domain.TextFormField
                 ), "can not change form field type"
 
                 document = self.__update_text_form_field(document, form_field)
             elif isinstance(form_field, proto.UpdateChoiceFormField):
                 assert isinstance(
-                    document, models.ChoiceFormField
+                    document, domain.ChoiceField
                 ), "can not change form field type"
 
                 document = self.__update_choice_form_field(document, form_field)
 
             document.updated_at = datetime.now().replace(microsecond=0)
-            await models.FormFieldDocument.find_one(
-                models.FormFieldDocument.id == document.id,
-                with_children=True,
-            ).replace_one(document)
-            await document.sync()
+
+            self._form_field_collection[document.id] = document
+            document = self._form_field_collection.get(document.id)
 
             return domain.FormFieldResolver.validate_python(
                 document, from_attributes=True
@@ -314,7 +291,7 @@ class MongoDBAdapter(
 
     def __update_form_field(
         self,
-        document: models.FormField,
+        document: domain.FormField,
         source: proto.UpdateFormField,
     ):
         if source.required is not None:
@@ -334,9 +311,9 @@ class MongoDBAdapter(
 
     def __update_text_form_field(
         self,
-        document: models.TextFormField,
+        document: domain.TextFormField,
         source: proto.UpdateTextFormField,
-    ) -> models.TextFormField:
+    ) -> domain.TextFormField:
         self.__update_form_field(document, source)
 
         if source.re is not None:
@@ -349,9 +326,9 @@ class MongoDBAdapter(
 
     def __update_choice_form_field(
         self,
-        document: models.ChoiceFormField,
+        document: domain.ChoiceField,
         source: proto.UpdateChoiceFormField,
-    ) -> models.ChoiceFormField:
+    ) -> domain.ChoiceField:
         self.__update_form_field(document, source)
 
         if source.options is not None:
@@ -375,14 +352,15 @@ class MongoDBAdapter(
         form_field: proto.DeleteFormField,
     ) -> domain.FormField:
         try:
-            document: models.FormField | None = await models.FormFieldDocument.get(
-                form_field.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(form_field, BaseModel):
+                raise AttributeError("form_field must be a pydantic model")
+
+            document = self._form_field_collection.get(form_field.id)
             assert document is not None, "document not found"
 
             document.deleted_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._form_field_collection[form_field.id] = document
+            document = self._form_field_collection.get(form_field.id)
 
             return domain.FormFieldResolver.validate_python(document)
 
@@ -400,15 +378,18 @@ class MongoDBAdapter(
         answer: proto.CreateAnswer,
     ) -> domain.Answer:
         try:
-            timestamp = datetime.now().replace(microsecond=0)
-            answer.created_at = timestamp
-            answer.updated_at = timestamp
+            if not isinstance(answer, BaseModel):
+                raise TypeError("answer must be a pydantic model")
 
-            model = models.AnswerResolver.validate_python(
-                answer,
-                from_attributes=True,
-            )
-            document = await model.insert()
+            timestamp = datetime.now().replace(microsecond=0)
+            data = json.loads(answer.model_dump_json())
+            data["_id"] = str(ObjectID())
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model = domain.AnswerResolver.validate_python(data)
+            self._answer_collection[model.id] = model
+            document = self._answer_collection.get(model.id)
             assert document is not None, "insert failed"
 
             return domain.AnswerResolver.validate_python(document)
@@ -426,10 +407,10 @@ class MongoDBAdapter(
         answer: proto.ReadAnswer,
     ) -> domain.Answer:
         try:
-            document = await models.AnswerDocument.get(
-                answer.id,
-                with_children=True,
-            )
+            if not isinstance(answer, BaseModel):
+                raise AttributeError("answer must be a pydantic model")
+
+            document = self._answer_collection.get(answer.id)
             assert document is not None, "document not found"
 
             return domain.AnswerResolver.validate_python(document)
@@ -447,28 +428,28 @@ class MongoDBAdapter(
         answer: proto.UpdateAnswer,
     ) -> domain.Answer:
         try:
-            document: models.Answer | None = await models.AnswerDocument.get(
-                answer.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(answer, BaseModel):
+                raise AttributeError("answer must be a pydantic model")
 
+            document = self._answer_collection.get(answer.id)
             assert document is not None, "document not found"
 
             if isinstance(answer, proto.UpdateTextAnswer):
                 assert isinstance(
-                    document, models.TextAnswer
+                    document, domain.TextAnswer
                 ), "can not change answer type"
 
                 document = self.__update_text_answer(document, answer)
             elif isinstance(answer, proto.UpdateChoiceAnswer):
                 assert isinstance(
-                    document, models.ChoiceAnswer
+                    document, domain.ChoiceAnswer
                 ), "can not change answer type"
 
                 document = self.__update_choice_answer(document, answer)
 
             document.updated_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._answer_collection[answer.id] = document
+            document = self._answer_collection.get(answer.id)
 
             return domain.AnswerResolver.validate_python(document)
 
@@ -485,9 +466,9 @@ class MongoDBAdapter(
 
     def __update_text_answer(
         self,
-        document: models.TextAnswer,
+        document: domain.TextAnswer,
         source: proto.UpdateTextAnswer,
-    ) -> models.TextAnswer:
+    ) -> domain.TextAnswer:
         if source.text is not None:
             document.text = source.text
 
@@ -501,9 +482,9 @@ class MongoDBAdapter(
 
     def __update_choice_answer(
         self,
-        document: models.ChoiceAnswer,
+        document: domain.ChoiceAnswer,
         source: proto.UpdateChoiceAnswer,
-    ) -> models.ChoiceAnswer:
+    ) -> domain.ChoiceAnswer:
         if source.option_ids is not None:
             document.option_ids = source.option_ids
 
@@ -517,14 +498,15 @@ class MongoDBAdapter(
         answer: proto.DeleteAnswer,
     ) -> domain.Answer:
         try:
-            document: models.Answer | None = await models.AnswerDocument.get(
-                answer.id,
-                with_children=True,
-            )  # type: ignore
+            if not isinstance(answer, BaseModel):
+                raise AttributeError("answer must be a pydantic model")
+
+            document = self._answer_collection.get(answer.id)
             assert document is not None, "document not found"
 
             document.deleted_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._answer_collection[answer.id] = document
+            document = self._answer_collection.get(answer.id)
 
             return domain.AnswerResolver.validate_python(document)
         except (ValidationError, AttributeError) as e:
@@ -541,12 +523,21 @@ class MongoDBAdapter(
         user: proto.CreateUser,
     ) -> domain.User:
         try:
-            timestamp = datetime.now().replace(microsecond=0)
-            user.created_at = timestamp
-            user.updated_at = timestamp
+            if not isinstance(user, BaseModel):
+                raise TypeError("user must be a pydantic model")
 
-            model = models.User.model_validate(user, from_attributes=True)
-            document = await model.insert()
+            timestamp = datetime.now().replace(microsecond=0)
+
+            data = json.loads(user.model_dump_json())
+            data["_id"] = str(ObjectID())
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model = domain.User.model_validate(data)
+
+            self._user_collection[model.id] = model
+            document = self._user_collection.get(model.id)
+
             assert document is not None, "insert failed"
 
             return domain.User.model_validate(document)
@@ -563,12 +554,18 @@ class MongoDBAdapter(
         try:
             match user:
                 case proto.FindUsersByTid():
-                    documents = await models.User.find_many({"tid": user.tid}).to_list()
+                    documents = [
+                        user
+                        for user in self._user_collection.values()
+                        if user.tid == user.tid
+                    ]
 
                 case proto.FindUsersByProfileUsername():
-                    documents = await models.User.find_many(
-                        {"profile.username": user.username}
-                    ).to_list()
+                    documents = [
+                        user
+                        for user in self._user_collection.values()
+                        if user.profile.username == user.profile.username
+                    ]
 
                 case _:
                     documents = []
@@ -589,10 +586,10 @@ class MongoDBAdapter(
         user: proto.ReadUser,
     ) -> domain.User:
         try:
-            document = await models.User.get(
-                user.id,
-                with_children=True,
-            )
+            if not isinstance(user, BaseModel):
+                raise AttributeError("user must be a pydantic model")
+
+            document = self._user_collection.get(user.id)
             assert document is not None, "document not found"
 
             return domain.User.model_validate(document)
@@ -610,15 +607,16 @@ class MongoDBAdapter(
         user: proto.UpdateUser,
     ) -> domain.User:
         try:
-            document = await models.User.get(
-                user.id,
-                with_children=True,
-            )
+            if not isinstance(user, BaseModel):
+                raise AttributeError("user must be a pydantic model")
+
+            document = self._user_collection.get(user.id)
             assert document is not None, "document not found"
 
             document = self.__update_user(document, user)
             document.updated_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._user_collection[user.id] = document
+            document = self._user_collection.get(user.id)
 
             return domain.User.model_validate(document, from_attributes=True)
 
@@ -635,9 +633,9 @@ class MongoDBAdapter(
 
     def __update_user(
         self,
-        document: models.User,
+        document: domain.User,
         source: proto.UpdateUser,
-    ) -> models.User:
+    ) -> domain.User:
         if source.views is not None:
             document.views = source.views
 
@@ -669,14 +667,15 @@ class MongoDBAdapter(
         user: proto.DeleteUser,
     ) -> domain.User:
         try:
-            document = await models.User.get(
-                user.id,
-                with_children=True,
-            )
+            if not isinstance(user, BaseModel):
+                raise AttributeError("user must be a pydantic model")
+
+            document = self._user_collection.get(user.id)
             assert document is not None, "document not found"
 
             document.deleted_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._user_collection[user.id] = document
+            document = self._user_collection.get(user.id)
 
             return domain.User.model_validate(document, from_attributes=True)
         except (ValidationError, AttributeError) as e:
@@ -693,12 +692,21 @@ class MongoDBAdapter(
         room: proto.CreateRoom,
     ) -> domain.Room:
         try:
-            timestamp = datetime.now().replace(microsecond=0)
-            room.created_at = timestamp
-            room.updated_at = timestamp
+            if not isinstance(room, BaseModel):
+                raise TypeError("room must be a pydantic model")
 
-            model = models.Room.model_validate(room, from_attributes=True)
-            document = await model.insert()
+            timestamp = datetime.now().replace(microsecond=0)
+
+            data = json.loads(room.model_dump_json())
+            data["_id"] = ObjectID()
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model = domain.Room.model_validate(data, from_attributes=True)
+
+            self._room_collection[model.id] = model
+            document = self._room_collection.get(model.id)
+
             assert document is not None, "insert failed"
 
             return domain.Room.model_validate(document)
@@ -716,10 +724,10 @@ class MongoDBAdapter(
         room: proto.ReadRoom,
     ) -> domain.Room:
         try:
-            document = await models.Room.get(
-                room.id,
-                with_children=True,
-            )
+            if not isinstance(room, BaseModel):
+                raise AttributeError("room must be a pydantic model")
+
+            document = self._room_collection.get(room.id)
             assert document is not None, "document not found"
 
             return domain.Room.model_validate(document)
@@ -737,15 +745,16 @@ class MongoDBAdapter(
         room: proto.UpdateRoom,
     ) -> domain.Room:
         try:
-            document = await models.Room.get(
-                room.id,
-                with_children=True,
-            )
+            if not isinstance(room, BaseModel):
+                raise AttributeError("room must be a pydantic model")
+
+            document = self._room_collection.get(room.id)
             assert document is not None, "document not found"
 
             document = self.__update_room(document, room)
             document.updated_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._room_collection[room.id] = document
+            document = self._room_collection.get(room.id)
 
             return domain.Room.model_validate(document, from_attributes=True)
         except exception.UpdateRoomException as e:
@@ -761,9 +770,9 @@ class MongoDBAdapter(
 
     def __update_room(
         self,
-        document: models.Room,
+        document: domain.Room,
         source: proto.UpdateRoom,
-    ) -> models.Room:
+    ) -> domain.Room:
         if source.name is not None:
             document.name = source.name
 
@@ -786,14 +795,15 @@ class MongoDBAdapter(
         room: proto.DeleteRoom,
     ) -> domain.Room:
         try:
-            document = await models.Room.get(
-                room.id,
-                with_children=True,
-            )
+            if not isinstance(room, BaseModel):
+                raise AttributeError("room must be a pydantic model")
+
+            document = self._room_collection.get(room.id)
             assert document is not None, "document not found"
 
             document.deleted_at = datetime.now().replace(microsecond=0)
-            document = await document.replace()
+            self._room_collection[room.id] = document
+            document = self._room_collection.get(room.id)
 
             return domain.Room.model_validate(document, from_attributes=True)
         except (ValidationError, AttributeError) as e:
