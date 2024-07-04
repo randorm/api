@@ -40,6 +40,7 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     id: ObjectID = Field(alias="_id")
     # optional fields
     required: bool | None = Field(default=None)
+    frozen: bool | None = Field(default=None)
     question: str | None = Field(default=None)
     question_entities: set[FormatEntity] | None = Field(default=None)
     respondent_count: int | None = Field(default=None)
@@ -48,6 +49,7 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     ex: str | None = Field(default=None)
     # exclude
     creator_id: Literal[None] = None
+    allocation_id: Literal[None] = None
 
 
 class UpdateChoiceOption(ChoiceOption):
@@ -59,6 +61,7 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
     id: ObjectID = Field(alias="_id")
     # optional fields
     required: bool | None = Field(default=None)
+    frozen: bool | None = Field(default=None)
     question: str | None = Field(default=None)
     question_entities: set[FormatEntity] | None = Field(default=None)
     respondent_count: int | None = Field(default=None)
@@ -67,6 +70,7 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
     multiple: bool | None = Field(default=None)
     # exclude
     creator_id: Literal[None] = None
+    allocation_id: Literal[None] = None
 
 
 type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField

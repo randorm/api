@@ -300,6 +300,9 @@ class MemoryDBAdapter(
         if source.required is not None:
             document.required = source.required
 
+        if source.frozen is not None:
+            document.frozen = source.frozen
+
         if source.question is not None:
             document.question = source.question
 

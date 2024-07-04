@@ -20,8 +20,12 @@ class BaseFormField(pydantic.BaseModel):
     updated_at: datetime.datetime
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
 
+    allocation_id: ObjectID
+
     kind: FormFieldKind
     required: bool
+    frozen: bool
+
     question: str = pydantic.Field(min_length=1)
     question_entities: set[FormatEntity] = pydantic.Field(default_factory=set)
 

@@ -30,8 +30,11 @@ param_attrs = [_get_mongo, _get_memory]
 async def test_create_text_form_field_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    allocation_id = domain.ObjectID()
 
     data = proto.CreateTextFormField(
+        allocation_id=allocation_id,
+        frozen=False,
         required=True,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
@@ -45,6 +48,7 @@ async def test_create_text_form_field_ok(actor_fn: ActorFn):
 
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextFormField)
+    assert response.allocation_id == allocation_id
     assert response.required == data.required
     assert response.question == data.question
     assert response.question_entities == data.question_entities
@@ -63,8 +67,11 @@ async def test_create_text_form_field_ok(actor_fn: ActorFn):
 async def test_create_choice_form_field_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    allocation_id = domain.ObjectID()
 
     data = proto.CreateChoiceFormField(
+        allocation_id=allocation_id,
+        frozen=False,
         required=True,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
@@ -82,6 +89,7 @@ async def test_create_choice_form_field_ok(actor_fn: ActorFn):
 
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceFormField)
+    assert response.allocation_id == allocation_id
     assert response.required == data.required
     assert response.question == data.question
     assert response.question_entities == data.question_entities
@@ -101,9 +109,12 @@ async def test_create_choice_form_field_ok(actor_fn: ActorFn):
 async def test_read_text_form_field_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    allocation_id = domain.ObjectID()
 
     data = proto.CreateTextFormField(
+        allocation_id=allocation_id,
         required=True,
+        frozen=False,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
         creator_id=owner,
@@ -136,9 +147,12 @@ async def test_read_text_form_field_ok(actor_fn: ActorFn):
 async def test_read_choice_form_field_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    allocation_id = domain.ObjectID()
 
     data = proto.CreateChoiceFormField(
+        allocation_id=allocation_id,
         required=True,
+        frozen=False,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
         creator_id=owner,
@@ -177,8 +191,12 @@ async def test_update_text_form_field_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
 
+    allocation_id = domain.ObjectID()
+
     data = proto.CreateTextFormField(
+        allocation_id=allocation_id,
         required=True,
+        frozen=False,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
         creator_id=owner,
@@ -194,6 +212,7 @@ async def test_update_text_form_field_ok(actor_fn: ActorFn):
     new_data = proto.UpdateTextFormField(
         _id=document.id,
         required=False,
+        frozen=True,
         question="test2",
         question_entities={domain.ItalicEntity(offset=0, length=4)},
         re=re.compile(r".*"),
@@ -226,6 +245,8 @@ async def test_update_choice_form_field_ok(actor_fn: ActorFn):
     owner = domain.ObjectID()
 
     data = proto.CreateChoiceFormField(
+        allocation_id=domain.ObjectID(),
+        frozen=False,
         required=True,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
@@ -286,6 +307,8 @@ async def test_delete_text_form_field_ok(actor_fn: ActorFn):
     owner = domain.ObjectID()
 
     data = proto.CreateTextFormField(
+        allocation_id=domain.ObjectID(),
+        frozen=False,
         required=True,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
@@ -321,6 +344,8 @@ async def test_delete_choice_form_field_ok(actor_fn: ActorFn):
     owner = domain.ObjectID()
 
     data = proto.CreateChoiceFormField(
+        allocation_id=domain.ObjectID(),
+        frozen=False,
         required=True,
         question="test",
         question_entities={domain.BoldEntity(offset=0, length=4)},
