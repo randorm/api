@@ -130,3 +130,32 @@ AllocationResolver = TypeAdapter(
     Allocation,
     config=ConfigDict(extra="ignore", from_attributes=True),
 )
+
+
+class ParticipantDocument(bn.Document):
+    class Settings:
+        indexes = ["id"]
+        name = "participants"
+        is_root = True
+
+
+class CreatingParticipant(ParticipantDocument, domain.CreatingParticipant): ...
+
+
+class CreatedParticipant(ParticipantDocument, domain.CreatedParticipant): ...
+
+
+class ActiveParticipant(ParticipantDocument, domain.ActiveParticipant): ...
+
+
+class AllocatedParticipant(ParticipantDocument, domain.AllocatedParticipant): ...
+
+
+type Participant = (
+    CreatingParticipant | CreatedParticipant | ActiveParticipant | AllocatedParticipant
+)
+
+ParticipantResolver = TypeAdapter(
+    Participant,
+    config=ConfigDict(extra="ignore", from_attributes=True),
+)

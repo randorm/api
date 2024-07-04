@@ -15,6 +15,7 @@ from src.domain.model.allocation import AllocationState
 class MongoDBAdapter(
     proto.AllocationDatabaseProtocol,
     proto.FormFieldDatabaseProtocol,
+    proto.ParticipantDatabaseProtocol,
     proto.RoomDatabaseProtocol,
     proto.UserDatabaseProtocol,
 ):
@@ -47,6 +48,11 @@ class MongoDBAdapter(
                 models.RoomedAllocation,
                 models.ClosedAllocation,
                 models.FailedAllocation,
+                models.ParticipantDocument,
+                models.CreatingParticipant,
+                models.CreatedParticipant,
+                models.ActiveParticipant,
+                models.AllocatedParticipant,
             ],
         )
 
@@ -809,4 +815,135 @@ class MongoDBAdapter(
         except Exception as e:
             raise exception.DeleteRoomException(
                 f"failed to delete room with id {room.id} with error: {e}"
+            ) from e
+
+    async def create_participant(
+        self, participant: proto.CreateParticipant
+    ) -> domain.Participant:
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            participant.created_at = timestamp
+            participant.updated_at = timestamp
+
+            model = models.ParticipantResolver.validate_python(
+                participant,
+                from_attributes=True,
+            )
+            document = await model.insert()
+            assert document is not None, "insert failed"
+
+            return domain.ParticipantResolver.validate_python(
+                document.model_dump(by_alias=True),
+                from_attributes=True,
+            )
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateParticipantException(
+                f"failed to create participant with error: {e}"
+            ) from e
+
+    async def read_participant(
+        self, participant: proto.ReadParticipant
+    ) -> domain.Participant:
+        try:
+            document = await models.ParticipantDocument.get(
+                participant.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
+
+            return domain.ParticipantResolver.validate_python(
+                document.model_dump(by_alias=True),
+                from_attributes=True,
+            )
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadParticipantException(
+                f"failed to read participant with id {participant.id} with error: {e}"
+            ) from e
+
+    async def update_participant(
+        self, participant: proto.UpdateParticipant
+    ) -> domain.Participant:
+        try:
+            document: models.Participant | None = await models.ParticipantDocument.get(
+                participant.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
+
+            document = self.__update_participant(document, participant)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            await models.ParticipantDocument.find_one(
+                models.ParticipantDocument.id == document.id,
+                with_children=True,
+            ).replace_one(document)
+            await document.sync()
+
+            return domain.ParticipantResolver.validate_python(
+                document.model_dump(by_alias=True),
+                from_attributes=True,
+            )
+        except exception.UpdateParticipantException as e:
+            raise e
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateParticipantException(
+                f"failed to update participant with id {participant.id} with error: {e}"
+            ) from e
+
+    def __update_participant(
+        self,
+        document: models.Participant,
+        source: proto.UpdateParticipant,
+    ) -> models.Participant:
+        if source.viewed_ids is not None:
+            document.viewed_ids = source.viewed_ids
+
+        if source.subscription_ids is not None:
+            document.subscription_ids = source.subscription_ids
+
+        if source.subscribers_ids is not None:
+            document.subscribers_ids = source.subscribers_ids
+
+        if source.state is not None:
+            data = document.model_dump(by_alias=True)
+            data["state"] = source.state
+            document = models.ParticipantResolver.validate_python(data)
+
+        return document
+
+    async def delete_participant(
+        self, participant: proto.DeleteParticipant
+    ) -> domain.Participant:
+        try:
+            document: models.Participant | None = await models.ParticipantDocument.get(
+                participant.id,
+                with_children=True,
+            )  # type: ignore
+            assert document is not None, "document not found"
+
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
+
+            return domain.ParticipantResolver.validate_python(
+                document.model_dump(by_alias=True),
+                from_attributes=True,
+            )
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteParticipantException(
+                f"failed to delete participant with id {participant.id} with error: {e}"
             ) from e

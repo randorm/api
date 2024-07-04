@@ -15,12 +15,14 @@ class MemoryDBAdapter(
     proto.FormFieldDatabaseProtocol,
     proto.RoomDatabaseProtocol,
     proto.UserDatabaseProtocol,
+    proto.ParticipantDatabaseProtocol,
 ):
     _allocation_collection: dict[ObjectID, domain.Allocation]
     _form_field_collection: dict[ObjectID, domain.FormField]
     _answer_collection: dict[ObjectID, domain.Answer]
     _user_collection: dict[ObjectID, domain.User]
     _room_collection: dict[ObjectID, domain.Room]
+    _participant_collection: dict[ObjectID, domain.Participant]
 
     def __init__(self):
         self._allocation_collection = {}
@@ -28,6 +30,7 @@ class MemoryDBAdapter(
         self._answer_collection = {}
         self._user_collection = {}
         self._room_collection = {}
+        self._participant_collection = {}
 
     async def create_allocation(
         self,
@@ -813,4 +816,128 @@ class MemoryDBAdapter(
         except Exception as e:
             raise exception.DeleteRoomException(
                 f"failed to delete room with id {room.id} with error: {e}"
+            ) from e
+
+    async def create_participant(
+        self, participant: proto.CreateParticipant
+    ) -> domain.Participant:
+        try:
+            if not isinstance(participant, BaseModel):
+                raise TypeError("participant must be a pydantic model")
+
+            timestamp = datetime.now().replace(microsecond=0)
+
+            data = json.loads(participant.model_dump_json())
+            data["_id"] = ObjectID()
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model = domain.ParticipantResolver.validate_python(data)
+
+            self._participant_collection[model.id] = model
+            document = self._participant_collection.get(model.id)
+
+            assert document is not None, "insert failed"
+
+            return domain.ParticipantResolver.validate_python(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreateParticipantException(
+                f"failed to create participant with error: {e}"
+            ) from e
+
+    async def read_participant(
+        self, participant: proto.ReadParticipant
+    ) -> domain.Participant:
+        try:
+            if not isinstance(participant, BaseModel):
+                raise AttributeError("participant must be a pydantic model")
+
+            document = self._participant_collection.get(participant.id)
+            assert document is not None, "document not found"
+
+            return domain.ParticipantResolver.validate_python(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadParticipantException(
+                f"failed to read participant with id {participant.id} with error: {e}"
+            ) from e
+
+    async def update_participant(
+        self, participant: proto.UpdateParticipant
+    ) -> domain.Participant:
+        try:
+            if not isinstance(participant, BaseModel):
+                raise AttributeError("participant must be a pydantic model")
+
+            document = self._participant_collection.get(participant.id)
+            assert document is not None, "document not found"
+
+            document = self.__update_participant(document, participant)
+            self._participant_collection[participant.id] = document
+            document = self._participant_collection.get(participant.id)
+
+            return domain.ParticipantResolver.validate_python(
+                document, from_attributes=True
+            )
+        except exception.UpdateParticipantException as e:
+            raise e
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdateParticipantException(
+                f"failed to update participant with id {participant.id} with error: {e}"
+            ) from e
+
+    def __update_participant(
+        self,
+        document: domain.Participant,
+        source: proto.UpdateParticipant,
+    ) -> domain.Participant:
+        if source.viewed_ids is not None:
+            document.viewed_ids = source.viewed_ids
+
+        if source.subscription_ids is not None:
+            document.subscription_ids = source.subscription_ids
+
+        if source.subscribers_ids is not None:
+            document.subscribers_ids = source.subscribers_ids
+
+        if source.state is not None:
+            data = document.model_dump(by_alias=True)
+            data["state"] = source.state
+            document = domain.ParticipantResolver.validate_python(data)
+
+        return document
+
+    async def delete_participant(
+        self, participant: proto.DeleteParticipant
+    ) -> domain.Participant:
+        try:
+            if not isinstance(participant, BaseModel):
+                raise AttributeError("participant must be a pydantic model")
+
+            document = self._participant_collection.get(participant.id)
+            assert document is not None, "document not found"
+
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            self._participant_collection[participant.id] = document
+            document = self._participant_collection.get(participant.id)
+
+            return domain.ParticipantResolver.validate_python(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeleteParticipantException(
+                f"failed to delete participant with id {participant.id} with error: {e}"
             ) from e

@@ -3,7 +3,14 @@ Database Protocols module.
 All protocols related to CRUD operations with databases should be defined here.
 """
 
-from src.protocol.internal.database import allocation, form_field, mixin, room, user
+from src.protocol.internal.database import (
+    allocation,
+    form_field,
+    mixin,
+    participants,
+    room,
+    user,
+)
 from src.protocol.internal.database.allocation import (
     AllocationDatabaseProtocol,
     CreateAllocation,
@@ -39,6 +46,17 @@ from src.protocol.internal.database.form_field import (
     UpdateTextFormField,
 )
 from src.protocol.internal.database.mixin import ExcludeFieldMixin
+from src.protocol.internal.database.participants import (
+    CreateActiveParticipant,
+    CreateAllocatedParticipant,
+    CreateCreatedParticipant,
+    CreateCreatingParticipant,
+    CreateParticipant,
+    DeleteParticipant,
+    ParticipantDatabaseProtocol,
+    ReadParticipant,
+    UpdateParticipant,
+)
 from src.protocol.internal.database.room import (
     CreateRoom,
     DeleteRoom,

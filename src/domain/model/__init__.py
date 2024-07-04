@@ -44,6 +44,16 @@ from src.domain.model.format_entity import (
     StrikethroughEntity,
     UnderlineEntity,
 )
+from src.domain.model.participants import (
+    ActiveParticipant,
+    AllocatedParticipant,
+    BaseParticipant,
+    CreatedParticipant,
+    CreatingParticipant,
+    Participant,
+    ParticipantResolver,
+    ParticipantState,
+)
 from src.domain.model.room import Room
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Gender, LanguageCode, Profile, User
