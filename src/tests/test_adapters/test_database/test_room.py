@@ -30,10 +30,13 @@ async def test_create_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
 
+    person1 = domain.ObjectID()
+    person2 = domain.ObjectID()
+
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied=2,
+        occupied={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -70,11 +73,13 @@ async def test_create_room_reflect_fail(actor_fn: ActorFn):
 async def test_read_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    person1 = domain.ObjectID()
+    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied=2,
+        occupied={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -113,11 +118,13 @@ async def test_read_room_reflect_fail(actor_fn: ActorFn):
 async def test_update_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    person1 = domain.ObjectID()
+    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied=2,
+        occupied={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -126,11 +133,13 @@ async def test_update_room_ok(actor_fn: ActorFn):
     document = await actor.create_room(data)
     new_editors = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
 
+    new_persons = {person2, person1, domain.ObjectID(), domain.ObjectID()}
+
     new_data = proto.UpdateRoom(
         _id=document.id,
         name="test2",
         capacity=10,
-        occupied=10,
+        occupied=new_persons,
         editor_ids=new_editors,
         gender_restriction=domain.Gender.MALE,
     )
@@ -166,11 +175,13 @@ async def test_update_room_reflect_fail(actor_fn: ActorFn):
 async def test_delete_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
+    person1 = domain.ObjectID()
+    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied=2,
+        occupied={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,

@@ -13,8 +13,11 @@ class RoomType:
 
     name: sb.auto
     capacity: sb.auto
-    occupied: sb.auto
+
     gender_restriction: GenderType
+
+    occupied_ids: list[scalar.ObjectID]
+    occupied: sb.Private[list[UserType]]
 
     creator_id: scalar.ObjectID
     creator: sb.Private[UserType]

@@ -81,7 +81,7 @@ async def test_create_choice_form_field_ok(actor_fn: ActorFn):
     response = await actor.create_form_field(data)
 
     assert response.kind == domain.FormFieldKind.CHOICE
-    assert isinstance(response, domain.ChoiceField)
+    assert isinstance(response, domain.ChoiceFormField)
     assert response.required == data.required
     assert response.question == data.question
     assert response.question_entities == data.question_entities
@@ -156,7 +156,7 @@ async def test_read_choice_form_field_ok(actor_fn: ActorFn):
     response = await actor.read_form_field(proto.ReadFormField(_id=document.id))
 
     assert response.kind == domain.FormFieldKind.CHOICE
-    assert isinstance(response, domain.ChoiceField)
+    assert isinstance(response, domain.ChoiceFormField)
     assert response.required == data.required
     assert response.question == data.question
     assert response.question_entities == data.question_entities
@@ -259,7 +259,7 @@ async def test_update_choice_form_field_ok(actor_fn: ActorFn):
     response = await actor.update_form_field(new_data)
 
     assert response.kind == domain.FormFieldKind.CHOICE
-    assert isinstance(response, domain.ChoiceField)
+    assert isinstance(response, domain.ChoiceFormField)
     assert response.required == new_data.required
     assert response.question == new_data.question
     assert response.question_entities == new_data.question_entities
@@ -340,7 +340,7 @@ async def test_delete_choice_form_field_ok(actor_fn: ActorFn):
     response = await actor.delete_form_field(proto.DeleteFormField(_id=document.id))
 
     assert response.kind == domain.FormFieldKind.CHOICE
-    assert isinstance(response, domain.ChoiceField)
+    assert isinstance(response, domain.ChoiceFormField)
     assert response.required == data.required
     assert response.question == data.question
     assert response.question_entities == data.question_entities

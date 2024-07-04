@@ -57,7 +57,7 @@ async def test_create_choise_answer_ok(actor_fn: ActorFn):
     field_id = domain.ObjectID()
 
     data = proto.CreateChoiceAnswer(
-        option_ids={domain.ObjectID()},
+        option_indexes={3},
         field_id=field_id,
         respondent_id=owner,
     )
@@ -68,7 +68,7 @@ async def test_create_choise_answer_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
     assert response.field_id == field_id
-    assert response.option_ids == data.option_ids
+    assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
     assert response.deleted_at is None
@@ -109,7 +109,7 @@ async def test_read_choice_answer_ok(actor_fn: ActorFn):
     field_id = domain.ObjectID()
 
     data = proto.CreateChoiceAnswer(
-        option_ids={domain.ObjectID()},
+        option_indexes={3},
         field_id=field_id,
         respondent_id=owner,
     )
@@ -122,7 +122,7 @@ async def test_read_choice_answer_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
     assert response.field_id == field_id
-    assert response.option_ids == data.option_ids
+    assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
     assert response.deleted_at is None
@@ -169,7 +169,7 @@ async def test_update_choice_answer_ok(actor_fn: ActorFn):
     field_id = domain.ObjectID()
 
     data = proto.CreateChoiceAnswer(
-        option_ids={domain.ObjectID()},
+        option_indexes={3},
         field_id=field_id,
         respondent_id=owner,
     )
@@ -178,7 +178,7 @@ async def test_update_choice_answer_ok(actor_fn: ActorFn):
 
     new_data = proto.UpdateChoiceAnswer(
         _id=document.id,
-        option_ids={domain.ObjectID(), domain.ObjectID(), domain.ObjectID()},
+        option_indexes={0, 1, 2},
     )
 
     response = await actor.update_answer(new_data)
@@ -187,7 +187,7 @@ async def test_update_choice_answer_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
     assert response.field_id == field_id
-    assert response.option_ids == new_data.option_ids
+    assert response.option_indexes == new_data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
     assert response.deleted_at is None
@@ -228,7 +228,7 @@ async def test_delete_choice_answer_ok(actor_fn: ActorFn):
     field_id = domain.ObjectID()
 
     data = proto.CreateChoiceAnswer(
-        option_ids={domain.ObjectID()},
+        option_indexes={3},
         field_id=field_id,
         respondent_id=owner,
     )
@@ -241,7 +241,7 @@ async def test_delete_choice_answer_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
     assert response.field_id == field_id
-    assert response.option_ids == data.option_ids
+    assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
     assert response.deleted_at is not None
@@ -505,7 +505,7 @@ async def test_update_choice_answer_field_id_ok(actor_fn: ActorFn):
     owner = domain.ObjectID()
 
     data = proto.CreateChoiceAnswer(
-        option_ids={domain.ObjectID()},
+        option_indexes={0},
         field_id=domain.ObjectID(),
         respondent_id=owner,
     )
@@ -516,7 +516,7 @@ async def test_update_choice_answer_field_id_ok(actor_fn: ActorFn):
 
     new_data = proto.UpdateChoiceAnswer(
         _id=document.id,
-        option_ids={domain.ObjectID(), domain.ObjectID(), domain.ObjectID()},
+        option_indexes={0, 1, 2},
         field_id=new_field_id,
     )
 
@@ -526,7 +526,7 @@ async def test_update_choice_answer_field_id_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
     assert response.field_id == new_field_id
-    assert response.option_ids == new_data.option_ids
+    assert response.option_indexes == new_data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
     assert response.deleted_at is None

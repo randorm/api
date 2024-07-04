@@ -39,18 +39,17 @@ class TextFormField(BaseFormField):
 
 
 class ChoiceOption(pydantic.BaseModel):
-    id: ObjectID = pydantic.Field(alias="_id")
     text: str = pydantic.Field(min_length=1)
     respondent_count: int = pydantic.Field(default=0, ge=0)
 
 
-class ChoiceField(BaseFormField):
+class ChoiceFormField(BaseFormField):
     kind: Literal[FormFieldKind.CHOICE] = FormFieldKind.CHOICE
     options: list[ChoiceOption] = pydantic.Field(min_length=1)
     multiple: bool
 
 
-type FormField = TextFormField | ChoiceField
+type FormField = TextFormField | ChoiceFormField
 
 FormFieldResolver = pydantic.TypeAdapter(
     type=FormField,
@@ -78,7 +77,7 @@ class TextAnswer(BaseAnswer):
 
 class ChoiceAnswer(BaseAnswer):
     kind: Literal[FormFieldKind.CHOICE] = FormFieldKind.CHOICE
-    option_ids: set[ObjectID]
+    option_indexes: set[int]
 
 
 type Answer = TextAnswer | ChoiceAnswer

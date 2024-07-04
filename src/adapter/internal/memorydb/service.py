@@ -144,8 +144,8 @@ class MemoryDBAdapter(
                     data, from_attributes=True
                 )
 
-        if source.field_ids is not None:
-            document.field_ids = source.field_ids
+        if source.form_field_ids is not None:
+            document.form_field_ids = source.form_field_ids
 
         if source.editor_ids is not None:
             document.editor_ids = source.editor_ids
@@ -264,7 +264,7 @@ class MemoryDBAdapter(
                 document = self.__update_text_form_field(document, form_field)
             elif isinstance(form_field, proto.UpdateChoiceFormField):
                 assert isinstance(
-                    document, domain.ChoiceField
+                    document, domain.ChoiceFormField
                 ), "can not change form field type"
 
                 document = self.__update_choice_form_field(document, form_field)
@@ -326,9 +326,9 @@ class MemoryDBAdapter(
 
     def __update_choice_form_field(
         self,
-        document: domain.ChoiceField,
+        document: domain.ChoiceFormField,
         source: proto.UpdateChoiceFormField,
-    ) -> domain.ChoiceField:
+    ) -> domain.ChoiceFormField:
         self.__update_form_field(document, source)
 
         if source.options is not None:
@@ -485,8 +485,8 @@ class MemoryDBAdapter(
         document: domain.ChoiceAnswer,
         source: proto.UpdateChoiceAnswer,
     ) -> domain.ChoiceAnswer:
-        if source.option_ids is not None:
-            document.option_ids = source.option_ids
+        if source.option_indexes is not None:
+            document.option_indexes = source.option_indexes
 
         if source.field_id is not None:
             document.field_id = source.field_id

@@ -67,7 +67,7 @@ class UpdateAllocation(ExcludeFieldMixin, BaseAllocation):
     name: str | None = Field(default=None)
     due: datetime.datetime | None = Field(default=None)
     state: AllocationState | None = Field(default=None)
-    field_ids: set[ObjectID] | None = Field(default=None)
+    form_field_ids: set[ObjectID] | None = Field(default=None)
     editor_ids: set[ObjectID] | None = Field(default=None)
     participant_ids: set[ObjectID] | None = Field(default=None)
     # exclude

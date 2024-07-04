@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 from src.domain.model.form_field import (
     Answer,
     ChoiceAnswer,
-    ChoiceField,
+    ChoiceFormField,
     ChoiceOption,
     FormField,
     TextAnswer,
@@ -21,7 +21,7 @@ from src.protocol.internal.database.mixin import ExcludeFieldMixin
 class CreateTextFormField(ExcludeFieldMixin, TextFormField): ...
 
 
-class CreateChoiceFormField(ExcludeFieldMixin, ChoiceField): ...
+class CreateChoiceFormField(ExcludeFieldMixin, ChoiceFormField): ...
 
 
 type CreateFormField = CreateTextFormField | CreateChoiceFormField
@@ -55,7 +55,7 @@ class UpdateChoiceOption(ChoiceOption):
     respondent_count: int | None = Field(default=None)
 
 
-class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceField):
+class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
     id: ObjectID = Field(alias="_id")
     # optional fields
     required: bool | None = Field(default=None)
@@ -111,7 +111,7 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
 
 class UpdateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")
-    option_ids: set[ObjectID] | None = Field(default=None)
+    option_indexes: set[int] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
     # exclude
     respondent_id: Literal[None] = None

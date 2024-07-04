@@ -69,8 +69,9 @@ class MongoDBAdapter(
             document: models.Allocation = await model.insert()
             assert document is not None, "insert failed"
 
-            return domain.AllocationResolver.validate_python(document)
-
+            return domain.AllocationResolver.validate_python(
+                document.model_dump(by_alias=True)
+            )
         except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
                 f"failed to reflect allocation type with error: {e}"
@@ -91,7 +92,9 @@ class MongoDBAdapter(
             )
             assert document is not None, "document not found"
 
-            return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(
+                document.model_dump(by_alias=True)
+            )
 
         except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
@@ -124,7 +127,9 @@ class MongoDBAdapter(
             ).replace_one(document)
             await document.sync()
 
-            return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(
+                document.model_dump(by_alias=True)
+            )
 
         except exception.UpdateAllocationException as e:
             raise e
@@ -139,23 +144,22 @@ class MongoDBAdapter(
 
     def __update_allocation(
         self, document: models.Allocation, source: proto.UpdateAllocation
-    ):
+    ) -> models.Allocation:
+        data = document.model_dump(by_alias=True)
+
         if source.name is not None:
-            document.name = source.name
+            data["name"] = source.name
 
         if source.due is not None:
-            document.due = source.due
+            data["due"] = source.due
 
         match source.state:
             case None:
                 ...
 
             case AllocationState.CREATING | AllocationState.FAILED:
-                document.state = source.state  # type: ignore
-
-                document = models.AllocationResolver.validate_python(
-                    document.model_dump(by_alias=True)
-                )
+                data["state"] = source.state
+                del data["participant_ids"]
 
             case (
                 AllocationState.CREATED
@@ -164,20 +168,17 @@ class MongoDBAdapter(
                 | AllocationState.ROOMED
                 | AllocationState.CLOSED
             ):
-                document.state = source.state  # type: ignore
-
-                data = document.model_dump()
+                data["state"] = source.state
                 data["participant_ids"] = set()
-                document = models.AllocationResolver.validate_python(data)
 
-        if source.field_ids is not None:
-            document.field_ids = source.field_ids
+        if source.form_field_ids is not None:
+            data["form_field_ids"] = source.form_field_ids
 
         if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+            data["editor_ids"] = source.editor_ids
 
         if source.participant_ids is not None:
-            if document.state not in [
+            if data["state"] not in [
                 AllocationState.CREATED,
                 AllocationState.OPEN,
                 AllocationState.ROOMING,
@@ -185,11 +186,12 @@ class MongoDBAdapter(
                 AllocationState.CLOSED,
             ]:
                 raise exception.UpdateAllocationException(
-                    f"can not change participant ids for document type {type(document)}"
+                    f"can not change participant ids for document state {data['state']}"
                 )
-            document.participant_ids = source.participant_ids  # type: ignore
 
-        return document
+            data["participant_ids"] = source.participant_ids
+
+        return models.AllocationResolver.validate_python(data, from_attributes=True)
 
     async def delete_allocation(
         self,
@@ -204,8 +206,11 @@ class MongoDBAdapter(
 
             document.deleted_at = datetime.now().replace(microsecond=0)
             document = await document.replace()
+            assert document is not None, "document replacement failed"
 
-            return domain.AllocationResolver.validate_python(document)
+            return domain.AllocationResolver.validate_python(
+                document.model_dump(by_alias=True)
+            )
 
         except (ValidationError, AttributeError) as e:
             raise exception.ReflectAlloctionException(
@@ -253,7 +258,6 @@ class MongoDBAdapter(
                 with_children=True,
             )
             assert document is not None, "document not found"
-            print(document.model_dump_json())
 
             return domain.FormFieldResolver.validate_python(document)
 
@@ -504,8 +508,8 @@ class MongoDBAdapter(
         document: models.ChoiceAnswer,
         source: proto.UpdateChoiceAnswer,
     ) -> models.ChoiceAnswer:
-        if source.option_ids is not None:
-            document.option_ids = source.option_ids
+        if source.option_indexes is not None:
+            document.option_indexes = source.option_indexes
 
         if source.field_id is not None:
             document.field_id = source.field_id

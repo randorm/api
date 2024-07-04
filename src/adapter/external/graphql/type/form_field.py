@@ -10,7 +10,7 @@ from src.domain.model.form_field import (
     BaseAnswer,
     BaseFormField,
     ChoiceAnswer,
-    ChoiceField,
+    ChoiceFormField,
     ChoiceOption,
     FormFieldKind,
     TextAnswer,
@@ -60,11 +60,11 @@ class ChoiceOptionType:
     respondent_count: sb.auto
 
 
-@sb.experimental.pydantic.type(model=ChoiceField)
+@sb.experimental.pydantic.type(model=ChoiceFormField)
 class ChoiceFormFieldType(BaseFormFieldType):
     kind: FormFieldKindType = FormFieldKindType.CHOICE
 
-    options_ids: list[scalar.ObjectID]
+    options_ids: list[int]
     options: sb.Private[list[ChoiceOptionType]]
     multiple: sb.auto
 

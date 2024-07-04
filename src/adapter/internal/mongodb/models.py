@@ -57,7 +57,7 @@ class TextFormField(FormFieldDocument, domain.TextFormField):
         )
 
 
-class ChoiceFormField(FormFieldDocument, domain.ChoiceField): ...
+class ChoiceFormField(FormFieldDocument, domain.ChoiceFormField): ...
 
 
 type FormField = TextFormField | ChoiceFormField

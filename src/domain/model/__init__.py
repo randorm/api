@@ -22,7 +22,7 @@ from src.domain.model.form_field import (
     BaseAnswer,
     BaseFormField,
     ChoiceAnswer,
-    ChoiceField,
+    ChoiceFormField,
     ChoiceOption,
     FormField,
     FormFieldKind,

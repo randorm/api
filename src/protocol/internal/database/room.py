@@ -21,7 +21,7 @@ class UpdateRoom(ExcludeFieldMixin, Room):
     # optional fields
     name: str | None = Field(default=None)
     capacity: int | None = Field(default=None)
-    occupied: int | None = Field(default=None)
+    occupied: set[ObjectID] | None = Field(default=None)
     gender_restriction: Gender | None = Field(default=None)
     editor_ids: set[ObjectID] | None = Field(default=None)
     # exclude

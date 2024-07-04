@@ -34,7 +34,7 @@ async def test_create_creating_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -49,7 +49,7 @@ async def test_create_creating_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -67,7 +67,7 @@ async def test_create_created_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -83,7 +83,7 @@ async def test_create_created_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -102,7 +102,7 @@ async def test_create_open_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateOpenAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -118,7 +118,7 @@ async def test_create_open_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -137,7 +137,7 @@ async def test_create_rooming_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -153,7 +153,7 @@ async def test_create_rooming_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -172,7 +172,7 @@ async def test_create_roomed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -188,7 +188,7 @@ async def test_create_roomed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -207,7 +207,7 @@ async def test_create_closed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateClosedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -223,7 +223,7 @@ async def test_create_closed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -242,7 +242,7 @@ async def test_create_failed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateFailedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -257,7 +257,7 @@ async def test_create_failed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -275,7 +275,7 @@ async def test_read_creating_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -291,7 +291,7 @@ async def test_read_creating_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
 
@@ -305,7 +305,7 @@ async def test_read_created_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -322,7 +322,7 @@ async def test_read_created_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
     assert data.participant_ids == response.participant_ids
@@ -337,7 +337,7 @@ async def test_read_open_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateOpenAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -354,7 +354,7 @@ async def test_read_open_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
     assert data.participant_ids == response.participant_ids
@@ -369,7 +369,7 @@ async def test_read_rooming_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -386,7 +386,7 @@ async def test_read_rooming_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
     assert data.participant_ids == response.participant_ids
@@ -401,7 +401,7 @@ async def test_read_roomed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -418,7 +418,7 @@ async def test_read_roomed_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
     assert data.participant_ids == response.participant_ids
@@ -433,7 +433,7 @@ async def test_read_closed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateClosedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -450,7 +450,7 @@ async def test_read_closed_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
     assert data.participant_ids == response.participant_ids
@@ -465,7 +465,7 @@ async def test_read_failed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateFailedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -481,7 +481,7 @@ async def test_read_failed_allocation_ok(actor_fn: ActorFn):
     if data.due is not None:
         assert response.due is not None
         assert data.due.date() == response.due.date()
-    assert data.field_ids == response.field_ids
+    assert data.form_field_ids == response.form_field_ids
     assert data.creator_id == response.creator_id
     assert data.editor_ids == response.editor_ids
 
@@ -495,13 +495,13 @@ async def test_update_creating_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={owner},
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
 
@@ -510,7 +510,7 @@ async def test_update_creating_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
         )
     )
@@ -520,7 +520,7 @@ async def test_update_creating_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.CreatingAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
 
     # todo: test fail with participant_ids
@@ -535,7 +535,7 @@ async def test_update_created_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -544,7 +544,7 @@ async def test_update_created_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
     new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
@@ -554,7 +554,7 @@ async def test_update_created_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
             participant_ids=new_participant_ids,
         )
@@ -565,7 +565,7 @@ async def test_update_created_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.CreatedAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
     assert response.participant_ids == new_participant_ids
 
@@ -579,7 +579,7 @@ async def test_update_open_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateOpenAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -588,7 +588,7 @@ async def test_update_open_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
     new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
@@ -598,7 +598,7 @@ async def test_update_open_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
             participant_ids=new_participant_ids,
         )
@@ -609,7 +609,7 @@ async def test_update_open_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.OpenAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
     assert response.participant_ids == new_participant_ids
 
@@ -623,7 +623,7 @@ async def test_update_rooming_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -632,7 +632,7 @@ async def test_update_rooming_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
     new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
@@ -642,7 +642,7 @@ async def test_update_rooming_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
             participant_ids=new_participant_ids,
         )
@@ -653,7 +653,7 @@ async def test_update_rooming_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.RoomingAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
     assert response.participant_ids == new_participant_ids
 
@@ -667,7 +667,7 @@ async def test_update_roomed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -676,7 +676,7 @@ async def test_update_roomed_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
     new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
@@ -686,7 +686,7 @@ async def test_update_roomed_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
             participant_ids=new_participant_ids,
         )
@@ -697,7 +697,7 @@ async def test_update_roomed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.RoomedAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
     assert response.participant_ids == new_participant_ids
 
@@ -711,7 +711,7 @@ async def test_update_closed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateClosedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -720,7 +720,7 @@ async def test_update_closed_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
     new_participant_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
@@ -730,7 +730,7 @@ async def test_update_closed_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
             participant_ids=new_participant_ids,
         )
@@ -741,7 +741,7 @@ async def test_update_closed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.ClosedAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
     assert response.participant_ids == new_participant_ids
 
@@ -755,7 +755,7 @@ async def test_update_failed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateFailedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -763,7 +763,7 @@ async def test_update_failed_allocation_ok(actor_fn: ActorFn):
     )
     document = await actor.create_allocation(data)
 
-    new_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
+    new_form_field_ids = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
     new_date = (date + timedelta(days=5)).replace(microsecond=0)
     new_editor_ids = {owner, domain.ObjectID(), domain.ObjectID()}
 
@@ -772,7 +772,7 @@ async def test_update_failed_allocation_ok(actor_fn: ActorFn):
             _id=document.id,
             name="test2",
             due=new_date,
-            field_ids=new_field_ids,
+            form_field_ids=new_form_field_ids,
             editor_ids=new_editor_ids,
         )
     )
@@ -782,7 +782,7 @@ async def test_update_failed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.FailedAllocation)
     assert response.name == "test2"
     assert response.due == new_date
-    assert response.field_ids == new_field_ids
+    assert response.form_field_ids == new_form_field_ids
     assert response.editor_ids == new_editor_ids
 
 
@@ -795,7 +795,7 @@ async def test_delete_creating_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -811,7 +811,7 @@ async def test_delete_creating_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -829,7 +829,7 @@ async def test_delete_created_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateCreatedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -846,7 +846,7 @@ async def test_delete_created_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -865,7 +865,7 @@ async def test_delete_open_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateOpenAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -882,7 +882,7 @@ async def test_delete_open_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -901,7 +901,7 @@ async def test_delete_rooming_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomingAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -918,7 +918,7 @@ async def test_delete_rooming_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -937,7 +937,7 @@ async def test_delete_roomed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateRoomedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -954,7 +954,7 @@ async def test_delete_roomed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -973,7 +973,7 @@ async def test_delete_closed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateClosedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -990,7 +990,7 @@ async def test_delete_closed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -1009,7 +1009,7 @@ async def test_delete_failed_allocation_ok(actor_fn: ActorFn):
     data = proto.CreateFailedAllocation(
         name="test",
         due=date,
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=owner,
         editor_ids={
             owner,
@@ -1025,7 +1025,7 @@ async def test_delete_failed_allocation_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.name == "test"
     assert response.due == date
-    assert len(response.field_ids) == 0
+    assert len(response.form_field_ids) == 0
     assert response.creator_id == owner
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
@@ -1608,11 +1608,9 @@ async def test_update_allocation_change_state_ok(actor_fn: ActorFn):
     data = proto.CreateCreatingAllocation(
         name="test",
         due=datetime.now(),
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=domain.ObjectID(),
-        editor_ids={
-            domain.ObjectID(),
-        },
+        editor_ids={domain.ObjectID()},
     )
     document = await actor.create_allocation(data)
 
@@ -1636,7 +1634,7 @@ async def test_update_creating_allocation_change_participant_fail(actor_fn: Acto
     data = proto.CreateCreatingAllocation(
         name="test",
         due=datetime.now(),
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=domain.ObjectID(),
         editor_ids={
             domain.ObjectID(),
@@ -1659,7 +1657,7 @@ async def test_update_rooming_allocation_change_participant_drop(actor_fn: Actor
     data = proto.CreateRoomingAllocation(
         name="test",
         due=datetime.now(),
-        field_ids=set(),
+        form_field_ids=set(),
         creator_id=domain.ObjectID(),
         editor_ids={
             domain.ObjectID(),
