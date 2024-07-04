@@ -10,7 +10,7 @@ import src.domain.model as domain
 
 class User(bn.Document, domain.User):
     class Settings:
-        indexes = ["id", "tid"]
+        indexes = ["id", "telegram_id"]
         name = "users"
 
 

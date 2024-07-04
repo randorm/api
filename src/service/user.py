@@ -9,7 +9,7 @@ class UserService:
 
     async def create_user(self, user: proto.CreateUser) -> domain.User:
         users = await self.__user_repository.find_users(
-            proto.FindUsersByTid(tid=user.tid)
+            proto.FindUsersByTid(telegram_id=user.telegram_id)
         )
         if len(users) > 0:
             raise CreateUserException("user already exists")
@@ -23,13 +23,13 @@ class UserService:
 
     async def exists(self, user_tid: int) -> bool:
         users = await self.__user_repository.find_users(
-            proto.FindUsersByTid(tid=user_tid)
+            proto.FindUsersByTid(telegram_id=user_tid)
         )
         return len(users) > 0
 
     async def find_user_by_tid(self, user_tid: int) -> domain.User:
         users = await self.__user_repository.find_users(
-            proto.FindUsersByTid(tid=user_tid)
+            proto.FindUsersByTid(telegram_id=user_tid)
         )
         if len(users) > 0:
             return users[0]

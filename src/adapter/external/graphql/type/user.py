@@ -31,7 +31,7 @@ class ProfileType:
 @sb.experimental.pydantic.type(model=User)
 class UserType:
     id: scalar.ObjectID
-    tid: sb.auto
+    telegram_id: sb.auto
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto

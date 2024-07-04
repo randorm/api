@@ -567,7 +567,9 @@ class MongoDBAdapter(
         try:
             match user:
                 case proto.FindUsersByTid():
-                    documents = await models.User.find_many({"tid": user.tid}).to_list()
+                    documents = await models.User.find_many(
+                        {"telegram_id": user.telegram_id}
+                    ).to_list()
 
                 case proto.FindUsersByProfileUsername():
                     documents = await models.User.find_many(

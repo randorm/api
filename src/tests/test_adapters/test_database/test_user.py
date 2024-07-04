@@ -33,7 +33,7 @@ async def test_create_user_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=1,
+        telegram_id=1,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -48,7 +48,7 @@ async def test_create_user_ok(actor_fn: ActorFn):
     response = await actor.create_user(data)
 
     assert isinstance(response, domain.User)
-    assert response.tid == data.tid
+    assert response.telegram_id == data.telegram_id
     assert response.profile.username == data.profile.username
     assert response.profile.first_name == data.profile.first_name
     assert response.profile.last_name == data.profile.last_name
@@ -79,7 +79,7 @@ async def test_find_users_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=345,
+        telegram_id=345,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -93,11 +93,13 @@ async def test_find_users_ok(actor_fn: ActorFn):
 
     document = await actor.create_user(data)
 
-    response = await actor.find_users(proto.FindUsersByTid(tid=document.tid))
+    response = await actor.find_users(
+        proto.FindUsersByTid(telegram_id=document.telegram_id)
+    )
 
     assert isinstance(response, list)
     assert len(response) == 1
-    assert response[0].tid == data.tid
+    assert response[0].telegram_id == data.telegram_id
     assert response[0].profile.username == data.profile.username
     assert response[0].profile.first_name == data.profile.first_name
     assert response[0].profile.last_name == data.profile.last_name
@@ -116,7 +118,7 @@ async def test_find_users_by_username_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=346,
+        telegram_id=346,
         profile=domain.Profile(
             username="test345",
             first_name="test",
@@ -136,7 +138,7 @@ async def test_find_users_by_username_ok(actor_fn: ActorFn):
 
     assert isinstance(response, list)
     assert len(response) == 1
-    assert response[0].tid == data.tid
+    assert response[0].telegram_id == data.telegram_id
     assert response[0].profile.username == data.profile.username
     assert response[0].profile.first_name == data.profile.first_name
     assert response[0].profile.last_name == data.profile.last_name
@@ -155,7 +157,7 @@ async def test_read_user_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=1,
+        telegram_id=1,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -172,7 +174,7 @@ async def test_read_user_ok(actor_fn: ActorFn):
     response = await actor.read_user(proto.ReadUser(_id=document.id))
 
     assert isinstance(response, domain.User)
-    assert response.tid == data.tid
+    assert response.telegram_id == data.telegram_id
     assert response.profile.username == data.profile.username
     assert response.profile.first_name == data.profile.first_name
     assert response.profile.last_name == data.profile.last_name
@@ -203,7 +205,7 @@ async def test_update_user_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=1,
+        telegram_id=1,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -234,7 +236,7 @@ async def test_update_user_ok(actor_fn: ActorFn):
     response = await actor.update_user(new_data)
 
     assert isinstance(response, domain.User)
-    assert response.tid == data.tid
+    assert response.telegram_id == data.telegram_id
     assert new_data.profile is not None
     assert response.profile.username == new_data.profile.username
     assert response.profile.first_name == new_data.profile.first_name
@@ -266,7 +268,7 @@ async def test_delete_user_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=1,
+        telegram_id=1,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -283,7 +285,7 @@ async def test_delete_user_ok(actor_fn: ActorFn):
     response = await actor.delete_user(proto.DeleteUser(_id=document.id))
 
     assert isinstance(response, domain.User)
-    assert response.tid == data.tid
+    assert response.telegram_id == data.telegram_id
     assert response.profile.username == data.profile.username
     assert response.profile.first_name == data.profile.first_name
     assert response.profile.last_name == data.profile.last_name
@@ -385,7 +387,7 @@ async def test_update_user_only_views_ok(actor_fn: ActorFn):
     actor = await actor_fn()
 
     data = proto.CreateUser(
-        tid=1,
+        telegram_id=1,
         profile=domain.Profile(
             username="test",
             first_name="test",
@@ -408,7 +410,7 @@ async def test_update_user_only_views_ok(actor_fn: ActorFn):
 
     response = await actor.update_user(new_data)
 
-    assert response.tid == data.tid
+    assert response.telegram_id == data.telegram_id
     assert response.profile.username == document.profile.username
     assert response.profile.first_name == document.profile.first_name
     assert response.profile.last_name == document.profile.last_name

@@ -16,7 +16,7 @@ class CreateUser(ExcludeFieldMixin, User): ...
 
 
 class FindUsersByTid(BaseModel):
-    tid: int
+    telegram_id: int
 
 
 class FindUsersByProfileUsername(BaseModel):
@@ -46,7 +46,7 @@ class UpdateUser(ExcludeFieldMixin, User):
     views: int | None = Field(default=None)
     profile: UpdateProfile | None = Field(default=None)
     # exclude
-    tid: Literal[None] = None
+    telegram_id: Literal[None] = None
 
 
 class DeleteUser(BaseModel):

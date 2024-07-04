@@ -67,10 +67,10 @@ async def test_register_ok():
     assert isinstance(container, TgOauthContainer)
     dto = container.to_dto(jwt_secret)
     assert isinstance(dto.id, ObjectID)
-    assert dto.tid == payload.id
+    assert dto.telegram_id == payload.id
 
     user = await storage.read_user(ReadUser(_id=dto.id))
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username
@@ -113,10 +113,10 @@ async def test_register_from_dict_ok():
     assert isinstance(container, TgOauthContainer)
     dto = container.to_dto(jwt_secret)
     assert isinstance(dto.id, ObjectID)
-    assert dto.tid == payload.id
+    assert dto.telegram_id == payload.id
 
     user = await storage.read_user(ReadUser(_id=dto.id))
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username
@@ -244,10 +244,10 @@ async def test_register_user_exists_error():
     assert isinstance(container, TgOauthContainer)
     dto = container.to_dto(jwt_secret)
     assert isinstance(dto.id, ObjectID)
-    assert dto.tid == payload.id
+    assert dto.telegram_id == payload.id
 
     user = await storage.read_user(ReadUser(_id=dto.id))
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username
@@ -290,7 +290,7 @@ async def test_retrieve_user_ok():
 
     user = await actor.retrieve_user(container)
 
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username
@@ -321,7 +321,9 @@ async def test_retrieve_user_not_found_error():
 
     with pytest.raises(exception.UserNotFoundException):
         await actor.retrieve_user(
-            TgOauthContainer.construct(TgOauthDTO(id=ObjectID(), tid=0), jwt_secret)
+            TgOauthContainer.construct(
+                TgOauthDTO(id=ObjectID(), telegram_id=0), jwt_secret
+            )
         )
 
 
@@ -365,10 +367,10 @@ async def test_login_ok():
 
     dto = container.to_dto(jwt_secret)
     assert isinstance(dto.id, ObjectID)
-    assert dto.tid == payload.id
+    assert dto.telegram_id == payload.id
 
     user = await storage.read_user(ReadUser(_id=dto.id))
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username
@@ -410,10 +412,10 @@ async def test_login_from_dict_ok():
     container: TgOauthContainer = await actor.login(payload_data)  # type: ignore
     dto = container.to_dto(jwt_secret)
     assert isinstance(dto.id, ObjectID)
-    assert dto.tid == payload.id
+    assert dto.telegram_id == payload.id
 
     user = await storage.read_user(ReadUser(_id=dto.id))
-    assert user.tid == payload.id
+    assert user.telegram_id == payload.id
     assert user.profile.first_name == payload.profile.first_name
     assert user.profile.last_name == payload.profile.last_name
     assert user.profile.username == payload.profile.username

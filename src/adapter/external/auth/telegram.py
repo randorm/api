@@ -53,7 +53,7 @@ class TgOauthRegisterCallback(TgOauthLoginCallback):
 
 class TgOauthDTO(OAuthDTO):
     id: ObjectID
-    tid: int
+    telegram_id: int
 
 
 class TgOauthContainer(BaseModel, OAuthContainer):
@@ -107,7 +107,7 @@ class TelegramOauthAdapter(OauthProtocol):
             self.__check_hash(request)
 
             user = await self.__service.create_user(
-                CreateUser(tid=request.id, profile=request.profile)
+                CreateUser(telegram_id=request.id, profile=request.profile)
             )
         except (ValidationError, database_exception.ReflectUserException) as e:
             raise auth_exception.InvalidCredentialsException(
@@ -121,7 +121,7 @@ class TelegramOauthAdapter(OauthProtocol):
             raise e
 
         return TgOauthContainer.construct(
-            TgOauthDTO(id=user.id, tid=user.tid), self.__jwt_secret
+            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self.__jwt_secret
         )
 
     async def login(self, data: Any) -> TgOauthContainer:
@@ -140,7 +140,7 @@ class TelegramOauthAdapter(OauthProtocol):
             raise e
 
         return TgOauthContainer.construct(
-            TgOauthDTO(id=user.id, tid=user.tid), self.__jwt_secret
+            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self.__jwt_secret
         )
 
     async def retrieve_user(self, data: TgOauthContainer) -> User:

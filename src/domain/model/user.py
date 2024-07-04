@@ -32,7 +32,7 @@ class Profile(pydantic.BaseModel):
 
 class User(pydantic.BaseModel):
     id: ObjectID = pydantic.Field(alias="_id")
-    tid: int  # telegram id, should be serialized as int128
+    telegram_id: int  # telegram id, should be serialized as int128
     created_at: datetime.datetime
     updated_at: datetime.datetime
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
