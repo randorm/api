@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-import src.domain.model.participants as domain
+import src.domain.model.participant as domain
 from src.domain.model.scalar.object_id import ObjectID
 from src.protocol.internal.database.mixin import ExcludeFieldMixin
 

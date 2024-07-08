@@ -14,7 +14,7 @@ class RoomType:
     name: sb.auto
     capacity: sb.auto
 
-    gender_restriction: GenderType
+    gender_restriction: GenderType  # type: ignore
 
     occupied_ids: list[scalar.ObjectID]
     occupied: sb.Private[list[UserType]]

@@ -789,7 +789,7 @@ class MemoryDBAdapter(
             document.capacity = source.capacity
 
         if source.occupied is not None:
-            document.occupied = source.occupied
+            document.occupied_ids = source.occupied
 
         if source.gender_restriction is not None:
             document.gender_restriction = source.gender_restriction

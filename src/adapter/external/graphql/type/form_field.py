@@ -1,9 +1,9 @@
-from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.type.allocation import AllocationType
 from src.adapter.external.graphql.type.format_entity import FormatEntityType
 from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.form_field import (
@@ -17,11 +17,7 @@ from src.domain.model.form_field import (
     TextFormField,
 )
 
-
-@sb.enum
-class FormFieldKindType(StrEnum):
-    TEXT = FormFieldKind.TEXT.value
-    CHOICE = FormFieldKind.CHOICE.value
+FormFieldKindType = sb.enum(FormFieldKind)
 
 
 @sb.experimental.pydantic.interface(model=BaseFormField)
@@ -31,8 +27,13 @@ class BaseFormFieldType:
     updated_at: sb.auto
     deleted_at: sb.auto
 
-    kind: FormFieldKindType
+    allocation_id: scalar.ObjectID
+    allocation: sb.Private[AllocationType]
+
+    kind: FormFieldKindType  # type: ignore
     required: sb.auto
+    frozen: sb.auto
+
     question: sb.auto
     question_entities: list[FormatEntityType]
 
@@ -47,7 +48,7 @@ class BaseFormFieldType:
 
 @sb.experimental.pydantic.type(model=TextFormField)
 class TextFormFieldType(BaseFormFieldType):
-    kind: FormFieldKindType = FormFieldKindType.TEXT
+    kind: Literal[FormFieldKindType.TEXT] = FormFieldKindType.TEXT
 
     re: sb.auto
     ex: sb.auto
@@ -62,7 +63,7 @@ class ChoiceOptionType:
 
 @sb.experimental.pydantic.type(model=ChoiceFormField)
 class ChoiceFormFieldType(BaseFormFieldType):
-    kind: FormFieldKindType = FormFieldKindType.CHOICE
+    kind: Literal[FormFieldKindType.CHOICE] = FormFieldKindType.CHOICE
 
     options_ids: list[int]
     options: sb.Private[list[ChoiceOptionType]]
@@ -83,7 +84,7 @@ class BaseAnswerType:
     deleted_at: sb.auto
 
     field_id: sb.auto
-    field_kind: FormFieldKindType
+    field_kind: FormFieldKindType  # type: ignore
 
     respondent_id: scalar.ObjectID
     respondent: sb.Private[UserType]
@@ -91,17 +92,17 @@ class BaseAnswerType:
 
 @sb.experimental.pydantic.type(model=TextAnswer)
 class TextAnswerType(BaseAnswerType):
-    kind: FormFieldKindType = FormFieldKindType.TEXT
+    kind: Literal[FormFieldKindType.TEXT] = FormFieldKindType.TEXT
     text: sb.auto
     text_entities: list[FormatEntityType]
 
 
 @sb.experimental.pydantic.type(model=ChoiceAnswer)
 class ChoiceAnswerType(BaseAnswerType):
-    kind: FormFieldKindType = FormFieldKindType.CHOICE
+    kind: Literal[FormFieldKindType.CHOICE] = FormFieldKindType.CHOICE
 
-    choices_ids: list[scalar.ObjectID]
-    choices: sb.Private[list[ChoiceOptionType]]
+    option_indexes: list[int]
+    options: sb.Private[list[ChoiceOptionType]]
 
 
 type AnswerType = Annotated[

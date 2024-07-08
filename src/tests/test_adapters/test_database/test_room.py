@@ -36,7 +36,7 @@ async def test_create_room_ok(actor_fn: ActorFn):
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied={person1, person2},
+        occupied_ids={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -47,7 +47,7 @@ async def test_create_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied == data.occupied
+    assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
     assert response.editor_ids == {owner}
     assert response.gender_restriction is None
@@ -79,7 +79,7 @@ async def test_read_room_ok(actor_fn: ActorFn):
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied={person1, person2},
+        occupied_ids={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -92,7 +92,7 @@ async def test_read_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied == data.occupied
+    assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
     assert response.editor_ids == {owner}
     assert response.gender_restriction is None
@@ -124,7 +124,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied={person1, person2},
+        occupied_ids={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -149,7 +149,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == new_data.name
     assert response.capacity == new_data.capacity
-    assert response.occupied == new_data.occupied
+    assert response.occupied_ids == new_data.occupied
     assert response.creator_id == owner
     assert response.editor_ids == new_editors
     assert response.gender_restriction == domain.Gender.MALE
@@ -181,7 +181,7 @@ async def test_delete_room_ok(actor_fn: ActorFn):
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied={person1, person2},
+        occupied_ids={person1, person2},
         creator_id=owner,
         editor_ids={owner},
         gender_restriction=None,
@@ -194,7 +194,7 @@ async def test_delete_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied == data.occupied
+    assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
     assert response.editor_ids == {owner}
     assert response.gender_restriction is None

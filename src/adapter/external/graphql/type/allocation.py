@@ -1,5 +1,4 @@
-from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 import strawberry as sb
 
@@ -18,16 +17,7 @@ from src.domain.model.allocation import (
     RoomingAllocation,
 )
 
-
-@sb.enum
-class AllocationStateType(StrEnum):
-    CREATING = AllocationState.CREATING.value
-    CREATED = AllocationState.CREATED.value
-    OPEN = AllocationState.OPEN.value
-    ROOMING = AllocationState.ROOMING.value
-    ROOMED = AllocationState.ROOMED.value
-    CLOSED = AllocationState.CLOSED.value
-    FAILED = AllocationState.FAILED.value
+AllocationStateType = sb.enum(AllocationState)
 
 
 @sb.experimental.pydantic.interface(model=BaseAllocation)
@@ -39,7 +29,7 @@ class BaseAllocationType:
 
     name: sb.auto
     due: sb.auto
-    state: AllocationStateType
+    state: AllocationStateType  # type: ignore
 
     form_fields_ids: list[scalar.ObjectID]
     form_fields: sb.Private[list[FormFieldType]]
@@ -53,12 +43,12 @@ class BaseAllocationType:
 
 @sb.experimental.pydantic.type(model=CreatingAllocation)
 class CreatingAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.CREATING
+    state: Literal[AllocationStateType.CREATING] = AllocationStateType.CREATING
 
 
 @sb.experimental.pydantic.type(model=CreatedAllocation)
 class CreatedAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.CREATED
+    state: Literal[AllocationStateType.CREATED] = AllocationStateType.CREATED
 
     participants_ids: list[scalar.ObjectID]
     participants: sb.Private[list[UserType]]
@@ -66,7 +56,7 @@ class CreatedAllocationType(BaseAllocationType):
 
 @sb.experimental.pydantic.type(model=OpenAllocation)
 class OpenAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.OPEN
+    state: Literal[AllocationStateType.OPEN] = AllocationStateType.OPEN
 
     participants_ids: list[scalar.ObjectID]
     participants: sb.Private[list[UserType]]
@@ -74,7 +64,7 @@ class OpenAllocationType(BaseAllocationType):
 
 @sb.experimental.pydantic.type(model=RoomingAllocation)
 class RoomingAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.ROOMING
+    state: Literal[AllocationStateType.ROOMING] = AllocationStateType.ROOMING
 
     participants_ids: list[scalar.ObjectID]
     participants: sb.Private[list[UserType]]
@@ -82,7 +72,7 @@ class RoomingAllocationType(BaseAllocationType):
 
 @sb.experimental.pydantic.type(model=RoomedAllocation)
 class RoomedAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.ROOMED
+    state: Literal[AllocationStateType.ROOMED] = AllocationStateType.ROOMED
 
     participants_ids: list[scalar.ObjectID]
     participants: sb.Private[list[UserType]]
@@ -90,7 +80,7 @@ class RoomedAllocationType(BaseAllocationType):
 
 @sb.experimental.pydantic.type(model=ClosedAllocation)
 class ClosedAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.CLOSED
+    state: Literal[AllocationStateType.CLOSED] = AllocationStateType.CLOSED
 
     participants_ids: list[scalar.ObjectID]
     participants: sb.Private[list[UserType]]
@@ -98,7 +88,7 @@ class ClosedAllocationType(BaseAllocationType):
 
 @sb.experimental.pydantic.type(model=FailedAllocation)
 class FailedAllocationType(BaseAllocationType):
-    state: AllocationStateType = AllocationStateType.FAILED
+    state: Literal[AllocationStateType.FAILED] = AllocationStateType.FAILED
 
 
 type AllocationType = Annotated[

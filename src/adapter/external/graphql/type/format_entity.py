@@ -1,5 +1,4 @@
-from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 import strawberry as sb
 
@@ -16,65 +15,55 @@ from src.domain.model.format_entity import (
     UnderlineEntity,
 )
 
-
-@sb.enum
-class FormatOptionType(StrEnum):
-    SPOILER = FormatOption.SPOILER.value
-    BOLD = FormatOption.BOLD.value
-    ITALIC = FormatOption.ITALIC.value
-    MONOSPACE = FormatOption.MONOSPACE.value
-    LINK = FormatOption.LINK.value
-    STRIKETHROUGH = FormatOption.STRIKETHROUGH.value
-    UNDERLINE = FormatOption.UNDERLINE.value
-    CODE = FormatOption.CODE.value
+FormatOptionType = sb.enum(FormatOption)
 
 
 @sb.experimental.pydantic.interface(model=BaseFormatEntity)
 class BaseFormatEntityType:
-    option: FormatOptionType
+    option: FormatOptionType  # type: ignore
     offset: sb.auto
     length: sb.auto
 
 
 @sb.experimental.pydantic.type(model=SpoilerEntity)
 class SpoilerEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.SPOILER
+    option: Literal[FormatOptionType.SPOILER] = FormatOptionType.SPOILER
 
 
 @sb.experimental.pydantic.type(model=BoldEntity)
 class BoldEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.BOLD
+    option: Literal[FormatOptionType.BOLD] = FormatOptionType.BOLD
 
 
 @sb.experimental.pydantic.type(model=ItalicEntity)
 class ItalicEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.ITALIC
+    option: Literal[FormatOptionType.ITALIC] = FormatOptionType.ITALIC
 
 
 @sb.experimental.pydantic.type(model=MonospaceEntity)
 class MonospaceEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.MONOSPACE
+    option: Literal[FormatOptionType.MONOSPACE] = FormatOptionType.MONOSPACE
 
 
 @sb.experimental.pydantic.type(model=LinkEntity)
 class LinkEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.LINK
+    option: Literal[FormatOptionType.LINK] = FormatOptionType.LINK
     url: sb.auto
 
 
 @sb.experimental.pydantic.type(model=StrikethroughEntity)
 class StrikethroughEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.STRIKETHROUGH
+    option: Literal[FormatOptionType.STRIKETHROUGH] = FormatOptionType.STRIKETHROUGH
 
 
 @sb.experimental.pydantic.type(model=UnderlineEntity)
 class UnderlineEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.UNDERLINE
+    option: Literal[FormatOptionType.UNDERLINE] = FormatOptionType.UNDERLINE
 
 
 @sb.experimental.pydantic.type(model=CodeEntity)
 class CodeEntityType(BaseFormatEntityType):
-    option: FormatOptionType = FormatOptionType.CODE
+    option: Literal[FormatOptionType.CODE] = FormatOptionType.CODE
     language: sb.auto
 
 

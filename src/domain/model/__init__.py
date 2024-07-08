@@ -44,7 +44,7 @@ from src.domain.model.format_entity import (
     StrikethroughEntity,
     UnderlineEntity,
 )
-from src.domain.model.participants import (
+from src.domain.model.participant import (
     ActiveParticipant,
     AllocatedParticipant,
     BaseParticipant,

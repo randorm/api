@@ -15,7 +15,7 @@ class Room(pydantic.BaseModel):
 
     name: str = pydantic.Field(min_length=1)
     capacity: int = pydantic.Field(ge=0)
-    occupied: set[ObjectID] = pydantic.Field(default_factory=set)
+    occupied_ids: set[ObjectID] = pydantic.Field(default_factory=set)
     gender_restriction: Gender | None
 
     creator_id: ObjectID
