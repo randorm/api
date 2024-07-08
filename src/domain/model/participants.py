@@ -46,7 +46,9 @@ class AllocatedParticipant(BaseParticipant):
     state: Literal[ParticipantState.ALLOCATED] = ParticipantState.ALLOCATED
 
 
-type Participant = CreatingParticipant | CreatedParticipant | ActiveParticipant | AllocatedParticipant
+type Participant = (
+    CreatingParticipant | CreatedParticipant | ActiveParticipant | AllocatedParticipant
+)
 
 
 ParticipantResolver = pydantic.TypeAdapter(

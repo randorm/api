@@ -8,7 +8,7 @@ setup:
 
 tidy path=".":
     poetry run isort {{ path }}
-    poetry run black {{ path }}
+    poetry run ruff format {{ path }}
     just --fmt --unstable
 
 check:
