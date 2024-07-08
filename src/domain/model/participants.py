@@ -25,9 +25,9 @@ class BaseParticipant(pydantic.BaseModel):
 
     state: ParticipantState
 
-    viewed_ids: set[ObjectID]
-    subscription_ids: set[ObjectID]
-    subscribers_ids: set[ObjectID]
+    viewed_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    subscription_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    subscribers_ids: set[ObjectID] = pydantic.Field(default_factory=set)
 
 
 class CreatingParticipant(BaseParticipant):
@@ -44,6 +44,7 @@ class ActiveParticipant(BaseParticipant):
 
 class AllocatedParticipant(BaseParticipant):
     state: Literal[ParticipantState.ALLOCATED] = ParticipantState.ALLOCATED
+    room_id: ObjectID
 
 
 type Participant = (

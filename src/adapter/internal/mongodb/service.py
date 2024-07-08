@@ -924,6 +924,14 @@ class MongoDBAdapter(
             data["state"] = source.state
             document = models.ParticipantResolver.validate_python(data)
 
+        if source.room_id is not None:
+            if document.state not in [domain.ParticipantState.ALLOCATED]:
+                raise exception.UpdateParticipantException(
+                    f"can not change room id for participant state {document.state}"
+                )
+
+            document.room_id = source.room_id  # type: ignore
+
         return document
 
     async def delete_participant(

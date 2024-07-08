@@ -123,6 +123,7 @@ async def test_create_allocated_participant_ok(actor_fn: ActorFn):
     person1 = domain.ObjectID()
     person2 = domain.ObjectID()
     person3 = domain.ObjectID()
+    room_id = domain.ObjectID()
 
     data = proto.CreateAllocatedParticipant(
         allocation_id=allocation_id,
@@ -130,6 +131,7 @@ async def test_create_allocated_participant_ok(actor_fn: ActorFn):
         viewed_ids={person1, person2},
         subscription_ids={person1},
         subscribers_ids={person3},
+        room_id=room_id,
     )
 
     response = await actor.create_participant(data)
@@ -139,9 +141,10 @@ async def test_create_allocated_participant_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.allocation_id == allocation_id
     assert response.user_id == user_id
-    assert len(response.viewed_ids) == 2
-    assert len(response.subscription_ids) == 1
-    assert len(response.subscribers_ids) == 1
+    assert response.room_id == room_id
+    assert response.viewed_ids == {person1, person2}
+    assert response.subscription_ids == {person1}
+    assert response.subscribers_ids == {person3}
 
 
 @pytest.mark.parametrize(param_string, param_attrs)
@@ -243,6 +246,7 @@ async def test_read_allocated_participant_ok(actor_fn: ActorFn):
     person1 = domain.ObjectID()
     person2 = domain.ObjectID()
     person3 = domain.ObjectID()
+    room_id = domain.ObjectID()
 
     data = proto.CreateAllocatedParticipant(
         allocation_id=allocation_id,
@@ -250,6 +254,7 @@ async def test_read_allocated_participant_ok(actor_fn: ActorFn):
         viewed_ids={person1, person2},
         subscription_ids={person1},
         subscribers_ids={person3},
+        room_id=room_id,
     )
 
     document = await actor.create_participant(data)
@@ -259,6 +264,7 @@ async def test_read_allocated_participant_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.AllocatedParticipant)
     assert data.allocation_id == response.allocation_id
     assert data.user_id == response.user_id
+    assert data.room_id == response.room_id
     assert data.viewed_ids == response.viewed_ids
     assert data.subscription_ids == response.subscription_ids
     assert data.subscribers_ids == response.subscribers_ids
@@ -347,6 +353,7 @@ async def test_update_allocated_participant_ok(actor_fn: ActorFn):
     person1 = domain.ObjectID()
     person2 = domain.ObjectID()
     person3 = domain.ObjectID()
+    room_id = domain.ObjectID()
 
     data = proto.CreateAllocatedParticipant(
         allocation_id=allocation_id,
@@ -354,6 +361,7 @@ async def test_update_allocated_participant_ok(actor_fn: ActorFn):
         viewed_ids={person1, person2},
         subscription_ids={person1},
         subscribers_ids={person3},
+        room_id=room_id,
     )
 
     document = await actor.create_participant(data)
@@ -367,9 +375,11 @@ async def test_update_allocated_participant_ok(actor_fn: ActorFn):
 
     response = await actor.update_participant(new_data)
 
+    assert isinstance(response, domain.AllocatedParticipant)
     assert response.id == new_data.id
     assert response.allocation_id == data.allocation_id
     assert response.user_id == data.user_id
+    assert response.room_id == data.room_id
     assert response.viewed_ids == new_data.viewed_ids
     assert response.subscription_ids == new_data.subscription_ids
     assert response.subscribers_ids == new_data.subscribers_ids
@@ -483,6 +493,7 @@ async def test_delete_allocated_participant_ok(actor_fn: ActorFn):
     person1 = domain.ObjectID()
     person2 = domain.ObjectID()
     person3 = domain.ObjectID()
+    room_id = domain.ObjectID()
 
     data = proto.CreateAllocatedParticipant(
         allocation_id=allocation_id,
@@ -490,6 +501,7 @@ async def test_delete_allocated_participant_ok(actor_fn: ActorFn):
         viewed_ids={person1, person2},
         subscription_ids={person1},
         subscribers_ids={person3},
+        room_id=room_id,
     )
 
     document = await actor.create_participant(data)
@@ -502,6 +514,7 @@ async def test_delete_allocated_participant_ok(actor_fn: ActorFn):
     assert isinstance(response.id, domain.ObjectID)
     assert response.allocation_id == allocation_id
     assert response.user_id == user_id
+    assert response.room_id == room_id
     assert len(response.viewed_ids) == 2
     assert len(response.subscription_ids) == 1
 
@@ -721,3 +734,102 @@ async def test_upadte_participant_change_state_ok(actor_fn: ActorFn):
     assert response.subscription_ids == new_data.subscription_ids
     assert response.subscribers_ids == new_data.subscribers_ids
     assert response.state == domain.ParticipantState.CREATED
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_participant_change_room_ok(actor_fn: ActorFn):
+    actor = await actor_fn()
+    owner = domain.ObjectID()
+    target = domain.ObjectID()
+
+    data = proto.CreateAllocatedParticipant(
+        user_id=owner,
+        allocation_id=target,
+        room_id=domain.ObjectID(),
+        state=domain.ParticipantState.ALLOCATED,
+    )
+
+    document = await actor.create_participant(data)
+
+    new_data = proto.UpdateParticipant(
+        _id=document.id,
+        room_id=domain.ObjectID(),
+    )
+
+    response = await actor.update_participant(new_data)
+
+    assert isinstance(response, domain.AllocatedParticipant)
+    assert response.id == new_data.id
+    assert response.allocation_id == data.allocation_id
+    assert response.user_id == data.user_id
+    assert response.room_id == new_data.room_id
+    assert response.state == domain.ParticipantState.ALLOCATED
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_creating_participant_room_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+    owner = domain.ObjectID()
+    target = domain.ObjectID()
+
+    data = proto.CreateCreatingParticipant(
+        user_id=owner,
+        allocation_id=target,
+        state=domain.ParticipantState.CREATING,
+    )
+
+    document = await actor.create_participant(data)
+
+    new_data = proto.UpdateParticipant(
+        _id=document.id,
+        room_id=domain.ObjectID(),
+    )
+
+    with pytest.raises(exception.UpdateParticipantException):
+        await actor.update_participant(new_data)
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_created_participant_room_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+    owner = domain.ObjectID()
+    target = domain.ObjectID()
+
+    data = proto.CreateCreatedParticipant(
+        user_id=owner,
+        allocation_id=target,
+        state=domain.ParticipantState.CREATED,
+    )
+
+    document = await actor.create_participant(data)
+
+    new_data = proto.UpdateParticipant(
+        _id=document.id,
+        room_id=domain.ObjectID(),
+    )
+
+    with pytest.raises(exception.UpdateParticipantException):
+        await actor.update_participant(new_data)
+
+
+@pytest.mark.parametrize(param_string, param_attrs)
+async def test_update_active_participant_room_fail(actor_fn: ActorFn):
+    actor = await actor_fn()
+    owner = domain.ObjectID()
+    target = domain.ObjectID()
+
+    data = proto.CreateActiveParticipant(
+        user_id=owner,
+        allocation_id=target,
+        state=domain.ParticipantState.ACTIVE,
+    )
+
+    document = await actor.create_participant(data)
+
+    new_data = proto.UpdateParticipant(
+        _id=document.id,
+        room_id=domain.ObjectID(),
+    )
+
+    with pytest.raises(exception.UpdateParticipantException):
+        await actor.update_participant(new_data)

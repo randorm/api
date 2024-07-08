@@ -47,6 +47,7 @@ class UpdateParticipant(ExcludeFieldMixin, domain.BaseParticipant):
     subscription_ids: set[ObjectID] | None = Field(default=None)
     subscribers_ids: set[ObjectID] | None = Field(default=None)
     state: domain.ParticipantState | None = Field(default=None)
+    room_id: ObjectID | None = Field(default=None)
 
 
 class DeleteParticipant(BaseModel):
