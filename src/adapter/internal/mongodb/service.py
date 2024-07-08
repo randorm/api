@@ -32,27 +32,28 @@ class MongoDBAdapter(
         await bn.init_beanie(
             self._client.db_name,
             document_models=[
-                models.User,
-                models.Room,
-                models.FormFieldDocument,
-                models.TextFormField,
-                models.ChoiceFormField,
-                models.AnswerDocument,
-                models.TextAnswer,
-                models.ChoiceAnswer,
-                models.AllocationDocument,
-                models.CreatingAllocation,
-                models.CreatedAllocation,
-                models.OpenAllocation,
-                models.RoomingAllocation,
-                models.RoomedAllocation,
-                models.ClosedAllocation,
-                models.FailedAllocation,
-                models.ParticipantDocument,
-                models.CreatingParticipant,
-                models.CreatedParticipant,
                 models.ActiveParticipant,
                 models.AllocatedParticipant,
+                models.AllocationDocument,
+                models.AnswerDocument,
+                models.ChoiceAnswer,
+                models.ChoiceFormField,
+                models.ClosedAllocation,
+                models.CreatedAllocation,
+                models.CreatedParticipant,
+                models.CreatingAllocation,
+                models.CreatingParticipant,
+                models.FailedAllocation,
+                models.FormFieldDocument,
+                models.OpenAllocation,
+                models.ParticipantDocument,
+                models.Preference,
+                models.Room,
+                models.RoomedAllocation,
+                models.RoomingAllocation,
+                models.TextAnswer,
+                models.TextFormField,
+                models.User,
             ],
         )
 
@@ -937,6 +938,7 @@ class MongoDBAdapter(
 
             document.deleted_at = datetime.now().replace(microsecond=0)
             document = await document.replace()
+            assert document is not None, "document replacement failed"
 
             return domain.ParticipantResolver.validate_python(
                 document.model_dump(by_alias=True),
@@ -949,4 +951,112 @@ class MongoDBAdapter(
         except Exception as e:
             raise exception.DeleteParticipantException(
                 f"failed to delete participant with id {participant.id} with error: {e}"
+            ) from e
+
+    async def create_preference(
+        self, preference: proto.CreatePreference
+    ) -> domain.Preference:
+        try:
+            timestamp = datetime.now().replace(microsecond=0)
+            preference.created_at = timestamp
+            preference.updated_at = timestamp
+
+            model = models.Preference.model_validate(preference, from_attributes=True)
+            document = await model.insert()
+            assert document is not None, "insert failed"
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreatePreferenceException(
+                f"failed to create preference with error: {e}"
+            ) from e
+
+    async def read_preference(
+        self, preference: proto.ReadPreference
+    ) -> domain.Preference:
+        try:
+            document = await models.Preference.get(
+                preference.id,
+                with_children=True,
+            )
+            assert document is not None, "document not found"
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadPreferenceException(
+                f"failed to read preference with id {preference.id} with error: {e}"
+            ) from e
+
+    async def update_preference(
+        self, preference: proto.UpdatePreference
+    ) -> domain.Preference:
+        try:
+            document: models.Preference | None = await models.Preference.get(
+                preference.id
+            )
+            assert document is not None, "document not found"
+
+            document = self.__update_preference(document, preference)
+            document.updated_at = datetime.now().replace(microsecond=0)
+            await models.Preference.find_one(
+                models.Preference.id == document.id,
+                with_children=True,
+            ).replace_one(document)
+            await document.sync()
+
+            return domain.Preference.model_validate(document)
+        except exception.UpdatePreferenceException as e:
+            raise e
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdatePreferenceException(
+                f"failed to update preference with id {preference.id} with error: {e}"
+            ) from e
+
+    def __update_preference(
+        self,
+        document: models.Preference,
+        source: proto.UpdatePreference,
+    ) -> models.Preference:
+        if source.kind is not None:
+            document.kind = source.kind
+
+        if source.status is not None:
+            document.status = source.status
+
+        return document
+
+    async def delete_preference(
+        self,
+        preference: proto.DeletePreference,
+    ) -> domain.Preference:
+        try:
+            document: models.Preference | None = await models.Preference.get(
+                preference.id
+            )
+            assert document is not None, "document not found"
+
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            document = await document.replace()
+            assert document is not None, "document replacement failed"
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeletePreferenceException(
+                f"failed to delete preference with id {preference.id} with error: {e}"
             ) from e

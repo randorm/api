@@ -159,3 +159,9 @@ ParticipantResolver = TypeAdapter(
     Participant,
     config=ConfigDict(extra="ignore", from_attributes=True),
 )
+
+
+class Preference(bn.Document, domain.Preference):
+    class Settings:
+        indexes = ["id"]
+        name = "preferences"

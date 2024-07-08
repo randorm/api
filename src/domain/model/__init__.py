@@ -54,6 +54,7 @@ from src.domain.model.participants import (
     ParticipantResolver,
     ParticipantState,
 )
+from src.domain.model.preference import Preference, PreferenceKind, PreferenceStatus
 from src.domain.model.room import Room
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Gender, LanguageCode, Profile, User

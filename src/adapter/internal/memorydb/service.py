@@ -16,6 +16,7 @@ class MemoryDBAdapter(
     proto.RoomDatabaseProtocol,
     proto.UserDatabaseProtocol,
     proto.ParticipantDatabaseProtocol,
+    proto.PreferenceDatabaseProtocol,
 ):
     _allocation_collection: dict[ObjectID, domain.Allocation]
     _form_field_collection: dict[ObjectID, domain.FormField]
@@ -23,6 +24,7 @@ class MemoryDBAdapter(
     _user_collection: dict[ObjectID, domain.User]
     _room_collection: dict[ObjectID, domain.Room]
     _participant_collection: dict[ObjectID, domain.Participant]
+    _preference_collection: dict[ObjectID, domain.Preference]
 
     def __init__(self):
         self._allocation_collection = {}
@@ -31,6 +33,7 @@ class MemoryDBAdapter(
         self._user_collection = {}
         self._room_collection = {}
         self._participant_collection = {}
+        self._preference_collection = {}
 
     async def create_allocation(
         self,
@@ -943,4 +946,122 @@ class MemoryDBAdapter(
         except Exception as e:
             raise exception.DeleteParticipantException(
                 f"failed to delete participant with id {participant.id} with error: {e}"
+            ) from e
+
+    async def create_preference(
+        self,
+        preference: proto.CreatePreference,
+    ) -> domain.Preference:
+        try:
+            if not isinstance(preference, BaseModel):
+                raise TypeError("preference must be a pydantic model")
+
+            timestamp = datetime.now().replace(microsecond=0)
+
+            data = json.loads(preference.model_dump_json())
+            data["_id"] = str(ObjectID())
+            data["created_at"] = timestamp
+            data["updated_at"] = timestamp
+
+            model = domain.Preference.model_validate(data)
+
+            self._preference_collection[model.id] = model
+            document = self._preference_collection.get(model.id)
+
+            assert document is not None, "insert failed"
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.CreatePreferenceException(
+                f"failed to create preference with error: {e}"
+            ) from e
+
+    async def read_preference(
+        self,
+        preference: proto.ReadPreference,
+    ) -> domain.Preference:
+        try:
+            if not isinstance(preference, BaseModel):
+                raise AttributeError("preference must be a pydantic model")
+
+            document = self._preference_collection.get(preference.id)
+            assert document is not None, "document not found"
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadPreferenceException(
+                f"failed to read preference with id {preference.id} with error: {e}"
+            ) from e
+
+    async def update_preference(
+        self,
+        preference: proto.UpdatePreference,
+    ) -> domain.Preference:
+        try:
+            if not isinstance(preference, BaseModel):
+                raise AttributeError("preference must be a pydantic model")
+
+            document = self._preference_collection.get(preference.id)
+            assert document is not None, "document not found"
+
+            document = self.__update_preference(document, preference)
+            self._preference_collection[preference.id] = document
+            document = self._preference_collection.get(preference.id)
+
+            return domain.Preference.model_validate(document)
+        except exception.UpdatePreferenceException as e:
+            raise e
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.UpdatePreferenceException(
+                f"failed to update preference with id {preference.id} with error: {e}"
+            ) from e
+
+    def __update_preference(
+        self,
+        document: domain.Preference,
+        source: proto.UpdatePreference,
+    ) -> domain.Preference:
+        if source.kind is not None:
+            document.kind = source.kind
+
+        if source.status is not None:
+            document.status = source.status
+
+        return document
+
+    async def delete_preference(
+        self,
+        preference: proto.DeletePreference,
+    ) -> domain.Preference:
+        try:
+            if not isinstance(preference, BaseModel):
+                raise AttributeError("preference must be a pydantic model")
+
+            document = self._preference_collection.get(preference.id)
+            assert document is not None, "document not found"
+
+            document.deleted_at = datetime.now().replace(microsecond=0)
+            self._preference_collection[preference.id] = document
+            document = self._preference_collection.get(preference.id)
+
+            return domain.Preference.model_validate(document)
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.DeletePreferenceException(
+                f"failed to delete preference with id {preference.id} with error: {e}"
             ) from e

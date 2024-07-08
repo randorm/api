@@ -57,6 +57,13 @@ from src.protocol.internal.database.participants import (
     ReadParticipant,
     UpdateParticipant,
 )
+from src.protocol.internal.database.preference import (
+    CreatePreference,
+    DeletePreference,
+    PreferenceDatabaseProtocol,
+    ReadPreference,
+    UpdatePreference,
+)
 from src.protocol.internal.database.room import (
     CreateRoom,
     DeleteRoom,
