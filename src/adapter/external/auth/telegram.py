@@ -129,7 +129,7 @@ class TelegramOauthAdapter(OauthProtocol):
             request = TgOauthLoginCallback.model_validate(data, from_attributes=True)
             self.__check_hash(request)
 
-            user = await self.__service.find_by_tid(request.id)
+            user = await self.__service.find_by_telegram_id(request.id)
         except (ValidationError, database_exception.ReflectUserException) as e:
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
