@@ -16,11 +16,9 @@ class RoomType:
 
     name: sb.auto
     capacity: sb.auto
+    occupied: sb.auto
 
     gender_restriction: GenderType  # type: ignore
-
-    occupied_ids: list[scalar.ObjectID]
-    # occupied: sb.Private[list[UserType]]
 
     creator_id: scalar.ObjectID
     creator: LazyUserType = sb.field(

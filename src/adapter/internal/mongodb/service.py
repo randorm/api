@@ -787,7 +787,7 @@ class MongoDBAdapter(
             document.capacity = source.capacity
 
         if source.occupied is not None:
-            document.occupied_ids = source.occupied
+            document.occupied = source.occupied
 
         if source.gender_restriction is not None:
             document.gender_restriction = source.gender_restriction

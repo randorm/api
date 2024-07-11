@@ -30,13 +30,10 @@ async def test_create_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
 
-    person1 = domain.ObjectID()
-    person2 = domain.ObjectID()
-
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied_ids={person1, person2},
+        occupied=2,
         creator_id=owner,
         editors_ids={owner},
         gender_restriction=None,
@@ -47,7 +44,7 @@ async def test_create_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied_ids == data.occupied_ids
+    assert response.occupied == data.occupied
     assert response.creator_id == owner
     assert response.editors_ids == {owner}
     assert response.gender_restriction is None
@@ -73,13 +70,11 @@ async def test_create_room_reflect_fail(actor_fn: ActorFn):
 async def test_read_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
-    person1 = domain.ObjectID()
-    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied_ids={person1, person2},
+        occupied=2,
         creator_id=owner,
         editors_ids={owner},
         gender_restriction=None,
@@ -92,7 +87,7 @@ async def test_read_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied_ids == data.occupied_ids
+    assert response.occupied == data.occupied
     assert response.creator_id == owner
     assert response.editors_ids == {owner}
     assert response.gender_restriction is None
@@ -118,13 +113,11 @@ async def test_read_room_reflect_fail(actor_fn: ActorFn):
 async def test_update_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
-    person1 = domain.ObjectID()
-    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied_ids={person1, person2},
+        occupied=2,
         creator_id=owner,
         editors_ids={owner},
         gender_restriction=None,
@@ -133,13 +126,11 @@ async def test_update_room_ok(actor_fn: ActorFn):
     document = await actor.create_room(data)
     new_editors = {domain.ObjectID(), domain.ObjectID(), domain.ObjectID()}
 
-    new_persons = {person2, person1, domain.ObjectID(), domain.ObjectID()}
-
     new_data = proto.UpdateRoom(
         _id=document.id,
         name="test2",
         capacity=10,
-        occupied=new_persons,
+        occupied=3,
         editors_ids=new_editors,
         gender_restriction=domain.Gender.MALE,
     )
@@ -149,7 +140,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == new_data.name
     assert response.capacity == new_data.capacity
-    assert response.occupied_ids == new_data.occupied
+    assert response.occupied == new_data.occupied
     assert response.creator_id == owner
     assert response.editors_ids == new_editors
     assert response.gender_restriction == domain.Gender.MALE
@@ -175,13 +166,11 @@ async def test_update_room_reflect_fail(actor_fn: ActorFn):
 async def test_delete_room_ok(actor_fn: ActorFn):
     actor = await actor_fn()
     owner = domain.ObjectID()
-    person1 = domain.ObjectID()
-    person2 = domain.ObjectID()
 
     data = proto.CreateRoom(
         name="test",
         capacity=5,
-        occupied_ids={person1, person2},
+        occupied=2,
         creator_id=owner,
         editors_ids={owner},
         gender_restriction=None,
@@ -194,7 +183,7 @@ async def test_delete_room_ok(actor_fn: ActorFn):
     assert isinstance(response, domain.Room)
     assert response.name == data.name
     assert response.capacity == data.capacity
-    assert response.occupied_ids == data.occupied_ids
+    assert response.occupied == data.occupied
     assert response.creator_id == owner
     assert response.editors_ids == {owner}
     assert response.gender_restriction is None
