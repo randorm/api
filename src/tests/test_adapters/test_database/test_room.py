@@ -38,7 +38,7 @@ async def test_create_room_ok(actor_fn: ActorFn):
         capacity=5,
         occupied_ids={person1, person2},
         creator_id=owner,
-        editor_ids={owner},
+        editors_ids={owner},
         gender_restriction=None,
     )
 
@@ -49,7 +49,7 @@ async def test_create_room_ok(actor_fn: ActorFn):
     assert response.capacity == data.capacity
     assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
-    assert response.editor_ids == {owner}
+    assert response.editors_ids == {owner}
     assert response.gender_restriction is None
     assert isinstance(response.id, domain.ObjectID)
     assert isinstance(response.created_at, datetime)
@@ -81,7 +81,7 @@ async def test_read_room_ok(actor_fn: ActorFn):
         capacity=5,
         occupied_ids={person1, person2},
         creator_id=owner,
-        editor_ids={owner},
+        editors_ids={owner},
         gender_restriction=None,
     )
 
@@ -94,7 +94,7 @@ async def test_read_room_ok(actor_fn: ActorFn):
     assert response.capacity == data.capacity
     assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
-    assert response.editor_ids == {owner}
+    assert response.editors_ids == {owner}
     assert response.gender_restriction is None
     assert isinstance(response.id, domain.ObjectID)
     assert isinstance(response.created_at, datetime)
@@ -126,7 +126,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
         capacity=5,
         occupied_ids={person1, person2},
         creator_id=owner,
-        editor_ids={owner},
+        editors_ids={owner},
         gender_restriction=None,
     )
 
@@ -140,7 +140,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
         name="test2",
         capacity=10,
         occupied=new_persons,
-        editor_ids=new_editors,
+        editors_ids=new_editors,
         gender_restriction=domain.Gender.MALE,
     )
 
@@ -151,7 +151,7 @@ async def test_update_room_ok(actor_fn: ActorFn):
     assert response.capacity == new_data.capacity
     assert response.occupied_ids == new_data.occupied
     assert response.creator_id == owner
-    assert response.editor_ids == new_editors
+    assert response.editors_ids == new_editors
     assert response.gender_restriction == domain.Gender.MALE
     assert isinstance(response.id, domain.ObjectID)
     assert isinstance(response.created_at, datetime)
@@ -183,7 +183,7 @@ async def test_delete_room_ok(actor_fn: ActorFn):
         capacity=5,
         occupied_ids={person1, person2},
         creator_id=owner,
-        editor_ids={owner},
+        editors_ids={owner},
         gender_restriction=None,
     )
 
@@ -196,7 +196,7 @@ async def test_delete_room_ok(actor_fn: ActorFn):
     assert response.capacity == data.capacity
     assert response.occupied_ids == data.occupied_ids
     assert response.creator_id == owner
-    assert response.editor_ids == {owner}
+    assert response.editors_ids == {owner}
     assert response.gender_restriction is None
     assert isinstance(response.id, domain.ObjectID)
     assert isinstance(response.created_at, datetime)

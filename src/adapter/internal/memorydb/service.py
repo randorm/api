@@ -145,18 +145,18 @@ class MemoryDBAdapter(
                 document.state = source.state  # type: ignore
 
                 data = document.model_dump(by_alias=True)
-                data["participant_ids"] = set()
+                data["participants_ids"] = set()
                 document = domain.AllocationResolver.validate_python(
                     data, from_attributes=True
                 )
 
-        if source.form_field_ids is not None:
-            document.form_field_ids = source.form_field_ids
+        if source.form_fields_ids is not None:
+            document.form_fields_ids = source.form_fields_ids
 
-        if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+        if source.editors_ids is not None:
+            document.editors_ids = source.editors_ids
 
-        if source.participant_ids is not None:
+        if source.participants_ids is not None:
             if document.state not in [
                 AllocationState.CREATED,
                 AllocationState.OPEN,
@@ -167,7 +167,7 @@ class MemoryDBAdapter(
                 raise exception.UpdateAllocationException(
                     f"can not change participant ids for document type {type(document)}"
                 )
-            document.participant_ids = source.participant_ids  # type: ignore
+            document.participants_ids = source.participants_ids  # type: ignore
 
         return document
 
@@ -315,8 +315,8 @@ class MemoryDBAdapter(
         if source.respondent_count is not None:
             document.respondent_count = source.respondent_count
 
-        if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+        if source.editors_ids is not None:
+            document.editors_ids = source.editors_ids
 
     def __update_text_form_field(
         self,
@@ -794,8 +794,8 @@ class MemoryDBAdapter(
         if source.gender_restriction is not None:
             document.gender_restriction = source.gender_restriction
 
-        if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+        if source.editors_ids is not None:
+            document.editors_ids = source.editors_ids
 
         return document
 

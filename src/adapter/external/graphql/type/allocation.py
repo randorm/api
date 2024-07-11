@@ -1,8 +1,8 @@
-from typing import Annotated, Literal
-
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.tool import resolver
+from src.adapter.external.graphql.tool.permission import DefaultPermissions
 from src.domain.model.allocation import (
     AllocationState,
     BaseAllocation,
@@ -30,72 +30,98 @@ class BaseAllocationType:
     state: AllocationStateType  # type: ignore
 
     form_fields_ids: list[scalar.ObjectID]
-    # form_fields: sb.Private[list[FormFieldType]]
+    form_fields: list[resolver.LazyFormFieldType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_form_fields,
+    )
 
     creator_id: scalar.ObjectID
-    # creator: sb.Private[UserType]
+    creator: resolver.LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_creator,
+    )
 
     editors_ids: list[scalar.ObjectID]
-    # editors: sb.Private[list[UserType]]
+    editors: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_editors,
+    )
 
 
 @sb.experimental.pydantic.type(model=CreatingAllocation)
 class CreatingAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.CREATING] = AllocationStateType.CREATING
+    state: AllocationStateType = sb.field(default=AllocationStateType.CREATING)  # type: ignore
 
 
 @sb.experimental.pydantic.type(model=CreatedAllocation)
 class CreatedAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.CREATED] = AllocationStateType.CREATED
+    state: AllocationStateType = sb.field(default=AllocationStateType.CREATED)  # type: ignore
 
     participants_ids: list[scalar.ObjectID]
-    # participants: sb.Private[list[UserType]]
+    participants: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participants,
+    )
 
 
 @sb.experimental.pydantic.type(model=OpenAllocation)
 class OpenAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.OPEN] = AllocationStateType.OPEN
+    state: AllocationStateType = sb.field(default=AllocationStateType.OPEN)  # type: ignore
 
     participants_ids: list[scalar.ObjectID]
-    # participants: sb.Private[list[UserType]]
+    participants: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participants,
+    )
 
 
 @sb.experimental.pydantic.type(model=RoomingAllocation)
 class RoomingAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.ROOMING] = AllocationStateType.ROOMING
+    state: AllocationStateType = sb.field(default=AllocationStateType.ROOMING)  # type: ignore
 
     participants_ids: list[scalar.ObjectID]
-    # participants: sb.Private[list[UserType]]
+    participants: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participants,
+    )
 
 
 @sb.experimental.pydantic.type(model=RoomedAllocation)
 class RoomedAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.ROOMED] = AllocationStateType.ROOMED
+    state: AllocationStateType = sb.field(default=AllocationStateType.ROOMED)  # type: ignore
 
     participants_ids: list[scalar.ObjectID]
-    # participants: sb.Private[list[UserType]]
+    participants: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participants,
+    )
 
 
 @sb.experimental.pydantic.type(model=ClosedAllocation)
 class ClosedAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.CLOSED] = AllocationStateType.CLOSED
+    state: AllocationStateType = sb.field(default=AllocationStateType.CLOSED)  # type: ignore
 
     participants_ids: list[scalar.ObjectID]
-    # participants: sb.Private[list[UserType]]
+    participants: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participants,
+    )
 
 
 @sb.experimental.pydantic.type(model=FailedAllocation)
 class FailedAllocationType(BaseAllocationType):
-    state: Literal[AllocationStateType.FAILED] = AllocationStateType.FAILED
+    state: AllocationStateType = sb.field(default=AllocationStateType.FAILED)  # type: ignore
 
 
-AllocationType = Annotated[
-    CreatingAllocationType
-    | CreatedAllocationType
-    | OpenAllocationType
-    | RoomingAllocationType
-    | RoomedAllocationType
-    | ClosedAllocationType
-    | FailedAllocationType,
-    sb.union("AllocationType"),
-]
+AllocationType = sb.union(
+    "AllocationType",
+    types=(
+        CreatingAllocationType,
+        CreatedAllocationType,
+        OpenAllocationType,
+        RoomingAllocationType,
+        RoomedAllocationType,
+        ClosedAllocationType,
+        FailedAllocationType,
+    ),
+)

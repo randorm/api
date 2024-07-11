@@ -44,7 +44,7 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     question: str | None = Field(default=None)
     question_entities: set[FormatEntity] | None = Field(default=None)
     respondent_count: int | None = Field(default=None)
-    editor_ids: set[ObjectID] | None = Field(default=None)
+    editors_ids: set[ObjectID] | None = Field(default=None)
     re: Pattern[str] | None = Field(default=None)
     ex: str | None = Field(default=None)
     # exclude
@@ -65,7 +65,7 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
     question: str | None = Field(default=None)
     question_entities: set[FormatEntity] | None = Field(default=None)
     respondent_count: int | None = Field(default=None)
-    editor_ids: set[ObjectID] | None = Field(default=None)
+    editors_ids: set[ObjectID] | None = Field(default=None)
     options: list[UpdateChoiceOption | None] | None = Field(default=None)
     multiple: bool | None = Field(default=None)
     # exclude

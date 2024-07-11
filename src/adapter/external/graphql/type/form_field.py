@@ -1,5 +1,3 @@
-from typing import Annotated, Literal
-
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
@@ -33,7 +31,7 @@ class BaseFormFieldType:
     frozen: sb.auto
 
     question: sb.auto
-    question_entities: list[FormatEntityType]
+    question_entities: list[FormatEntityType]  # type: ignore
 
     respondent_count: sb.auto
 
@@ -46,9 +44,9 @@ class BaseFormFieldType:
 
 @sb.experimental.pydantic.type(model=TextFormField)
 class TextFormFieldType(BaseFormFieldType):
-    kind: Literal[FormFieldKindType.TEXT] = FormFieldKindType.TEXT
+    kind: FormFieldKindType = sb.field(default=FormFieldKindType.TEXT)  # type: ignore
 
-    re: sb.auto
+    re: str
     ex: sb.auto
 
 
@@ -60,16 +58,13 @@ class ChoiceOptionType:
 
 @sb.experimental.pydantic.type(model=ChoiceFormField)
 class ChoiceFormFieldType(BaseFormFieldType):
-    kind: Literal[FormFieldKindType.CHOICE] = FormFieldKindType.CHOICE
+    kind: FormFieldKindType = sb.field(default=FormFieldKindType.CHOICE)  # type: ignore
 
     options: list[ChoiceOptionType]
     multiple: sb.auto
 
 
-type FormFieldType = Annotated[
-    TextFormFieldType | ChoiceFormFieldType,
-    sb.union("FieldType"),
-]
+FormFieldType = sb.union("FieldType", types=(TextFormFieldType, ChoiceFormFieldType))
 
 
 @sb.experimental.pydantic.interface(model=BaseAnswer)
@@ -88,20 +83,17 @@ class BaseAnswerType:
 
 @sb.experimental.pydantic.type(model=TextAnswer)
 class TextAnswerType(BaseAnswerType):
-    kind: Literal[FormFieldKindType.TEXT] = FormFieldKindType.TEXT
+    kind: FormFieldKindType = sb.field(default=FormFieldKindType.TEXT)  # type: ignore
     text: sb.auto
-    text_entities: list[FormatEntityType]
+    text_entities: list[FormatEntityType]  # type: ignore
 
 
 @sb.experimental.pydantic.type(model=ChoiceAnswer)
 class ChoiceAnswerType(BaseAnswerType):
-    kind: Literal[FormFieldKindType.CHOICE] = FormFieldKindType.CHOICE
+    kind: FormFieldKindType = sb.field(default=FormFieldKindType.CHOICE)  # type: ignore
 
     option_indexes: list[int]
     options: sb.Private[list[ChoiceOptionType]]
 
 
-AnswerType = Annotated[
-    TextAnswerType | ChoiceAnswerType,
-    sb.union("AnswerType"),
-]
+AnswerType = sb.union("AnswerType", types=(TextAnswerType, ChoiceAnswerType))

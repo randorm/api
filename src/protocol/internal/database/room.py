@@ -23,7 +23,7 @@ class UpdateRoom(ExcludeFieldMixin, Room):
     capacity: int | None = Field(default=None)
     occupied: set[ObjectID] | None = Field(default=None)
     gender_restriction: Gender | None = Field(default=None)
-    editor_ids: set[ObjectID] | None = Field(default=None)
+    editors_ids: set[ObjectID] | None = Field(default=None)
     # exclude
     creator_id: Literal[None] = None
 

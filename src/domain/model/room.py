@@ -19,4 +19,4 @@ class Room(pydantic.BaseModel):
     gender_restriction: Gender | None
 
     creator_id: ObjectID
-    editor_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    editors_ids: set[ObjectID] = pydantic.Field(default_factory=set)

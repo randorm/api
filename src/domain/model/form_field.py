@@ -32,7 +32,7 @@ class BaseFormField(pydantic.BaseModel):
     respondent_count: int = pydantic.Field(default=0, ge=0)
 
     creator_id: ObjectID
-    editor_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    editors_ids: set[ObjectID] = pydantic.Field(default_factory=set)
 
 
 class TextFormField(BaseFormField):

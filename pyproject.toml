@@ -22,17 +22,19 @@ pyjwt = "^2.8.0"
 python-dotenv = "^1.0.1"
 aiohttp-asgi = "^0.5.2"
 starlette = "^0.37.2"
+loguru = "^0.7.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"     # formatter
-ruff = "^0.4.8"       # linter
-isort = "^5.13.2"     # imports sorter
-ipython = "^8.25.0"   # interactive shell
-bandit = "^1.7.9"     # security checker
+black = "^24.4.2"                                                        # formatter
+ruff = "^0.4.8"                                                          # linter
+isort = "^5.13.2"                                                        # imports sorter
+ipython = "^8.25.0"                                                      # interactive shell
+bandit = "^1.7.9"                                                        # security checker
 pre-commit = "^3.7.1"
 mypy = "^1.10.0"
 pyright = "^1.1.371"
 icecream = "^2.1.3"
+strawberry-graphql = { extras = ["debug-server"], version = "^0.235.2" }
 
 
 [tool.poetry.group.test.dependencies]

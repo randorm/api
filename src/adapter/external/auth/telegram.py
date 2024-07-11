@@ -158,11 +158,7 @@ class TelegramOauthAdapter(OauthProtocol):
             user = await self.__service.read(ReadUser(_id=dto.id))
         except (ValidationError, AttributeError) as e:
             raise auth_exception.InvalidCredentialsException("invalid data type") from e
-        except database_exception.ReflectUserException as e:
-            raise auth_exception.InvalidCredentialsException(
-                "failed to reflect user data to create user"
-            ) from e
-        except database_exception.ReadUserException as e:
+        except service_exception.ReadUserException as e:
             raise auth_exception.UserNotFoundException("user not found") from e
         else:
             return user

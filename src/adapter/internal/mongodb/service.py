@@ -166,7 +166,7 @@ class MongoDBAdapter(
 
             case AllocationState.CREATING | AllocationState.FAILED:
                 data["state"] = source.state
-                del data["participant_ids"]
+                del data["participants_ids"]
 
             case (
                 AllocationState.CREATED
@@ -176,15 +176,15 @@ class MongoDBAdapter(
                 | AllocationState.CLOSED
             ):
                 data["state"] = source.state
-                data["participant_ids"] = set()
+                data["participants_ids"] = set()
 
-        if source.form_field_ids is not None:
-            data["form_field_ids"] = source.form_field_ids
+        if source.form_fields_ids is not None:
+            data["form_fields_ids"] = source.form_fields_ids
 
-        if source.editor_ids is not None:
-            data["editor_ids"] = source.editor_ids
+        if source.editors_ids is not None:
+            data["editors_ids"] = source.editors_ids
 
-        if source.participant_ids is not None:
+        if source.participants_ids is not None:
             if data["state"] not in [
                 AllocationState.CREATED,
                 AllocationState.OPEN,
@@ -196,7 +196,7 @@ class MongoDBAdapter(
                     f"can not change participant ids for document state {data['state']}"
                 )
 
-            data["participant_ids"] = source.participant_ids
+            data["participants_ids"] = source.participants_ids
 
         return models.AllocationResolver.validate_python(data, from_attributes=True)
 
@@ -343,8 +343,8 @@ class MongoDBAdapter(
         if source.respondent_count is not None:
             document.respondent_count = source.respondent_count
 
-        if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+        if source.editors_ids is not None:
+            document.editors_ids = source.editors_ids
 
     def __update_text_form_field(
         self,
@@ -792,8 +792,8 @@ class MongoDBAdapter(
         if source.gender_restriction is not None:
             document.gender_restriction = source.gender_restriction
 
-        if source.editor_ids is not None:
-            document.editor_ids = source.editor_ids
+        if source.editors_ids is not None:
+            document.editors_ids = source.editors_ids
 
         return document
 

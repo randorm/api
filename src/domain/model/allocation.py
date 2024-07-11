@@ -27,10 +27,10 @@ class BaseAllocation(pydantic.BaseModel):
     due: datetime.datetime | None
     state: AllocationState
 
-    form_field_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    form_fields_ids: set[ObjectID] = pydantic.Field(default_factory=set)
 
     creator_id: ObjectID
-    editor_ids: set[ObjectID] = pydantic.Field(default_factory=set)
+    editors_ids: set[ObjectID] = pydantic.Field(default_factory=set)
 
 
 class CreatingAllocation(BaseAllocation):
@@ -39,27 +39,27 @@ class CreatingAllocation(BaseAllocation):
 
 class CreatedAllocation(BaseAllocation):
     state: Literal[AllocationState.CREATED] = AllocationState.CREATED
-    participant_ids: set[ObjectID]
+    participants_ids: set[ObjectID]
 
 
 class OpenAllocation(BaseAllocation):
     state: Literal[AllocationState.OPEN] = AllocationState.OPEN
-    participant_ids: set[ObjectID]
+    participants_ids: set[ObjectID]
 
 
 class RoomingAllocation(BaseAllocation):
     state: Literal[AllocationState.ROOMING] = AllocationState.ROOMING
-    participant_ids: set[ObjectID]
+    participants_ids: set[ObjectID]
 
 
 class RoomedAllocation(BaseAllocation):
     state: Literal[AllocationState.ROOMED] = AllocationState.ROOMED
-    participant_ids: set[ObjectID]
+    participants_ids: set[ObjectID]
 
 
 class ClosedAllocation(BaseAllocation):
     state: Literal[AllocationState.CLOSED] = AllocationState.CLOSED
-    participant_ids: set[ObjectID]
+    participants_ids: set[ObjectID]
 
 
 class FailedAllocation(BaseAllocation):

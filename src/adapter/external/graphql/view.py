@@ -2,7 +2,7 @@ import strawberry as sb
 from strawberry.asgi import GraphQL
 from strawberry.dataloader import DataLoader
 
-from src.adapter.external.graphql.query import GRAPHQL_QUERY
+from src.adapter.external.graphql.query import Query
 from src.adapter.external.graphql.tool.context import Context, DataContext
 from src.adapter.external.graphql.type.allocation import AllocationType
 from src.adapter.external.graphql.type.form_field import FormFieldType
@@ -24,7 +24,7 @@ from src.service.preference import PreferenceService
 from src.service.room import RoomService
 from src.service.user import UserService
 
-GRAPHQL_SCHEMA = sb.Schema(query=GRAPHQL_QUERY)
+GRAPHQL_SCHEMA = sb.Schema(query=Query)
 
 
 class RandormGraphQL(GraphQL):
