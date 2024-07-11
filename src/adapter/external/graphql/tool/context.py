@@ -26,9 +26,9 @@ class DataContext[LoaderType, ServiceType]:
 
 @dataclass
 class Context:
-    allocation: DataContext[AllocationType, AllocationService]
-    form_field: DataContext[FormFieldType, FormFieldService]
-    participant: DataContext[ParticipantType, ParticipantService]
+    allocation: DataContext[AllocationType, AllocationService]  # type: ignore
+    form_field: DataContext[FormFieldType, FormFieldService]  # type: ignore
+    participant: DataContext[ParticipantType, ParticipantService]  # type: ignore
     preference: DataContext[PreferenceType, PreferenceService]
     room: DataContext[RoomType, RoomService]
     user: DataContext[UserType, UserService]

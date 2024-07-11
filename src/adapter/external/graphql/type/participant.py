@@ -1,7 +1,8 @@
-from typing import Annotated, Literal
+from typing import Literal
 
 import strawberry as sb
 
+import src.domain.model.participant as domain
 from src.adapter.external.graphql import scalar
 from src.domain.model.participant import (
     ActiveParticipant,
@@ -63,10 +64,24 @@ class AllocatedParticipantType(BaseParticipantType):
     # room: sb.Private[RoomType]
 
 
-ParticipantType = Annotated[
-    CreatingParticipantType,
-    CreatedParticipantType,
-    ActiveParticipantType,
-    AllocatedParticipantType,
-    sb.union("ParticipantType"),
-]
+ParticipantType = sb.union(
+    "ParticipantType",
+    types=(
+        CreatingParticipantType,
+        CreatedParticipantType,
+        ActiveParticipantType,
+        AllocatedParticipantType,
+    ),
+)
+
+
+def domain_to_participant(data: domain.Participant) -> ParticipantType:  # type: ignore
+    match data:
+        case domain.CreatingParticipant():
+            return CreatingParticipantType.from_pydantic(data)
+        case domain.CreatedParticipant():
+            return CreatedParticipantType.from_pydantic(data)
+        case domain.ActiveParticipant():
+            return ActiveParticipantType.from_pydantic(data)
+        case domain.AllocatedParticipant():
+            return AllocatedParticipantType.from_pydantic(data)

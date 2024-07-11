@@ -1,5 +1,6 @@
 import strawberry as sb
 
+import src.domain.model.form_field as domain
 from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.type.format_entity import FormatEntityType
 from src.domain.model.form_field import (
@@ -65,6 +66,14 @@ class ChoiceFormFieldType(BaseFormFieldType):
 
 
 FormFieldType = sb.union("FieldType", types=(TextFormFieldType, ChoiceFormFieldType))
+
+
+def domain_to_form_field(data: domain.FormField) -> FormFieldType:  # type: ignore
+    match data:
+        case domain.TextFormField():
+            return TextFormFieldType.from_pydantic(data)
+        case domain.ChoiceFormField():
+            return ChoiceFormFieldType.from_pydantic(data)
 
 
 @sb.experimental.pydantic.interface(model=BaseAnswer)

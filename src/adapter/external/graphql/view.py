@@ -1,12 +1,21 @@
 import strawberry as sb
 from strawberry.asgi import GraphQL
-from strawberry.dataloader import DataLoader
+from strawberry.dataloader import DataLoader, DefaultCache
 
 from src.adapter.external.graphql.query import Query
 from src.adapter.external.graphql.tool.context import Context, DataContext
-from src.adapter.external.graphql.type.allocation import AllocationType
-from src.adapter.external.graphql.type.form_field import FormFieldType
-from src.adapter.external.graphql.type.participant import ParticipantType
+from src.adapter.external.graphql.type.allocation import (
+    AllocationType,
+    domain_to_allocation,
+)
+from src.adapter.external.graphql.type.form_field import (
+    FormFieldType,
+    domain_to_form_field,
+)
+from src.adapter.external.graphql.type.participant import (
+    ParticipantType,
+    domain_to_participant,
+)
 from src.adapter.external.graphql.type.preference import PreferenceType
 from src.adapter.external.graphql.type.room import RoomType
 from src.adapter.external.graphql.type.user import UserType
@@ -25,6 +34,12 @@ from src.service.room import RoomService
 from src.service.user import UserService
 
 GRAPHQL_SCHEMA = sb.Schema(query=Query)
+
+
+class CustomDefaultCache[K, T](DefaultCache[K, T]):
+    def delete(self, key: K) -> None:
+        if key in self.cache_map:
+            del self.cache_map[key]
 
 
 class RandormGraphQL(GraphQL):
@@ -49,27 +64,51 @@ class RandormGraphQL(GraphQL):
     async def get_context(self, request, response):
         return Context(
             user=DataContext(
-                loader=DataLoader(load_fn=self.__load_users),
+                loader=DataLoader(
+                    load_fn=self.__load_users,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._user_service,
             ),
             allocation=DataContext(
-                loader=DataLoader(load_fn=self.__load_allocations),
+                loader=DataLoader(
+                    load_fn=self.__load_allocations,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._allocation_service,
             ),
             form_field=DataContext(
-                loader=DataLoader(load_fn=self.__load_form_fields),
+                loader=DataLoader(
+                    load_fn=self.__load_form_fields,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._form_field_service,
             ),
             participant=DataContext(
-                loader=DataLoader(load_fn=self.__load_participants),
+                loader=DataLoader(
+                    load_fn=self.__load_participants,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._participant_service,
             ),
             preference=DataContext(
-                loader=DataLoader(load_fn=self.__load_preferences),
+                loader=DataLoader(
+                    load_fn=self.__load_preferences,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._preference_service,
             ),
             room=DataContext(
-                loader=DataLoader(load_fn=self.__load_rooms),
+                loader=DataLoader(
+                    load_fn=self.__load_rooms,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
                 service=self._room_service,
             ),
         )
@@ -80,25 +119,25 @@ class RandormGraphQL(GraphQL):
             for id in ids
         ]
 
-    async def __load_allocations(self, ids: list[ObjectID]) -> list[AllocationType]:
+    async def __load_allocations(self, ids: list[ObjectID]) -> list[AllocationType]:  # type: ignore
         return [
-            AllocationType.from_pydantic(
+            domain_to_allocation(
                 await self._allocation_service.read(ReadAllocation(_id=id))
             )
             for id in ids
         ]
 
-    async def __load_form_fields(self, ids: list[ObjectID]) -> list[FormFieldType]:
+    async def __load_form_fields(self, ids: list[ObjectID]) -> list[FormFieldType]:  # type: ignore
         return [
-            FormFieldType.from_pydantic(
+            domain_to_form_field(
                 await self._form_field_service.read(ReadFormField(_id=id))
             )
             for id in ids
         ]
 
-    async def __load_participants(self, ids: list[ObjectID]) -> list[ParticipantType]:
+    async def __load_participants(self, ids: list[ObjectID]) -> list[ParticipantType]:  # type: ignore
         return [
-            ParticipantType.from_pydantic(
+            domain_to_participant(
                 await self._participant_service.read(ReadParticipant(_id=id))
             )
             for id in ids

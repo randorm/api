@@ -1,5 +1,6 @@
 import strawberry as sb
 
+import src.domain.model.allocation as domain
 from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.tool import resolver
 from src.adapter.external.graphql.tool.permission import DefaultPermissions
@@ -125,3 +126,21 @@ AllocationType = sb.union(
         FailedAllocationType,
     ),
 )
+
+
+def domain_to_allocation(data: domain.Allocation) -> AllocationType:  # type: ignore
+    match data:
+        case domain.CreatingAllocation():
+            return CreatingAllocationType.from_pydantic(data)
+        case domain.CreatedAllocation():
+            return CreatedAllocationType.from_pydantic(data)
+        case domain.OpenAllocation():
+            return OpenAllocationType.from_pydantic(data)
+        case domain.RoomingAllocation():
+            return RoomingAllocationType.from_pydantic(data)
+        case domain.RoomedAllocation():
+            return RoomedAllocationType.from_pydantic(data)
+        case domain.ClosedAllocation():
+            return ClosedAllocationType.from_pydantic(data)
+        case domain.FailedAllocation():
+            return FailedAllocationType.from_pydantic(data)
