@@ -41,7 +41,7 @@ class UpdateProfile(Profile):
 
 
 class UpdateUser(ExcludeFieldMixin, User):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     # optional fields
     views: int | None = Field(default=None)
     profile: UpdateProfile | None = Field(default=None)

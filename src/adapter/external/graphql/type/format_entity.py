@@ -67,7 +67,7 @@ class CodeEntityType(BaseFormatEntityType):
     language: sb.auto
 
 
-type FormatEntityType = Annotated[
+FormatEntityType = Annotated[
     SpoilerEntityType
     | BoldEntityType
     | ItalicEntityType

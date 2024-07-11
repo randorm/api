@@ -1,12 +1,37 @@
-from typing import Any
+from dataclasses import dataclass
 
-import pydantic
+import strawberry as sb
 from strawberry.dataloader import DataLoader
 
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.type.allocation import AllocationType
+from src.adapter.external.graphql.type.form_field import FormFieldType
+from src.adapter.external.graphql.type.participant import ParticipantType
+from src.adapter.external.graphql.type.preference import PreferenceType
+from src.adapter.external.graphql.type.room import RoomType
+from src.adapter.external.graphql.type.user import UserType
+from src.service.allocation import AllocationService
+from src.service.form_field import FormFieldService
+from src.service.participant import ParticipantService
+from src.service.preference import PreferenceService
+from src.service.room import RoomService
+from src.service.user import UserService
 
 
-class Context(pydantic.BaseModel):
-    loaders: DataLoader[scalar.ObjectID, Any]
+@dataclass
+class DataContext[LoaderType, ServiceType]:
+    loader: DataLoader[scalar.ObjectID, LoaderType]
+    service: ServiceType
 
-    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+
+@dataclass
+class Context:
+    allocation: DataContext[AllocationType, AllocationService]
+    form_field: DataContext[FormFieldType, FormFieldService]
+    participant: DataContext[ParticipantType, ParticipantService]
+    preference: DataContext[PreferenceType, PreferenceService]
+    room: DataContext[RoomType, RoomService]
+    user: DataContext[UserType, UserService]
+
+
+type Info[T] = sb.Info[Context, T]

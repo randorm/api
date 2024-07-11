@@ -564,9 +564,9 @@ class MemoryDBAdapter(
             match user:
                 case proto.FindUsersByTid():
                     documents = [
-                        user
-                        for user in self._user_collection.values()
-                        if user.telegram_id == user.telegram_id
+                        item
+                        for item in self._user_collection.values()
+                        if user.telegram_id == item.telegram_id
                     ]
 
                 case proto.FindUsersByProfileUsername():

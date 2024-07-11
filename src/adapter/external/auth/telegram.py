@@ -106,7 +106,7 @@ class TelegramOauthAdapter(OauthProtocol):
             )
             self.__check_hash(request)
 
-            user = await self.__service.create_user(
+            user = await self.__service.create(
                 CreateUser(telegram_id=request.id, profile=request.profile)
             )
         except (ValidationError, database_exception.ReflectUserException) as e:
@@ -129,7 +129,7 @@ class TelegramOauthAdapter(OauthProtocol):
             request = TgOauthLoginCallback.model_validate(data, from_attributes=True)
             self.__check_hash(request)
 
-            user = await self.__service.find_user_by_tid(request.id)
+            user = await self.__service.find_by_tid(request.id)
         except (ValidationError, database_exception.ReflectUserException) as e:
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
@@ -155,7 +155,7 @@ class TelegramOauthAdapter(OauthProtocol):
                     "invalid data type"
                 ) from e
 
-            user = await self.__service.read_user(ReadUser(_id=dto.id))
+            user = await self.__service.read(ReadUser(_id=dto.id))
         except (ValidationError, AttributeError) as e:
             raise auth_exception.InvalidCredentialsException("invalid data type") from e
         except database_exception.ReflectUserException as e:

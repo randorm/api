@@ -23,8 +23,8 @@ class Gender(StrEnum):
 
 class Profile(pydantic.BaseModel):
     first_name: str = pydantic.Field(min_length=1)
-    last_name: str | None = pydantic.Field(min_length=1)
-    username: str | None = pydantic.Field(min_length=1)
+    last_name: str | None = pydantic.Field(default=None, min_length=1)
+    username: str | None = pydantic.Field(default=None, min_length=1)
     language_code: LanguageCode
     gender: Gender
     birthdate: datetime.date

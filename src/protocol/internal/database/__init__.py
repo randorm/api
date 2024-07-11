@@ -7,7 +7,7 @@ from src.protocol.internal.database import (
     allocation,
     form_field,
     mixin,
-    participants,
+    participant,
     room,
     user,
 )
@@ -46,7 +46,7 @@ from src.protocol.internal.database.form_field import (
     UpdateTextFormField,
 )
 from src.protocol.internal.database.mixin import ExcludeFieldMixin
-from src.protocol.internal.database.participants import (
+from src.protocol.internal.database.participant import (
     CreateActiveParticipant,
     CreateAllocatedParticipant,
     CreateCreatedParticipant,

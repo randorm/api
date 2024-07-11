@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 import src.domain.exception.database as exception
 import src.domain.model as domain
-import src.protocol.internal.database.participants as proto
+import src.protocol.internal.database.participant as proto
 from src.adapter.internal.memorydb.service import MemoryDBAdapter
 from src.adapter.internal.mongodb.service import MongoDBAdapter
 

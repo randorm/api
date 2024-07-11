@@ -1,11 +1,8 @@
-from typing import Literal
+from typing import Annotated, Literal
 
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
-from src.adapter.external.graphql.type.allocation import AllocationType
-from src.adapter.external.graphql.type.room import RoomType
-from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.participant import (
     ActiveParticipant,
     AllocatedParticipant,
@@ -20,27 +17,27 @@ ParticipantStateType = sb.enum(ParticipantState)
 
 @sb.experimental.pydantic.interface(model=BaseParticipant)
 class BaseParticipantType:
-    id: sb.auto
+    id: scalar.ObjectID
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
 
-    allocation_id: sb.auto
-    allocation: sb.Private[AllocationType]
+    allocation_id: scalar.ObjectID
+    # allocation: sb.Private[AllocationType]
 
-    user_id: sb.auto
-    user: sb.Private[UserType]
+    user_id: scalar.ObjectID
+    # user: sb.Private[UserType]
 
     state: ParticipantStateType  # type: ignore
 
     viewed_ids: list[scalar.ObjectID]
-    viewed: sb.Private[list[UserType]]
+    # viewed: sb.Private[list[UserType]]
 
     subscription_ids: list[scalar.ObjectID]
-    subscriptions: sb.Private[list[UserType]]
+    # subscriptions: sb.Private[list[UserType]]
 
     subscribers_ids: list[scalar.ObjectID]
-    subscribers: sb.Private[list[UserType]]
+    # subscribers: sb.Private[list[UserType]]
 
 
 @sb.experimental.pydantic.type(model=CreatingParticipant)
@@ -63,4 +60,13 @@ class AllocatedParticipantType(BaseParticipantType):
     state: Literal[ParticipantStateType.ALLOCATED] = ParticipantStateType.ALLOCATED
 
     room_id: sb.auto
-    room: sb.Private[RoomType]
+    # room: sb.Private[RoomType]
+
+
+ParticipantType = Annotated[
+    CreatingParticipantType,
+    CreatedParticipantType,
+    ActiveParticipantType,
+    AllocatedParticipantType,
+    sb.union("ParticipantType"),
+]
