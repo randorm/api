@@ -4,6 +4,8 @@ import strawberry as sb
 
 import src.domain.model.participant as domain
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.tool import resolver
+from src.adapter.external.graphql.tool.permission import DefaultPermissions
 from src.domain.model.participant import (
     ActiveParticipant,
     AllocatedParticipant,
@@ -24,21 +26,36 @@ class BaseParticipantType:
     deleted_at: sb.auto
 
     allocation_id: scalar.ObjectID
-    # allocation: sb.Private[AllocationType]
+    allocation: resolver.LazyAllocationType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_allocation,
+    )
 
     user_id: scalar.ObjectID
-    # user: sb.Private[UserType]
+    user: resolver.LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_user,
+    )
 
     state: ParticipantStateType  # type: ignore
 
     viewed_ids: list[scalar.ObjectID]
-    # viewed: sb.Private[list[UserType]]
+    viewed: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_viewed,
+    )
 
     subscription_ids: list[scalar.ObjectID]
-    # subscriptions: sb.Private[list[UserType]]
+    subscriptions: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_subscriptions,
+    )
 
     subscribers_ids: list[scalar.ObjectID]
-    # subscribers: sb.Private[list[UserType]]
+    subscribers: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_subscribers,
+    )
 
 
 @sb.experimental.pydantic.type(model=CreatingParticipant)
@@ -61,7 +78,10 @@ class AllocatedParticipantType(BaseParticipantType):
     state: Literal[ParticipantStateType.ALLOCATED] = ParticipantStateType.ALLOCATED
 
     room_id: sb.auto
-    # room: sb.Private[RoomType]
+    room: resolver.LazyRoomType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_room,
+    )
 
 
 ParticipantType = sb.union(

@@ -2,6 +2,8 @@ import strawberry as sb
 
 import src.domain.model.form_field as domain
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.tool import resolver
+from src.adapter.external.graphql.tool.permission import DefaultPermissions
 from src.adapter.external.graphql.type.format_entity import FormatEntityType
 from src.domain.model.form_field import (
     BaseAnswer,
@@ -37,10 +39,16 @@ class BaseFormFieldType:
     respondent_count: sb.auto
 
     creator_id: scalar.ObjectID
-    # creator: sb.Private[UserType]
+    creator: resolver.LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_creator,
+    )
 
     editors_ids: list[scalar.ObjectID]
-    # editors: sb.Private[list[UserType]]
+    editors: list[resolver.LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_editors,
+    )
 
 
 @sb.experimental.pydantic.type(model=TextFormField)
@@ -87,7 +95,10 @@ class BaseAnswerType:
     field_kind: FormFieldKindType  # type: ignore
 
     respondent_id: scalar.ObjectID
-    # respondent: sb.Private[UserType]
+    respondent: resolver.LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_respondent,
+    )
 
 
 @sb.experimental.pydantic.type(model=TextAnswer)

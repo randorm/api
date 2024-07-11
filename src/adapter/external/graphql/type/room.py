@@ -1,6 +1,9 @@
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.tool import resolver
+from src.adapter.external.graphql.tool.permission import DefaultPermissions
+from src.adapter.external.graphql.tool.resolver import LazyUserType
 from src.adapter.external.graphql.type.user import GenderType
 from src.domain.model.room import Room
 
@@ -20,7 +23,13 @@ class RoomType:
     # occupied: sb.Private[list[UserType]]
 
     creator_id: scalar.ObjectID
-    # creator: sb.Private[UserType]
+    creator: LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_creator,
+    )
 
     editors_ids: list[scalar.ObjectID]
-    # editors: sb.Private[list[UserType]]
+    editors: list[LazyUserType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_editors,
+    )

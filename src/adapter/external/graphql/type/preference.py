@@ -1,6 +1,9 @@
 import strawberry as sb
 
 from src.adapter.external.graphql import scalar
+from src.adapter.external.graphql.tool import resolver
+from src.adapter.external.graphql.tool.permission import DefaultPermissions
+from src.adapter.external.graphql.tool.resolver import LazyUserType
 from src.domain.model.preference import Preference, PreferenceKind, PreferenceStatus
 
 PreferenceKindType = sb.enum(PreferenceKind)
@@ -18,7 +21,13 @@ class PreferenceType:
     status: PreferenceStatusType  # type: ignore
 
     user_id: scalar.ObjectID
-    # user: sb.Private[UserType]
+    user: LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_user,
+    )
 
     target_id: scalar.ObjectID
-    # target: sb.Private[UserType]
+    target: LazyUserType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_target,
+    )
