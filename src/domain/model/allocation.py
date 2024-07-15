@@ -24,7 +24,7 @@ class BaseAllocation(pydantic.BaseModel):
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
 
     name: str = pydantic.Field(min_length=1)
-    due: datetime.datetime | None
+    due: datetime.datetime | None = pydantic.Field(default=None)
     state: AllocationState
 
     form_fields_ids: set[ObjectID] = pydantic.Field(default_factory=set)

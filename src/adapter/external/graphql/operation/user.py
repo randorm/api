@@ -24,7 +24,7 @@ class UserQuery:
         return await info.context.user.loader.load(id)
 
     @sb.mutation(permission_classes=[DefaultPermissions])
-    async def create_user(
+    async def new_user(
         root: UserQuery,
         info: Info[UserQuery],
         telegram_id: int,
