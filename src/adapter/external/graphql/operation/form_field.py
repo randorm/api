@@ -115,7 +115,7 @@ class FormFieldQuery:
     ) -> graphql.FormFieldType:  # type: ignore
         return await info.context.form_field.loader.load(id)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def new_text_form_field(
         root: FormFieldQuery,
         info: Info[FormFieldQuery],
@@ -148,7 +148,7 @@ class FormFieldQuery:
         data = await info.context.form_field.service.create(request)
         return graphql.domain_to_form_field(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def new_choice_form_field(
         root: FormFieldQuery,
         info: Info[FormFieldQuery],
@@ -181,7 +181,7 @@ class FormFieldQuery:
         data = await info.context.form_field.service.create(request)
         return graphql.domain_to_form_field(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def update_text_form_field(
         root: FormFieldQuery,
         info: Info[FormFieldQuery],
@@ -213,7 +213,7 @@ class FormFieldQuery:
         info.context.form_field.loader.clear(id)
         return graphql.domain_to_form_field(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def update_choice_form_field(
         root: FormFieldQuery,
         info: Info[FormFieldQuery],
@@ -245,7 +245,7 @@ class FormFieldQuery:
         info.context.form_field.loader.clear(id)
         return graphql.domain_to_form_field(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_form_field(
         root: FormFieldQuery, info: Info[FormFieldQuery], id: scalar.ObjectID
     ) -> graphql.FormFieldType:  # type: ignore

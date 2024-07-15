@@ -1,5 +1,3 @@
-from typing import Literal
-
 import strawberry as sb
 
 import src.domain.model.participant as domain
@@ -60,24 +58,24 @@ class BaseParticipantType:
 
 @sb.experimental.pydantic.type(model=CreatingParticipant)
 class CreatingParticipantType(BaseParticipantType):
-    state: Literal[ParticipantStateType.CREATING] = ParticipantStateType.CREATING
+    state: ParticipantStateType = ParticipantStateType.CREATING  # type: ignore
 
 
 @sb.experimental.pydantic.type(model=CreatedParticipant)
 class CreatedParticipantType(BaseParticipantType):
-    state: Literal[ParticipantStateType.CREATED] = ParticipantStateType.CREATED
+    state: ParticipantStateType = ParticipantStateType.CREATED  # type: ignore
 
 
 @sb.experimental.pydantic.type(model=ActiveParticipant)
 class ActiveParticipantType(BaseParticipantType):
-    state: Literal[ParticipantStateType.ACTIVE] = ParticipantStateType.ACTIVE
+    state: ParticipantStateType = ParticipantStateType.ACTIVE  # type: ignore
 
 
 @sb.experimental.pydantic.type(model=AllocatedParticipant)
 class AllocatedParticipantType(BaseParticipantType):
-    state: Literal[ParticipantStateType.ALLOCATED] = ParticipantStateType.ALLOCATED
+    state: ParticipantStateType = ParticipantStateType.ALLOCATED  # type: ignore
 
-    room_id: sb.auto
+    room_id: scalar.ObjectID
     room: resolver.LazyRoomType = sb.field(
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_room,

@@ -155,7 +155,7 @@ class AllocationQuery:
         data = await info.context.allocation.service.create(request)
         return graphql.domain_to_allocation(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def update_allocation(
         root: AllocationQuery,
         info: Info[AllocationQuery],
@@ -184,7 +184,7 @@ class AllocationQuery:
         info.context.allocation.loader.clear(id)
         return graphql.domain_to_allocation(data)
 
-    @sb.mutation
+    @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_allocation(
         root: AllocationQuery, info: Info[AllocationQuery], id: scalar.ObjectID
     ) -> graphql.AllocationType:  # type: ignore
