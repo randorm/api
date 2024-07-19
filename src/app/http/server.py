@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from src.adapter.external.auth.telegram import TelegramOauthAdapter
 from src.adapter.external.graphql.view import GRAPHQL_SCHEMA, RandormGraphQL
-from src.adapter.internal.memorydb.service import MemoryDBAdapter
+from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.app.http.routes import oauth
 from src.service.allocation import AllocationService
 from src.service.form_field import FormFieldService

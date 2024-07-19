@@ -16,7 +16,7 @@ from src.adapter.external.auth.telegram import (
     TgOauthRegisterCallback,
     TgUserProfileMixin,
 )
-from src.adapter.internal.memorydb.service import MemoryDBAdapter
+from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.domain.model.scalar.object_id import ObjectID
 from src.domain.model.user import Gender, LanguageCode
 from src.protocol.internal.database.user import ReadUser

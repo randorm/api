@@ -5,4 +5,4 @@ All internal adapters should should be defined here.
 Example of such adapters are databases, caches, workers etc.
 """
 
-from src.adapter.internal import mongodb
+from src.adapter.internal import cache, database

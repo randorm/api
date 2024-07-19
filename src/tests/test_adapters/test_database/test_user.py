@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict
 import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database.user as proto
-from src.adapter.internal.memorydb.service import MemoryDBAdapter
-from src.adapter.internal.mongodb.service import MongoDBAdapter
+from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
+from src.adapter.internal.database.mongodb.service import MongoDBAdapter
 
 
 async def _get_mongo():

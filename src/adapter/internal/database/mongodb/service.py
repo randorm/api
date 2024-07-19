@@ -8,7 +8,7 @@ from pydantic import ValidationError
 import src.domain.exception.database as exception
 import src.domain.model as domain
 import src.protocol.internal.database as proto
-from src.adapter.internal.mongodb import models
+from src.adapter.internal.database.mongodb import models
 from src.domain.model.allocation import AllocationState
 
 
