@@ -33,4 +33,4 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache \
     poetry install --without=dev
 
-CMD ["poetry", "run", "python3", "-m", "aiohttp.web", "-H", "localhost", "-P", "8080", "src.app.http.server:init"]
+CMD ["poetry", "run", "python3", "-m", "aiohttp.web", "-H", "0.0.0.0", "-P", "8080", "src.app.http.server:init"]

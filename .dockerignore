@@ -1,5 +1,11 @@
+dockerfile
 .github
 .venv
 .git
 .ruff_cache
+htmlcov
+.coverage
+justfile
+LICENSE
+readme.md
 **/__pycache__
