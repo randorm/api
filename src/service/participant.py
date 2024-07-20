@@ -136,7 +136,7 @@ class ParticipantService(BaseService):
     ) -> list[domain.Participant]:
         try:
             log.debug(
-                f"reading participants {[participant.id for participant in participants]}"
+                f"reading participants {[str(participant.id) for  participant in participants]}"
             )
             documents = await self._participant_repo.read_many_participants(
                 participants
@@ -152,7 +152,7 @@ class ParticipantService(BaseService):
                 results.append(response)
 
             log.info(
-                f"read participants {[participant.id for participant in participants]}"
+                f"read participants {[str(participant.id) for  participant in participants]}"
             )
             return results
         except service_exception.ServiceException as e:

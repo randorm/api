@@ -88,7 +88,7 @@ class RoomService(BaseService):
 
     async def read_many(self, rooms: list[proto.ReadRoom]) -> list[domain.Room]:
         try:
-            log.debug(f"reading rooms {[room.id for room in rooms]}")
+            log.debug(f"reading rooms {[str(room.id) for  room in rooms]}")
             documents = await self._room_repo.read_many_rooms(rooms)
             results = []
             for request, response in zip(rooms, documents, strict=True):
@@ -99,7 +99,7 @@ class RoomService(BaseService):
                     )
 
                 results.append(response)
-            log.info(f"read rooms {[room.id for room in rooms]}")
+            log.info(f"read rooms {[str(room.id) for  room in rooms]}")
             return results
         except service_exception.ServiceException as e:
             log.error("failed to read rooms with error: {}", e)

@@ -824,7 +824,7 @@ class MongoDBAdapter(
                 case _:
                     documents = []
 
-            log.info(f"found users {[document.id for document in documents]}")
+            log.info(f"found users {[str(document.id) for  document in documents]}")
             return [domain.User.model_validate(document) for document in documents]
 
         except (ValidationError, AttributeError) as e:
@@ -1453,7 +1453,9 @@ class MongoDBAdapter(
             documents = await models.Preference.find_many(
                 {"user_id": preference.user_id, "target_id": preference.target_id}
             ).to_list()
-            log.info(f"found preferences {[document.id for document in documents]}")
+            log.info(
+                f"found preferences {[str(document.id) for  document in documents]}"
+            )
 
             return [
                 domain.Preference.model_validate(document) for document in documents

@@ -111,7 +111,7 @@ class FormFieldService(BaseService):
     ) -> list[domain.FormField]:
         try:
             log.debug(
-                f"reading form fields {[form_field.id for form_field in form_fields]}"
+                f"reading form fields {[str(form_field.id) for  form_field in form_fields]}"
             )
             documents = await self._form_field_repo.read_many_form_fields(form_fields)
             results = []
@@ -124,7 +124,7 @@ class FormFieldService(BaseService):
 
                 results.append(response)
             log.info(
-                f"read form fields {[form_field.id for form_field in form_fields]}"
+                f"read form fields {[str(form_field.id) for  form_field in form_fields]}"
             )
             return results
         except service_exception.ServiceException as e:

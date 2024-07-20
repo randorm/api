@@ -140,7 +140,7 @@ class AnswerService:
 
     async def read_many(self, answers: list[proto.ReadAnswer]) -> list[domain.Answer]:
         try:
-            log.debug(f"reading answers {[answer.id for answer in answers]}")
+            log.debug(f"reading answers {[str(answer.id) for  answer in answers]}")
             documents = await self._form_field_repo.read_many_answers(answers)
             results = []
             for request, response in zip(answers, documents, strict=True):
@@ -151,7 +151,7 @@ class AnswerService:
                     )
 
                 results.append(response)
-            log.info(f"read answers {[answer.id for answer in answers]}")
+            log.info(f"read answers {[str(answer.id) for  answer in answers]}")
             return results
         except service_exception.ServiceException as e:
             log.error("failed to read answers with error: {}", e)

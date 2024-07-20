@@ -162,7 +162,7 @@ class AllocationService(BaseService):
     ) -> list[domain.Allocation]:
         try:
             log.debug(
-                f"reading allocations {[allocation.id for allocation in allocations]}"
+                f"reading allocations {[str(allocation.id) for  allocation in allocations]}"
             )
             documents = await self._allocation_repo.read_many_allocations(allocations)
             results = []
@@ -174,7 +174,7 @@ class AllocationService(BaseService):
 
                 results.append(response)
             log.info(
-                f"read allocations {[allocation.id for allocation in allocations]}"
+                f"read allocations {[str(allocation.id) for  allocation in allocations]}"
             )
             return results
         except service_exception.ServiceException as e:

@@ -136,7 +136,7 @@ class PreferenceService(BaseService):
     ) -> list[domain.Preference]:
         try:
             log.debug(
-                f"reading preferences {[preference.id for preference in preferences]}"
+                f"reading preferences {[str(preference.id) for  preference in preferences]}"
             )
             documents = await self._preference_repo.read_many_preferences(preferences)
             results = []
@@ -149,7 +149,7 @@ class PreferenceService(BaseService):
 
                 results.append(response)
             log.info(
-                f"read preferences {[preference.id for preference in preferences]}"
+                f"read preferences {[str(preference.id) for  preference in preferences]}"
             )
             return results
         except service_exception.ServiceException as e:

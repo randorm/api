@@ -110,7 +110,7 @@ class UserService(BaseService):
 
     async def read_many(self, users: list[proto.ReadUser]) -> list[domain.User]:
         try:
-            log.debug(f"reading users {[user.id for user in users]}")
+            log.debug(f"reading users {[str(user.id) for  user in users]}")
             documents = await self.__repo.read_many_users(users)
             results = []
             for request, response in zip(users, documents, strict=True):
@@ -121,7 +121,7 @@ class UserService(BaseService):
                     )
 
                 results.append(response)
-            log.info(f"read users {[user.id for user in users]}")
+            log.info(f"read users {[str(user.id) for  user in users]}")
             return results
         except service_exception.ServiceException as e:
             log.error("failed to read users with error: {}", e)
