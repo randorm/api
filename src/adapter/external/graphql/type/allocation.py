@@ -21,7 +21,7 @@ AllocationStateType = sb.enum(AllocationState)
 
 @sb.experimental.pydantic.interface(model=BaseAllocation)
 class BaseAllocationType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
@@ -31,7 +31,7 @@ class BaseAllocationType:
     state: AllocationStateType  # type: ignore
 
     form_fields_ids: list[scalar.ObjectID]
-    form_fields: list[resolver.LazyFormFieldType] = sb.field(
+    form_fields: list[resolver.LazyFormFieldType] = sb.field(  # type: ignore
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_form_fields,
     )

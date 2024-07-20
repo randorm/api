@@ -12,7 +12,7 @@ PreferenceStatusType = sb.enum(PreferenceStatus)
 
 @sb.experimental.pydantic.type(model=Preference)
 class PreferenceType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto

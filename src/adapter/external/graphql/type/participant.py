@@ -18,13 +18,13 @@ ParticipantStateType = sb.enum(ParticipantState)
 
 @sb.experimental.pydantic.interface(model=BaseParticipant)
 class BaseParticipantType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
 
     allocation_id: scalar.ObjectID
-    allocation: resolver.LazyAllocationType = sb.field(
+    allocation: resolver.LazyAllocationType = sb.field(  # type: ignore
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_allocation,
     )

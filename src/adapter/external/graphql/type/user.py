@@ -20,7 +20,7 @@ class ProfileType:
 
 @sb.experimental.pydantic.type(model=User)
 class UserType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     telegram_id: sb.auto
     created_at: sb.auto
     updated_at: sb.auto

@@ -10,6 +10,7 @@ from src.domain.model.room import Room
 
 @sb.experimental.pydantic.type(model=Room)
 class RoomType:
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto

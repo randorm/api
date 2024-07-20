@@ -98,8 +98,8 @@ class AllocationService(BaseService):
 
             if allocation.form_fields_ids is not None:
                 if not await common.check_form_fields_exist(
-                    allocation,
-                    self._form_field_repo,  # type: ignore
+                    allocation,  # type: ignore
+                    self._form_field_repo,
                 ):
                     raise service_exception.UpdateAllocationException(
                         "one or more form fields does not exist"

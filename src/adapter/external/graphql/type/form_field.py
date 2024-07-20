@@ -21,7 +21,7 @@ FormFieldKindType = sb.enum(FormFieldKind)
 
 @sb.experimental.pydantic.interface(model=BaseFormField)
 class BaseFormFieldType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
@@ -83,7 +83,7 @@ def domain_to_form_field(data: domain.FormField) -> FormFieldType:  # type: igno
 
 @sb.experimental.pydantic.interface(model=BaseAnswer)
 class BaseAnswerType:
-    id: scalar.ObjectID
+    id: scalar.ObjectID = sb.field(name="id")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto
