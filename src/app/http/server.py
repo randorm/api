@@ -5,6 +5,7 @@ from src.adapter.external.graphql.view import RandormGraphQLView
 from src.app.http.routes import oauth
 from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.allocation import AllocationService
+from src.service.answer import AnswerService
 from src.service.form_field import FormFieldService
 from src.service.participant import ParticipantService
 from src.service.preference import PreferenceService
@@ -14,6 +15,7 @@ from src.service.user import UserService
 
 def build_server(
     user_service: UserService,
+    answer_service: AnswerService,
     allocation_service: AllocationService,
     form_field_service: FormFieldService,
     participant_service: ParticipantService,
@@ -38,6 +40,7 @@ def build_server(
             user_service,
             allocation_service,
             form_field_service,
+            answer_service,
             participant_service,
             preference_service,
             room_service,

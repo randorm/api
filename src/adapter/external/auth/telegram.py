@@ -121,19 +121,20 @@ class TelegramOauthAdapter(OauthProtocol):
                 CreateUser(telegram_id=request.id, profile=request.profile)
             )
         except (ValidationError, database_exception.ReflectUserException) as e:
-            # log.error(
-            #     f"failed to build callback data or reflect user data to create user with exception: ", e
-            # )
+            log.error(
+                "failed to build callback data or reflect user data to create user with exception: {}",
+                e,
+            )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to create user"
             ) from e
         except service_exception.CreateUserException as e:
-            log.error(f"creating new user failed with service exception: {e}")
+            log.error("creating new user failed with service exception: {}", e)
             raise auth_exception.UserAlreadyExistsException(
                 "creating new user failed"
             ) from e
         except auth_exception.AuthException as e:
-            log.error(f"authentiocation failed with auth exception: {e}")
+            log.error("authentiocation failed with auth exception: {}", e)
             raise e
 
         return TgOauthContainer.construct(
@@ -150,17 +151,18 @@ class TelegramOauthAdapter(OauthProtocol):
 
             user = await self.__service.find_by_telegram_id(request.id)
         except (ValidationError, database_exception.ReflectUserException) as e:
-            # log.error(
-            #     f"failed to build callback data or reflect user data to read user with exception: {e}"
-            # )
+            log.error(
+                "failed to build callback data or reflect user data to read user with exception: {}",
+                e,
+            )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
             ) from e
         except service_exception.ReadUserException as e:
-            log.error(f"reading user failed with service exception: {e}")
+            log.error("reading user failed with service exception: {}", e)
             raise auth_exception.UserNotFoundException("reading user failed") from e
         except auth_exception.AuthException as e:
-            log.error(f"authentiocation failed with auth exception: {e}")
+            log.error("authentiocation failed with auth exception: {}", e)
             raise e
 
         return TgOauthContainer.construct(
@@ -180,19 +182,19 @@ class TelegramOauthAdapter(OauthProtocol):
                 log.debug("building dto from container")
                 dto = data.to_dto(self.__jwt_secret)
             except Exception as e:
-                log.error(f"failed to build dto from container with exception: {e}")
+                log.error("failed to build dto from container with exception: {}", e)
                 raise auth_exception.InvalidCredentialsException(
                     "invalid data type"
                 ) from e
 
             user = await self.__service.read(ReadUser(_id=dto.id))
         except (ValidationError, AttributeError) as e:
-            # log.error(
-            #     "failed to construct dto or reflect to read user with exception: {e}", e
-            # )
+            log.error(
+                "failed to construct dto or reflect to read user with exception: {}", e
+            )
             raise auth_exception.InvalidCredentialsException("invalid data type") from e
         except service_exception.ReadUserException as e:
-            log.error(f"reading user failed with service exception: {e}")
+            log.error("reading user failed with service exception: {}", e)
             raise auth_exception.UserNotFoundException("user not found") from e
         else:
             log.debug(

@@ -7,6 +7,7 @@ from src.adapter.external.auth.telegram import TelegramOauthAdapter
 from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.app.http.server import build_server
 from src.service.allocation import AllocationService
+from src.service.answer import AnswerService
 from src.service.form_field import FormFieldService
 from src.service.participant import ParticipantService
 from src.service.preference import PreferenceService
@@ -54,11 +55,16 @@ async def app():
         room_repo=repo,
         user_repo=repo,
     )
+    answer_service = AnswerService(
+        form_field_repo=repo,
+        participant_repo=repo,
+    )
 
     oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
 
     return build_server(
         user_service,
+        answer_service,
         allocation_service,
         form_field_service,
         participant_service,
