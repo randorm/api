@@ -5,6 +5,8 @@ from src.adapter.external.graphql.operation.allocation import (
     AllocationQuery,
 )
 from src.adapter.external.graphql.operation.form_field import (
+    AnswerMutation,
+    AnswerQuery,
     FormFieldMutation,
     FormFieldQuery,
 )
@@ -23,6 +25,7 @@ from src.adapter.external.graphql.operation.user import UserMutation, UserQuery
 @sb.type
 class Query(
     AllocationQuery,
+    AnswerQuery,
     FormFieldQuery,
     ParticipantQuery,
     PreferenceQuery,
@@ -34,6 +37,7 @@ class Query(
 @sb.type
 class Mutation(
     AllocationMutation,
+    AnswerMutation,
     FormFieldMutation,
     ParticipantMutation,
     PreferenceMutation,
