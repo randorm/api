@@ -1,5 +1,5 @@
 import strawberry as sb
-from strawberry.asgi import GraphQL
+from strawberry.aiohttp.views import GraphQLView
 from strawberry.dataloader import DataLoader, DefaultCache
 
 from src.adapter.external.graphql.query import Query
@@ -42,7 +42,7 @@ class CustomDefaultCache[K, T](DefaultCache[K, T]):
             del self.cache_map[key]
 
 
-class RandormGraphQL(GraphQL):
+class RandormGraphQLView(GraphQLView):
     def __init__(
         self,
         schema: sb.Schema,

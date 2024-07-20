@@ -96,20 +96,6 @@ yarl = ">=1.0,<2.0"
 speedups = ["Brotli", "aiodns", "brotlicffi"]
 
 [[package]]
-name = "aiohttp-asgi"
-version = "0.5.2"
-description = "Adapter to running ASGI applications on aiohttp"
-optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "aiohttp_asgi-0.5.2-py3-none-any.whl", hash = "sha256:9a594f400696fe91c8b44c864261181844c764c8846aacd1384e9de49bce164a"},
-    {file = "aiohttp_asgi-0.5.2.tar.gz", hash = "sha256:bc601f74e286305cb35026d8701dd8eb74833c309e5f06493c487daa0daddb20"},
-]
-
-[package.dependencies]
-aiohttp = ">=3,<4"
-
-[[package]]
 name = "aiosignal"
 version = "1.3.1"
 description = "aiosignal: a list of registered asynchronous callbacks"
@@ -2143,4 +2129,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "ef1a47a834998d4ee7a043993e670fa02a77cf7560c01173fd8c25de1cf54f4b"
+content-hash = "63e267cf67e0b1ee40f3cf7af2840124225b2f09d3e696cbd91d38fb4026230c"

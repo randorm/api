@@ -1,11 +1,10 @@
 import os
 
 from aiohttp import web
-from aiohttp_asgi import ASGIResource
 from dotenv import load_dotenv
 
 from src.adapter.external.auth.telegram import TelegramOauthAdapter
-from src.adapter.external.graphql.view import GRAPHQL_SCHEMA, RandormGraphQL
+from src.adapter.external.graphql.view import GRAPHQL_SCHEMA, RandormGraphQLView
 from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.app.http.routes import oauth
 from src.service.allocation import AllocationService
@@ -46,8 +45,10 @@ def init(argv):
         service=user_service,
     ).regiter_routers(app)
 
-    graphql_resource = ASGIResource(
-        RandormGraphQL(
+    app.router.add_route(
+        "*",
+        "/graphql",
+        RandormGraphQLView(
             GRAPHQL_SCHEMA,
             user_service,
             allocation_service,
@@ -56,9 +57,6 @@ def init(argv):
             preference_service,
             room_service,
         ),
-        root_path="/graphql",
     )
-
-    app.router.register_resource(graphql_resource)
 
     return app
