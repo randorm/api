@@ -4,7 +4,7 @@ import rich
 from dotenv import load_dotenv
 
 from src.adapter.external.auth.telegram import TelegramOauthAdapter
-from src.adapter.internal.database.mongodb.service import MongoDBAdapter
+from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.app.http.server import build_server
 from src.service.allocation import AllocationService
 from src.service.form_field import FormFieldService
@@ -17,7 +17,8 @@ from src.service.user import UserService
 async def app():
     load_dotenv()
 
-    repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
+    # repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
+    repo = MemoryDBAdapter()
 
     secret_token = os.getenv("SECRET_TOKEN")
     if secret_token is None:
