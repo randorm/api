@@ -1,4 +1,14 @@
-# randorm-api
+![Repo Poster](./.github/poster.png)
+
+Server-side of Randorm service, written in Python.
+
+## Features
+- 🍓 GraphQL API powered by [Strawberry GraphQL](https://github.com/strawberry-graphql/strawberry)
+- 🤖 Telegram Bot powered by [aiogram ](https://github.com/aiogram/aiogram) 
+- 🛢️ Redis cache powered by [redis-py ](https://github.com/redis/redis-py) 
+- 🗃️ MongoDB database powered by [beanie](https://github.com/roman-right/beanie)
+- 🦅 Core Models powered by [pydantic](https://github.com/pydantic/pydantic)
+- 🧙‍♂️ Logging powered by [loguru](https://github.com/Delgan/loguru)
 
 ## Conventions
 - [PEP 8](https://www.python.org/dev/peps/pep-0008/)
@@ -7,7 +17,6 @@
 - [google format docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
 
 ## Dev Tools 
-
 |Tool|Description|
 |---|---|
 |[black](https://black.readthedocs.io/en/stable/)|uncompromising formatter - source of truth for code style & format|
@@ -49,4 +58,18 @@ just check
 ### Testing
 ```bash
 just test
+```
+
+### Launch API
+```bash
+just run-server
+```
+
+### Docker
+```bash
+just docker-build
+```
+
+```bash
+just docker-run
 ```
