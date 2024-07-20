@@ -569,9 +569,6 @@ class MongoDBAdapter(
         if source.text_entities is not None:
             document.text_entities = source.text_entities
 
-        if source.field_id is not None:
-            document.field_id = source.field_id
-
         return document
 
     def __update_choice_answer(
@@ -581,9 +578,6 @@ class MongoDBAdapter(
     ) -> models.ChoiceAnswer:
         if source.option_indexes is not None:
             document.option_indexes = source.option_indexes
-
-        if source.field_id is not None:
-            document.field_id = source.field_id
 
         return document
 
@@ -733,11 +727,11 @@ class MongoDBAdapter(
             raise e
         except (ValidationError, AttributeError) as e:
             raise exception.ReflectUserException(
-                f"failed to reflect user type with error: {e}"
+                "failed to reflect user type with error: ", e
             ) from e
         except Exception as e:
             raise exception.UpdateUserException(
-                f"failed to update user with id {user.id} with error: {e}"
+                f"failed to update user with id {user.id} with error: ", e
             ) from e
 
     def __update_user(

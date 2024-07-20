@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from src.adapter.external.graphql.tool.context import Context
     from src.adapter.external.graphql.type.allocation import AllocationType
     from src.adapter.external.graphql.type.form_field import FormFieldType
+    from src.adapter.external.graphql.type.participant import ParticipantType
     from src.adapter.external.graphql.type.room import RoomType
     from src.adapter.external.graphql.type.user import UserType
 
@@ -34,6 +35,11 @@ LazyAllocationType = Annotated[
 LazyRoomType = Annotated[
     "RoomType",
     sb.lazy(module_path="src.adapter.external.graphql.type.room"),
+]
+
+LazyParticipantType = Annotated[
+    "ParticipantType",  # type: ignore
+    sb.lazy(module_path="src.adapter.external.graphql.type.participant"),
 ]
 
 
@@ -88,8 +94,8 @@ class WithRespondent(Protocol):
 async def load_respondent(
     root: WithRespondent,
     info: sb.Info[LazyContext, WithRespondent],
-) -> LazyUserType:
-    return await info.context.user.loader.load(root.respondent_id)
+) -> LazyParticipantType:
+    return await info.context.participant.loader.load(root.respondent_id)
 
 
 class WithAllocation(Protocol):

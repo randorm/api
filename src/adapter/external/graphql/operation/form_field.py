@@ -121,6 +121,16 @@ class FormFieldQuery:
 
 
 @sb.type
+class AnswerQuery:
+    @sb.field(permission_classes=[DefaultPermissions])
+    async def answer(
+        root: AnswerQuery, info: Info[AnswerQuery], id: scalar.ObjectID
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity(f"loading answer {id}"):
+            return await info.context.answer.loader.load(id)
+
+
+@sb.type
 class FormFieldMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def new_text_form_field(
@@ -269,3 +279,102 @@ class FormFieldMutation:
             info.context.form_field.loader.clear(id)
             log.info(f"deleted form field {id}")
             return graphql.domain_to_form_field(data)
+
+
+@sb.type
+class AnswerMutation:
+    @sb.mutation(permission_classes=[DefaultPermissions])
+    async def new_text_answer(
+        root: AnswerMutation,
+        info: Info[AnswerMutation],
+        respondent_id: scalar.ObjectID,
+        form_field_id: scalar.ObjectID,
+        text: str,
+        text_entities: list[FormatEntityInput] | None = None,
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity("creating new text answer"):
+            request = proto.CreateTextAnswer(
+                respondent_id=respondent_id,
+                form_field_id=form_field_id,
+                text=text,
+                text_entities=(
+                    format_entities_to_domain_set(text_entities)
+                    if text_entities
+                    else set()
+                ),
+            )
+
+            data = await info.context.answer.service.create(request)
+            log.info(f"created text answer {data.id}")
+            return graphql.domain_to_answer(data)
+
+    @sb.mutation(permission_classes=[DefaultPermissions])
+    async def new_choice_answer(
+        root: AnswerMutation,
+        info: Info[AnswerMutation],
+        respondent_id: scalar.ObjectID,
+        form_field_id: scalar.ObjectID,
+        option_indexes: list[int],
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity("creating new choice answer"):
+            request = proto.CreateChoiceAnswer(
+                respondent_id=respondent_id,
+                form_field_id=form_field_id,
+                option_indexes=set(option_indexes),
+            )
+
+            data = await info.context.answer.service.create(request)
+            log.info(f"created choice answer {data.id}")
+            return graphql.domain_to_answer(data)
+
+    @sb.mutation(permission_classes=[DefaultPermissions])
+    async def update_text_answer(
+        root: AnswerMutation,
+        info: Info[AnswerMutation],
+        id: scalar.ObjectID,
+        text: str | None = None,
+        text_entities: list[FormatEntityInput] | None = None,
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity(f"updating text answer {id}"):
+            request = proto.UpdateTextAnswer(
+                _id=id,
+                text=text,
+                text_entities=(
+                    format_entities_to_domain_set(text_entities)
+                    if text_entities
+                    else set()
+                ),
+            )
+
+            data = await info.context.answer.service.update(request)
+            info.context.answer.loader.clear(id)
+            log.info(f"updated text answer {id}")
+            return graphql.domain_to_answer(data)
+
+    @sb.mutation(permission_classes=[DefaultPermissions])
+    async def update_choice_answer(
+        root: AnswerMutation,
+        info: Info[AnswerMutation],
+        id: scalar.ObjectID,
+        option_indexes: list[int] | None = None,
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity(f"updating choice answer {id}"):
+            request = proto.UpdateChoiceAnswer(
+                _id=id,
+                option_indexes=set(option_indexes) if option_indexes else None,
+            )
+
+            data = await info.context.answer.service.update(request)
+            info.context.answer.loader.clear(id)
+            log.info(f"updated choice answer {id}")
+            return graphql.domain_to_answer(data)
+
+    @sb.mutation(permission_classes=[DefaultPermissions])
+    async def delete_answer(
+        root: AnswerMutation, info: Info[AnswerMutation], id: scalar.ObjectID
+    ) -> graphql.AnswerType:  # type: ignore
+        with log.activity(f"deleting answer {id}"):
+            data = await info.context.answer.service.delete(proto.DeleteAnswer(_id=id))
+            info.context.answer.loader.clear(id)
+            log.info(f"deleted answer {id}")
+            return graphql.domain_to_answer(data)

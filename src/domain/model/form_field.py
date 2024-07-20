@@ -65,7 +65,7 @@ class BaseAnswer(pydantic.BaseModel):
     updated_at: datetime.datetime
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
 
-    field_id: ObjectID
+    form_field_id: ObjectID
     kind: FormFieldKind
 
     respondent_id: ObjectID
@@ -73,7 +73,7 @@ class BaseAnswer(pydantic.BaseModel):
 
 class TextAnswer(BaseAnswer):
     kind: Literal[FormFieldKind.TEXT] = FormFieldKind.TEXT
-    text: str = pydantic.Field(min_length=1)
+    text: str = pydantic.Field(min_length=0)
     text_entities: set[FormatEntity] = pydantic.Field(default_factory=set)
 
 

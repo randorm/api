@@ -88,11 +88,11 @@ class BaseAnswerType:
     updated_at: sb.auto
     deleted_at: sb.auto
 
-    field_id: scalar.ObjectID
-    field_kind: FormFieldKindType  # type: ignore
+    form_field_id: scalar.ObjectID
+    kind: FormFieldKindType  # type: ignore
 
     respondent_id: scalar.ObjectID
-    respondent: resolver.LazyUserType = sb.field(
+    respondent: resolver.LazyParticipantType = sb.field(
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_respondent,
     )
@@ -114,3 +114,11 @@ class ChoiceAnswerType(BaseAnswerType):
 
 
 AnswerType = sb.union("AnswerType", types=(TextAnswerType, ChoiceAnswerType))
+
+
+def domain_to_answer(data: domain.Answer) -> AnswerType:  # type: ignore
+    match data:
+        case domain.TextAnswer():
+            return TextAnswerType.from_pydantic(data)
+        case domain.ChoiceAnswer():
+            return ChoiceAnswerType.from_pydantic(data)

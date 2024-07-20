@@ -193,3 +193,51 @@ async def check_target_exist(obj: WithTarget, db: proto.UserDatabaseProtocol) ->
         return False
     else:
         return True
+
+
+class WithFormField(Protocol):
+    form_field_id: domain.ObjectID
+
+
+async def check_form_field_exist(
+    obj: WithFormField, db: proto.FormFieldDatabaseProtocol
+) -> bool:
+    try:
+        data = await db.read_many_form_fields(
+            [proto.ReadFormField(_id=obj.form_field_id)]
+        )
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
+
+    except Exception:
+        return False
+    else:
+        return True
+
+
+class WithRespondent(Protocol):
+    respondent_id: domain.ObjectID
+
+
+async def check_respondent_exist(
+    obj: WithRespondent, db: proto.ParticipantDatabaseProtocol
+) -> bool:
+    try:
+        data = await db.read_many_participants(
+            [proto.ReadParticipant(_id=obj.respondent_id)]
+        )
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
+
+    except Exception:
+        return False
+    else:
+        return True

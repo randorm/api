@@ -33,7 +33,7 @@ async def test_create_text_answer_ok(actor_fn: ActorFn):
     data = proto.CreateTextAnswer(
         text="test",
         text_entities={domain.BoldEntity(offset=0, length=4)},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -42,7 +42,7 @@ async def test_create_text_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.text == data.text
     assert response.text_entities == data.text_entities
     assert response.created_at is not None
@@ -58,7 +58,7 @@ async def test_create_choise_answer_ok(actor_fn: ActorFn):
 
     data = proto.CreateChoiceAnswer(
         option_indexes={3},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -67,7 +67,7 @@ async def test_create_choise_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
@@ -83,7 +83,7 @@ async def test_read_text_answer_ok(actor_fn: ActorFn):
     data = proto.CreateTextAnswer(
         text="test",
         text_entities={domain.BoldEntity(offset=0, length=4)},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -94,7 +94,7 @@ async def test_read_text_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.text == data.text
     assert response.text_entities == data.text_entities
     assert response.created_at is not None
@@ -110,7 +110,7 @@ async def test_read_choice_answer_ok(actor_fn: ActorFn):
 
     data = proto.CreateChoiceAnswer(
         option_indexes={3},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -121,7 +121,7 @@ async def test_read_choice_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
@@ -137,7 +137,7 @@ async def test_update_text_answer_ok(actor_fn: ActorFn):
     data = proto.CreateTextAnswer(
         text="test",
         text_entities={domain.BoldEntity(offset=0, length=4)},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -154,7 +154,7 @@ async def test_update_text_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.text == new_data.text
     assert response.text_entities == new_data.text_entities
     assert response.created_at is not None
@@ -170,7 +170,7 @@ async def test_update_choice_answer_ok(actor_fn: ActorFn):
 
     data = proto.CreateChoiceAnswer(
         option_indexes={3},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -186,7 +186,7 @@ async def test_update_choice_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.option_indexes == new_data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
@@ -202,7 +202,7 @@ async def test_delete_text_answer_ok(actor_fn: ActorFn):
     data = proto.CreateTextAnswer(
         text="test",
         text_entities={domain.BoldEntity(offset=0, length=4)},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -213,7 +213,7 @@ async def test_delete_text_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.text == data.text
     assert response.text_entities == data.text_entities
     assert response.created_at is not None
@@ -229,7 +229,7 @@ async def test_delete_choice_answer_ok(actor_fn: ActorFn):
 
     data = proto.CreateChoiceAnswer(
         option_indexes={3},
-        field_id=field_id,
+        form_field_id=field_id,
         respondent_id=owner,
     )
 
@@ -240,7 +240,7 @@ async def test_delete_choice_answer_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == field_id
+    assert response.form_field_id == field_id
     assert response.option_indexes == data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None
@@ -471,19 +471,16 @@ async def test_update_text_answer_field_id_ok(actor_fn: ActorFn):
     data = proto.CreateTextAnswer(
         text="test",
         text_entities={domain.BoldEntity(offset=0, length=4)},
-        field_id=domain.ObjectID(),
+        form_field_id=domain.ObjectID(),
         respondent_id=owner,
     )
 
     document = await actor.create_answer(data)
 
-    new_field_id = domain.ObjectID()
-
     new_data = proto.UpdateTextAnswer(
         _id=document.id,
         text="test2",
         text_entities={domain.ItalicEntity(offset=0, length=4)},
-        field_id=new_field_id,
     )
 
     response = await actor.update_answer(new_data)
@@ -491,7 +488,7 @@ async def test_update_text_answer_field_id_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.TEXT
     assert isinstance(response, domain.TextAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == new_field_id
+    assert response.form_field_id == data.form_field_id
     assert response.text == new_data.text
     assert response.text_entities == new_data.text_entities
     assert response.created_at is not None
@@ -506,18 +503,15 @@ async def test_update_choice_answer_field_id_ok(actor_fn: ActorFn):
 
     data = proto.CreateChoiceAnswer(
         option_indexes={0},
-        field_id=domain.ObjectID(),
+        form_field_id=domain.ObjectID(),
         respondent_id=owner,
     )
 
     document = await actor.create_answer(data)
 
-    new_field_id = domain.ObjectID()
-
     new_data = proto.UpdateChoiceAnswer(
         _id=document.id,
         option_indexes={0, 1, 2},
-        field_id=new_field_id,
     )
 
     response = await actor.update_answer(new_data)
@@ -525,7 +519,7 @@ async def test_update_choice_answer_field_id_ok(actor_fn: ActorFn):
     assert response.kind == domain.FormFieldKind.CHOICE
     assert isinstance(response, domain.ChoiceAnswer)
     assert response.respondent_id == owner
-    assert response.field_id == new_field_id
+    assert response.form_field_id == data.form_field_id
     assert response.option_indexes == new_data.option_indexes
     assert response.created_at is not None
     assert response.updated_at is not None

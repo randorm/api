@@ -10,7 +10,9 @@ from src.adapter.external.graphql.type.allocation import (
     domain_to_allocation,
 )
 from src.adapter.external.graphql.type.form_field import (
+    AnswerType,
     FormFieldType,
+    domain_to_answer,
     domain_to_form_field,
 )
 from src.adapter.external.graphql.type.participant import (
@@ -22,12 +24,13 @@ from src.adapter.external.graphql.type.room import RoomType
 from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.scalar.object_id import ObjectID
 from src.protocol.internal.database.allocation import ReadAllocation
-from src.protocol.internal.database.form_field import ReadFormField
+from src.protocol.internal.database.form_field import ReadAnswer, ReadFormField
 from src.protocol.internal.database.participant import ReadParticipant
 from src.protocol.internal.database.preference import ReadPreference
 from src.protocol.internal.database.room import ReadRoom
 from src.protocol.internal.database.user import ReadUser
 from src.service.allocation import AllocationService
+from src.service.answer import AnswerService
 from src.service.form_field import FormFieldService
 from src.service.participant import ParticipantService
 from src.service.preference import PreferenceService
@@ -48,6 +51,7 @@ class RandormGraphQLView(GraphQLView):
         user_service: UserService,
         allocation_service: AllocationService,
         form_field_service: FormFieldService,
+        answer_service: AnswerService,
         participant_service: ParticipantService,
         preference_service: PreferenceService,
         room_service: RoomService,
@@ -55,6 +59,7 @@ class RandormGraphQLView(GraphQLView):
         self._user_service = user_service
         self._allocation_service = allocation_service
         self._form_field_service = form_field_service
+        self._answer_service = answer_service
         self._participant_service = participant_service
         self._preference_service = preference_service
         self._room_service = room_service
@@ -85,6 +90,14 @@ class RandormGraphQLView(GraphQLView):
                     cache_map=CustomDefaultCache(),
                 ),
                 service=self._form_field_service,
+            ),
+            answer=DataContext(
+                loader=DataLoader(
+                    load_fn=self.__load_answers,
+                    cache_key_fn=str,
+                    cache_map=CustomDefaultCache(),
+                ),
+                service=self._answer_service,
             ),
             participant=DataContext(
                 loader=DataLoader(
@@ -117,6 +130,12 @@ class RandormGraphQLView(GraphQLView):
         response = await self._user_service.read_many(request)
 
         return [UserType.from_pydantic(obj) for obj in response]
+
+    async def __load_answers(self, ids: list[ObjectID]) -> list[AnswerType]:  # type: ignore
+        request = [ReadAnswer(_id=id) for id in ids]
+        response = await self._answer_service.read_many(request)
+
+        return [domain_to_answer(obj) for obj in response]
 
     async def __load_allocations(self, ids: list[ObjectID]) -> list[AllocationType]:  # type: ignore
         request = [ReadAllocation(_id=id) for id in ids]

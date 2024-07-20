@@ -121,9 +121,9 @@ class TelegramOauthAdapter(OauthProtocol):
                 CreateUser(telegram_id=request.id, profile=request.profile)
             )
         except (ValidationError, database_exception.ReflectUserException) as e:
-            log.error(
-                f"failed to build callback data or reflect user data to create user with exception: {e}"
-            )
+            # log.error(
+            #     f"failed to build callback data or reflect user data to create user with exception: ", e
+            # )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to create user"
             ) from e
@@ -150,9 +150,9 @@ class TelegramOauthAdapter(OauthProtocol):
 
             user = await self.__service.find_by_telegram_id(request.id)
         except (ValidationError, database_exception.ReflectUserException) as e:
-            log.error(
-                "failed to build callback data or reflect user data to read user with exception: {e}"
-            )
+            # log.error(
+            #     f"failed to build callback data or reflect user data to read user with exception: {e}"
+            # )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
             ) from e
@@ -187,15 +187,15 @@ class TelegramOauthAdapter(OauthProtocol):
 
             user = await self.__service.read(ReadUser(_id=dto.id))
         except (ValidationError, AttributeError) as e:
-            log.error(
-                f"failed to construct dto or reflect to read user with exception: {e}"
-            )
+            # log.error(
+            #     "failed to construct dto or reflect to read user with exception: {e}", e
+            # )
             raise auth_exception.InvalidCredentialsException("invalid data type") from e
         except service_exception.ReadUserException as e:
             log.error(f"reading user failed with service exception: {e}")
             raise auth_exception.UserNotFoundException("user not found") from e
         else:
             log.debug(
-                f"user id={user.id}, telegram_id={user.telegram_id} was retrieved"
+                f"user id={user.id}, telegram_id={user.telegram_id} was retrieved",
             )
             return user

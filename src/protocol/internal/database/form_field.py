@@ -106,16 +106,16 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
     id: ObjectID = Field(alias="_id")  # type: ignore
     text: str | None = Field(default=None)
     text_entities: set[FormatEntity] | None = Field(default=None)
-    field_id: ObjectID | None = Field(default=None)
     # exclude
+    form_field_id: Literal[None] = None
     respondent_id: Literal[None] = None
 
 
 class UpdateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer):
     id: ObjectID = Field(alias="_id")  # type: ignore
     option_indexes: set[int] | None = Field(default=None)
-    field_id: ObjectID | None = Field(default=None)
     # exclude
+    form_field_id: Literal[None] = None
     respondent_id: Literal[None] = None
 
 

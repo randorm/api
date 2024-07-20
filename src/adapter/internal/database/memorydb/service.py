@@ -500,9 +500,6 @@ class MemoryDBAdapter(
         if source.text_entities is not None:
             document.text_entities = source.text_entities
 
-        if source.field_id is not None:
-            document.field_id = source.field_id
-
         return document
 
     def __update_choice_answer(
@@ -512,9 +509,6 @@ class MemoryDBAdapter(
     ) -> domain.ChoiceAnswer:
         if source.option_indexes is not None:
             document.option_indexes = source.option_indexes
-
-        if source.field_id is not None:
-            document.field_id = source.field_id
 
         return document
 
