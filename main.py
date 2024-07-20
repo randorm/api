@@ -50,7 +50,10 @@ async def app():
         preference_repo=repo,
         user_repo=repo,
     )
-    room_service = RoomService(repo)
+    room_service = RoomService(
+        room_repo=repo,
+        user_repo=repo,
+    )
 
     oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
 
