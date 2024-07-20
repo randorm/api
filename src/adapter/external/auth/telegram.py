@@ -16,6 +16,9 @@ from src.domain.model.user import Profile, User
 from src.protocol.external.auth.oauth import OAuthContainer, OAuthDTO, OauthProtocol
 from src.protocol.internal.database.user import CreateUser, ReadUser
 from src.service.user import UserService
+from src.utils.logger.logger import Logger
+
+log = Logger("telegram-auth-adapter")
 
 
 class TgUserProfileMixin(Profile): ...
@@ -94,30 +97,43 @@ class TelegramOauthAdapter(OauthProtocol):
             data.to_data_string().encode(),
             hashlib.sha256,
         )
+
         if signing.hexdigest() != data.hash:
+            log.error("callback data validation faiked: hash mismatch")
             raise auth_exception.InvalidCredentialsException(
                 "data is malformed since the hash does not match"
             )
 
+        log.debug("callback data validation passed")
+
     async def register(self, data: Any) -> TgOauthContainer:
         try:
+            log.debug("building callback data from custom data")
             request: TgOauthRegisterCallback = TgOauthRegisterCallback.model_validate(
                 data, from_attributes=True
             )
+
+            log.debug("checking callback data hash")
             self.__check_hash(request)
 
+            log.debug(f"creating new user with telegram_id={request.id}")
             user = await self.__service.create(
                 CreateUser(telegram_id=request.id, profile=request.profile)
             )
         except (ValidationError, database_exception.ReflectUserException) as e:
+            log.error(
+                f"failed to build callback data or reflect user data to create user with exception: {e}"
+            )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to create user"
             ) from e
         except service_exception.CreateUserException as e:
+            log.error(f"creating new user failed with service exception: {e}")
             raise auth_exception.UserAlreadyExistsException(
                 "creating new user failed"
             ) from e
         except auth_exception.AuthException as e:
+            log.error(f"authentiocation failed with auth exception: {e}")
             raise e
 
         return TgOauthContainer.construct(
@@ -126,17 +142,25 @@ class TelegramOauthAdapter(OauthProtocol):
 
     async def login(self, data: Any) -> TgOauthContainer:
         try:
+            log.debug("building callback data from custom data")
             request = TgOauthLoginCallback.model_validate(data, from_attributes=True)
+
+            log.debug("checking callback data hash")
             self.__check_hash(request)
 
             user = await self.__service.find_by_telegram_id(request.id)
         except (ValidationError, database_exception.ReflectUserException) as e:
+            log.error(
+                "failed to build callback data or reflect user data to read user with exception: {e}"
+            )
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
             ) from e
         except service_exception.ReadUserException as e:
+            log.error(f"reading user failed with service exception: {e}")
             raise auth_exception.UserNotFoundException("reading user failed") from e
         except auth_exception.AuthException as e:
+            log.error(f"authentiocation failed with auth exception: {e}")
             raise e
 
         return TgOauthContainer.construct(
@@ -146,19 +170,32 @@ class TelegramOauthAdapter(OauthProtocol):
     async def retrieve_user(self, data: TgOauthContainer) -> User:
         try:
             if not isinstance(data, TgOauthContainer):
+                log.error(
+                    "invalid data type was passed to retrieve user function. "
+                    f"expected TgOauthContainer, got {type(data)}"
+                )
                 raise auth_exception.InvalidCredentialsException("invalid data type")
 
             try:
+                log.debug("building dto from container")
                 dto = data.to_dto(self.__jwt_secret)
             except Exception as e:
+                log.error(f"failed to build dto from container with exception: {e}")
                 raise auth_exception.InvalidCredentialsException(
                     "invalid data type"
                 ) from e
 
             user = await self.__service.read(ReadUser(_id=dto.id))
         except (ValidationError, AttributeError) as e:
+            log.error(
+                f"failed to construct dto or reflect to read user with exception: {e}"
+            )
             raise auth_exception.InvalidCredentialsException("invalid data type") from e
         except service_exception.ReadUserException as e:
+            log.error(f"reading user failed with service exception: {e}")
             raise auth_exception.UserNotFoundException("user not found") from e
         else:
+            log.debug(
+                f"user id={user.id}, telegram_id={user.telegram_id} was retrieved"
+            )
             return user

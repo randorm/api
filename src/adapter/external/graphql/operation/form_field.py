@@ -12,6 +12,9 @@ from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.tool.context import Info
 from src.adapter.external.graphql.tool.permission import DefaultPermissions
 from src.adapter.external.graphql.type import format_entity
+from src.utils.logger.logger import Logger
+
+log = Logger("graphql-form-ops")
 
 
 @sb.input
@@ -113,12 +116,16 @@ class FormFieldQuery:
     async def form_field(
         root: FormFieldQuery, info: Info[FormFieldQuery], id: scalar.ObjectID
     ) -> graphql.FormFieldType:  # type: ignore
-        return await info.context.form_field.loader.load(id)
+        with log.activity(f"loading form field {id}"):
+            return await info.context.form_field.loader.load(id)
 
+
+@sb.type
+class FormFieldMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def new_text_form_field(
-        root: FormFieldQuery,
-        info: Info[FormFieldQuery],
+        root: FormFieldMutation,
+        info: Info[FormFieldMutation],
         creator_id: scalar.ObjectID,
         allocation_id: scalar.ObjectID,
         question: str,
@@ -129,29 +136,31 @@ class FormFieldQuery:
         re: str | None = None,
         ex: str | None = None,
     ) -> graphql.TextFormFieldType:
-        request = proto.CreateTextFormField(
-            creator_id=creator_id,
-            allocation_id=allocation_id,
-            question=question,
-            required=required,
-            frozen=frozen,
-            question_entities=(
-                format_entities_to_domain_set(question_entities)
-                if question_entities
-                else set()
-            ),
-            editors_ids=set(editors_ids) if editors_ids else set(),
-            re=re_compile(re) if re else None,
-            ex=ex,
-        )
+        with log.activity("creating new text form field"):
+            request = proto.CreateTextFormField(
+                creator_id=creator_id,
+                allocation_id=allocation_id,
+                question=question,
+                required=required,
+                frozen=frozen,
+                question_entities=(
+                    format_entities_to_domain_set(question_entities)
+                    if question_entities
+                    else set()
+                ),
+                editors_ids=set(editors_ids) if editors_ids else set(),
+                re=re_compile(re) if re else None,
+                ex=ex,
+            )
 
-        data = await info.context.form_field.service.create(request)
-        return graphql.domain_to_form_field(data)
+            data = await info.context.form_field.service.create(request)
+            log.info(f"created text form field {data.id}")
+            return graphql.domain_to_form_field(data)
 
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def new_choice_form_field(
-        root: FormFieldQuery,
-        info: Info[FormFieldQuery],
+        root: FormFieldMutation,
+        info: Info[FormFieldMutation],
         creator_id: scalar.ObjectID,
         allocation_id: scalar.ObjectID,
         question: str,
@@ -162,29 +171,31 @@ class FormFieldQuery:
         question_entities: list[FormatEntityInput] | None = None,
         editors_ids: list[scalar.ObjectID] | None = None,
     ) -> graphql.ChoiceFormFieldType:
-        request = proto.CreateChoiceFormField(
-            creator_id=creator_id,
-            allocation_id=allocation_id,
-            question=question,
-            required=required,
-            frozen=frozen,
-            multiple=multiple,
-            options=choice_option_to_domain_list(options),
-            question_entities=(
-                format_entities_to_domain_set(question_entities)
-                if question_entities
-                else set()
-            ),
-            editors_ids=set(editors_ids) if editors_ids else set(),
-        )
+        with log.activity("creating new choice form field"):
+            request = proto.CreateChoiceFormField(
+                creator_id=creator_id,
+                allocation_id=allocation_id,
+                question=question,
+                required=required,
+                frozen=frozen,
+                multiple=multiple,
+                options=choice_option_to_domain_list(options),
+                question_entities=(
+                    format_entities_to_domain_set(question_entities)
+                    if question_entities
+                    else set()
+                ),
+                editors_ids=set(editors_ids) if editors_ids else set(),
+            )
 
-        data = await info.context.form_field.service.create(request)
-        return graphql.domain_to_form_field(data)
+            data = await info.context.form_field.service.create(request)
+            log.info(f"created choice form field {data.id}")
+            return graphql.domain_to_form_field(data)
 
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def update_text_form_field(
-        root: FormFieldQuery,
-        info: Info[FormFieldQuery],
+        root: FormFieldMutation,
+        info: Info[FormFieldMutation],
         id: scalar.ObjectID,
         question: str | None = None,
         required: bool | None = None,
@@ -194,29 +205,31 @@ class FormFieldQuery:
         re: str | None = None,
         ex: str | None = None,
     ) -> graphql.TextFormFieldType:
-        request = proto.UpdateTextFormField(
-            _id=id,
-            question=question,
-            required=required,
-            frozen=frozen,
-            question_entities=(
-                format_entities_to_domain_set(question_entities)
-                if question_entities
-                else set()
-            ),
-            editors_ids=set(editors_ids) if editors_ids else set(),
-            re=re_compile(re) if re else None,
-            ex=ex,
-        )
+        with log.activity(f"updating text form field {id}"):
+            request = proto.UpdateTextFormField(
+                _id=id,
+                question=question,
+                required=required,
+                frozen=frozen,
+                question_entities=(
+                    format_entities_to_domain_set(question_entities)
+                    if question_entities
+                    else set()
+                ),
+                editors_ids=set(editors_ids) if editors_ids else set(),
+                re=re_compile(re) if re else None,
+                ex=ex,
+            )
 
-        data = await info.context.form_field.service.update(request)
-        info.context.form_field.loader.clear(id)
-        return graphql.domain_to_form_field(data)
+            data = await info.context.form_field.service.update(request)
+            info.context.form_field.loader.clear(id)
+            log.info(f"updated text form field {id}")
+            return graphql.domain_to_form_field(data)
 
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def update_choice_form_field(
-        root: FormFieldQuery,
-        info: Info[FormFieldQuery],
+        root: FormFieldMutation,
+        info: Info[FormFieldMutation],
         id: scalar.ObjectID,
         question: str | None = None,
         required: bool | None = None,
@@ -226,31 +239,37 @@ class FormFieldQuery:
         question_entities: list[FormatEntityInput] | None = None,
         editors_ids: list[scalar.ObjectID] | None = None,
     ) -> graphql.ChoiceFormFieldType:
-        request = proto.UpdateChoiceFormField(
-            _id=id,
-            question=question,
-            required=required,
-            frozen=frozen,
-            multiple=multiple,
-            options=update_choice_option_to_proto_list(options) if options else None,
-            question_entities=(
-                format_entities_to_domain_set(question_entities)
-                if question_entities
-                else set()
-            ),
-            editors_ids=set(editors_ids) if editors_ids else set(),
-        )
+        with log.activity(f"updating choice form field {id}"):
+            request = proto.UpdateChoiceFormField(
+                _id=id,
+                question=question,
+                required=required,
+                frozen=frozen,
+                multiple=multiple,
+                options=(
+                    update_choice_option_to_proto_list(options) if options else None
+                ),
+                question_entities=(
+                    format_entities_to_domain_set(question_entities)
+                    if question_entities
+                    else set()
+                ),
+                editors_ids=set(editors_ids) if editors_ids else set(),
+            )
 
-        data = await info.context.form_field.service.update(request)
-        info.context.form_field.loader.clear(id)
-        return graphql.domain_to_form_field(data)
+            data = await info.context.form_field.service.update(request)
+            info.context.form_field.loader.clear(id)
+            log.info(f"updated choice form field {id}")
+            return graphql.domain_to_form_field(data)
 
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_form_field(
-        root: FormFieldQuery, info: Info[FormFieldQuery], id: scalar.ObjectID
+        root: FormFieldMutation, info: Info[FormFieldMutation], id: scalar.ObjectID
     ) -> graphql.FormFieldType:  # type: ignore
-        data = await info.context.form_field.service.delete(
-            proto.DeleteFormField(_id=id)
-        )
-        info.context.form_field.loader.clear(id)
-        return graphql.domain_to_form_field(data)
+        with log.activity(f"deleting form field {id}"):
+            data = await info.context.form_field.service.delete(
+                proto.DeleteFormField(_id=id)
+            )
+            info.context.form_field.loader.clear(id)
+            log.info(f"deleted form field {id}")
+            return graphql.domain_to_form_field(data)

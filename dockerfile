@@ -33,4 +33,5 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache \
     poetry install --without=dev
 
+ENV STRAWBERRY_DISABLE_RICH_ERRORS=1
 CMD ["poetry", "run", "gunicorn", "main:app", "--bind", "0.0.0.0:8080", "--worker-class", "aiohttp.GunicornWebWorker"]

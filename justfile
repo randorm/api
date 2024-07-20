@@ -20,7 +20,7 @@ test path="./src/tests" n_workers="8":
     docker stop randorm-api-tests-mongo
 
 run-server n_workers="1":
-    poetry run gunicorn main:app --bind 0.0.0.0:8080 --workers {{ n_workers }} --worker-class aiohttp.GunicornWebWorker
+    poetry run gunicorn main:app --bind localhost:8080 --workers {{ n_workers }} --worker-class aiohttp.GunicornWebWorker
 
 docker-build:
     docker buildx build . -t randorm-api:latest

@@ -4,8 +4,8 @@ GraphQL Protocol implementations
 
 from src.adapter.external.graphql import (
     operation,
-    query,
     scalar,
+    schema,
     tool,
     type,
     update,

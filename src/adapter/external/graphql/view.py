@@ -1,8 +1,9 @@
 import strawberry as sb
+import ujson
 from strawberry.aiohttp.views import GraphQLView
 from strawberry.dataloader import DataLoader, DefaultCache
+from strawberry.http import GraphQLHTTPResponse
 
-from src.adapter.external.graphql.query import Query
 from src.adapter.external.graphql.tool.context import Context, DataContext
 from src.adapter.external.graphql.type.allocation import (
     AllocationType,
@@ -33,8 +34,6 @@ from src.service.preference import PreferenceService
 from src.service.room import RoomService
 from src.service.user import UserService
 
-GRAPHQL_SCHEMA = sb.Schema(query=Query)
-
 
 class CustomDefaultCache[K, T](DefaultCache[K, T]):
     def delete(self, key: K) -> None:
@@ -59,7 +58,7 @@ class RandormGraphQLView(GraphQLView):
         self._participant_service = participant_service
         self._preference_service = preference_service
         self._room_service = room_service
-        super().__init__(schema)
+        super().__init__(schema, debug=False)
 
     async def get_context(self, request, response):
         return Context(
@@ -148,3 +147,6 @@ class RandormGraphQLView(GraphQLView):
         response = await self._room_service.read_many(request)
 
         return [RoomType.from_pydantic(obj) for obj in response]
+
+    def encode_json(self, response_data: GraphQLHTTPResponse) -> str:
+        return ujson.dumps(response_data, ensure_ascii=False)

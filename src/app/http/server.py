@@ -1,6 +1,7 @@
 from aiohttp import web
 
-from src.adapter.external.graphql.view import GRAPHQL_SCHEMA, RandormGraphQLView
+from src.adapter.external.graphql.schema import SCHEMA
+from src.adapter.external.graphql.view import RandormGraphQLView
 from src.app.http.routes import oauth
 from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.allocation import AllocationService
@@ -33,7 +34,7 @@ def build_server(
         "*",
         "/graphql",
         RandormGraphQLView(
-            GRAPHQL_SCHEMA,
+            SCHEMA,
             user_service,
             allocation_service,
             form_field_service,
