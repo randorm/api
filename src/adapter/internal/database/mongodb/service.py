@@ -18,6 +18,7 @@ class MongoDBAdapter(
     proto.ParticipantDatabaseProtocol,
     proto.RoomDatabaseProtocol,
     proto.UserDatabaseProtocol,
+    proto.PreferenceDatabaseProtocol,
 ):
     _client: AsyncIOMotorClient
 
@@ -228,6 +229,36 @@ class MongoDBAdapter(
                 f"failed to delete allocation with id {allocation.id} with error: {e}"
             ) from e
 
+    async def read_many_allocations(
+        self,
+        allocations: list[proto.ReadAllocation],
+    ) -> list[domain.Allocation | None]:
+        ids = [allocation.id for allocation in allocations]
+        try:
+            documents = await models.AllocationDocument.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.AllocationResolver.validate_python(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectAlloctionException(
+                f"failed to reflect allocation type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadAllocationException(
+                f"failed to read allocations with ids {ids} with error: {e}"
+            ) from e
+
     async def create_form_field(
         self,
         form_field: proto.CreateFormField,
@@ -383,6 +414,36 @@ class MongoDBAdapter(
             document.multiple = source.multiple
 
         return document
+
+    async def read_many_form_fields(
+        self,
+        form_fields: list[proto.ReadFormField],
+    ) -> list[domain.FormField | None]:
+        ids = [form_field.id for form_field in form_fields]
+        try:
+            documents = await models.FormFieldDocument.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.FormFieldResolver.validate_python(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectFormFieldException(
+                f"failed to reflect form field type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadFormFieldException(
+                f"failed to read form fields with ids {ids} with error: {e}"
+            ) from e
 
     async def delete_form_field(
         self,
@@ -550,6 +611,36 @@ class MongoDBAdapter(
                 f"failed to delete answer with id {answer.id} with error: {e}"
             ) from e
 
+    async def read_many_answers(
+        self,
+        answers: list[proto.ReadAnswer],
+    ) -> list[domain.Answer | None]:
+        ids = [answer.id for answer in answers]
+        try:
+            documents = await models.AnswerDocument.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.AnswerResolver.validate_python(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadAnswerException(
+                f"failed to read answers with ids {ids} with error: {e}"
+            ) from e
+
     async def create_user(
         self,
         user: proto.CreateUser,
@@ -704,6 +795,36 @@ class MongoDBAdapter(
                 f"failed to delete user with id {user.id} with error: {e}"
             ) from e
 
+    async def read_many_users(
+        self,
+        users: list[proto.ReadUser],
+    ) -> list[domain.User | None]:
+        ids = [user.id for user in users]
+        try:
+            documents = await models.User.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.User.model_validate(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectUserException(
+                f"failed to reflect user type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadUserException(
+                f"failed to read users with ids {ids} with error: {e}"
+            ) from e
+
     async def create_room(
         self,
         room: proto.CreateRoom,
@@ -819,6 +940,36 @@ class MongoDBAdapter(
         except Exception as e:
             raise exception.DeleteRoomException(
                 f"failed to delete room with id {room.id} with error: {e}"
+            ) from e
+
+    async def read_many_rooms(
+        self,
+        rooms: list[proto.ReadRoom],
+    ) -> list[domain.Room | None]:
+        ids = [room.id for room in rooms]
+        try:
+            documents = await models.Room.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.Room.model_validate(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectRoomException(
+                f"failed to reflect room type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadRoomException(
+                f"failed to read rooms with ids {ids} with error: {e}"
             ) from e
 
     async def create_participant(
@@ -961,6 +1112,36 @@ class MongoDBAdapter(
                 f"failed to delete participant with id {participant.id} with error: {e}"
             ) from e
 
+    async def read_many_participants(
+        self,
+        participants: list[proto.ReadParticipant],
+    ) -> list[domain.Participant | None]:
+        ids = [participant.id for participant in participants]
+        try:
+            documents = await models.ParticipantDocument.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.ParticipantResolver.validate_python(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadParticipantException(
+                f"failed to read participants with ids {ids} with error: {e}"
+            ) from e
+
     async def create_preference(
         self, preference: proto.CreatePreference
     ) -> domain.Preference:
@@ -1067,4 +1248,34 @@ class MongoDBAdapter(
         except Exception as e:
             raise exception.DeletePreferenceException(
                 f"failed to delete preference with id {preference.id} with error: {e}"
+            ) from e
+
+    async def read_many_preferences(
+        self,
+        preferences: list[proto.ReadPreference],
+    ) -> list[domain.Preference | None]:
+        ids = [preference.id for preference in preferences]
+        try:
+            documents = await models.Preference.find_many(
+                {"_id": {"$in": ids}},
+                with_children=True,
+            ).to_list()
+
+            aligned = {document.id: document for document in documents}
+
+            return [
+                (
+                    domain.Preference.model_validate(document)
+                    if (document := aligned.get(id)) is not None
+                    else None
+                )
+                for id in ids
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadPreferenceException(
+                f"failed to read preferences with ids {ids} with error: {e}"
             ) from e

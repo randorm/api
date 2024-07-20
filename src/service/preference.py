@@ -41,3 +41,29 @@ class PreferenceService(BaseService):
             raise service_exception.DeletePreferenceException(
                 "service failed to delete preference"
             ) from e
+
+    async def read_many(
+        self, preferences: list[proto.ReadPreference]
+    ) -> list[domain.Preference]:
+        try:
+            documents = await self._repo.read_many_preferences(preferences)
+            results = []
+            for request, response in zip(preferences, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadPreferenceException(
+                        f"failed to read preference {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadPreferenceException(
+                "failed to read preferences"
+            ) from e
+        except Exception as e:
+            raise service_exception.ReadPreferenceException(
+                "failed to read preferences"
+            ) from e

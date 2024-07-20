@@ -41,3 +41,29 @@ class AllocationService(BaseService):
             raise service_exception.DeleteAllocationException(
                 "failed to delete allocation"
             ) from e
+
+    async def read_many(
+        self, allocations: list[proto.ReadAllocation]
+    ) -> list[domain.Allocation]:
+        try:
+            documents = await self._repo.read_many_allocations(allocations)
+            results = []
+            for request, response in zip(allocations, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadAllocationException(
+                        f"failed to read allocation {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadAllocationException(
+                "failed to read allocations"
+            ) from e
+        except Exception as e:
+            raise service_exception.ReadAllocationException(
+                "failed to read allocations"
+            ) from e

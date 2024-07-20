@@ -68,3 +68,6 @@ class UserDatabaseProtocol(ABC):
 
     @abstractmethod
     async def delete_user(self, user: DeleteUser) -> User: ...
+
+    @abstractmethod
+    async def read_many_users(self, users: list[ReadUser]) -> list[User | None]: ...

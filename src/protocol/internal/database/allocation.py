@@ -62,7 +62,7 @@ class ReadAllocation(BaseModel):
 
 
 class UpdateAllocation(ExcludeFieldMixin, BaseAllocation):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     # optinal fields
     name: str | None = Field(default=None)
     due: datetime.datetime | None = Field(default=None)
@@ -90,3 +90,8 @@ class AllocationDatabaseProtocol(ABC):
 
     @abstractmethod
     async def delete_allocation(self, allocation: DeleteAllocation) -> Allocation: ...
+
+    @abstractmethod
+    async def read_many_allocations(
+        self, allocations: list[ReadAllocation]
+    ) -> list[Allocation | None]: ...

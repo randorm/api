@@ -41,3 +41,23 @@ class RoomService(BaseService):
             raise service_exception.DeleteRoomException(
                 "service failed to delete room"
             ) from e
+
+    async def read_many(self, rooms: list[proto.ReadRoom]) -> list[domain.Room]:
+        try:
+            documents = await self._repo.read_many_rooms(rooms)
+            results = []
+            for request, response in zip(rooms, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadRoomException(
+                        f"failed to read room {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadRoomException("failed to read rooms") from e
+        except Exception as e:
+            raise service_exception.ReadRoomException("failed to read rooms") from e

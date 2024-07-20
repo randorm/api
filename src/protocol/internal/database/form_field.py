@@ -37,7 +37,7 @@ class ReadFormField(BaseModel):
 
 
 class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     # optional fields
     required: bool | None = Field(default=None)
     frozen: bool | None = Field(default=None)
@@ -58,7 +58,7 @@ class UpdateChoiceOption(ChoiceOption):
 
 
 class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     # optional fields
     required: bool | None = Field(default=None)
     frozen: bool | None = Field(default=None)
@@ -105,7 +105,7 @@ class ReadAnswer(BaseModel):
 
 
 class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     text: str | None = Field(default=None)
     text_entities: set[FormatEntity] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
@@ -114,7 +114,7 @@ class UpdateTextAnswer(ExcludeFieldMixin, TextAnswer):
 
 
 class UpdateChoiceAnswer(ExcludeFieldMixin, ChoiceAnswer):
-    id: ObjectID = Field(alias="_id")
+    id: ObjectID = Field(alias="_id")  # type: ignore
     option_indexes: set[int] | None = Field(default=None)
     field_id: ObjectID | None = Field(default=None)
     # exclude
@@ -147,6 +147,11 @@ class FormFieldDatabaseProtocol(ABC):
     async def delete_form_field(self, form_field: DeleteFormField) -> FormField: ...
 
     @abstractmethod
+    async def read_many_form_fields(
+        self, form_fields: list[ReadFormField]
+    ) -> list[FormField | None]: ...
+
+    @abstractmethod
     async def create_answer(self, answer: CreateAnswer) -> Answer: ...
 
     @abstractmethod
@@ -157,3 +162,8 @@ class FormFieldDatabaseProtocol(ABC):
 
     @abstractmethod
     async def delete_answer(self, answer: DeleteAnswer) -> Answer: ...
+
+    @abstractmethod
+    async def read_many_answers(
+        self, answers: list[ReadAnswer]
+    ) -> list[Answer | None]: ...

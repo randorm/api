@@ -74,3 +74,8 @@ class ParticipantDatabaseProtocol(ABC):
     async def delete_participant(
         self, participant: DeleteParticipant
     ) -> domain.Participant: ...
+
+    @abstractmethod
+    async def read_many_participants(
+        self, participants: list[ReadParticipant]
+    ) -> list[domain.Participant | None]: ...

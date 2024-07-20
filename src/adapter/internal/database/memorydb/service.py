@@ -196,6 +196,14 @@ class MemoryDBAdapter(
                 f"failed to delete allocation with id {allocation.id} with error: {e}"
             ) from e
 
+    async def read_many_allocations(
+        self, allocations: list[proto.ReadAllocation]
+    ) -> list[domain.Allocation | None]:
+        return [
+            self._allocation_collection.get(allocation.id, None)
+            for allocation in allocations
+        ]
+
     async def create_form_field(
         self,
         form_field: proto.CreateFormField,
@@ -355,6 +363,14 @@ class MemoryDBAdapter(
             document.multiple = source.multiple
 
         return document
+
+    async def read_many_form_fields(
+        self, form_fields: list[proto.ReadFormField]
+    ) -> list[domain.FormField | None]:
+        return [
+            self._form_field_collection.get(form_field.id, None)
+            for form_field in form_fields
+        ]
 
     async def delete_form_field(
         self,
@@ -527,6 +543,11 @@ class MemoryDBAdapter(
                 f"failed to delete answer with id {answer.id} with error: {e}"
             ) from e
 
+    async def read_many_answers(
+        self, answers: list[proto.ReadAnswer]
+    ) -> list[domain.Answer | None]:
+        return [self._answer_collection.get(answer.id, None) for answer in answers]
+
     async def create_user(
         self,
         user: proto.CreateUser,
@@ -696,6 +717,11 @@ class MemoryDBAdapter(
                 f"failed to delete user with id {user.id} with error: {e}"
             ) from e
 
+    async def read_many_users(
+        self, users: list[proto.ReadUser]
+    ) -> list[domain.User | None]:
+        return [self._user_collection.get(user.id, None) for user in users]
+
     async def create_room(
         self,
         room: proto.CreateRoom,
@@ -823,6 +849,11 @@ class MemoryDBAdapter(
             raise exception.DeleteRoomException(
                 f"failed to delete room with id {room.id} with error: {e}"
             ) from e
+
+    async def read_many_rooms(
+        self, rooms: list[proto.ReadRoom]
+    ) -> list[domain.Room | None]:
+        return [self._room_collection.get(room.id, None) for room in rooms]
 
     async def create_participant(
         self, participant: proto.CreateParticipant
@@ -956,6 +987,14 @@ class MemoryDBAdapter(
                 f"failed to delete participant with id {participant.id} with error: {e}"
             ) from e
 
+    async def read_many_participants(
+        self, participants: list[proto.ReadParticipant]
+    ) -> list[domain.Participant | None]:
+        return [
+            self._participant_collection.get(participant.id, None)
+            for participant in participants
+        ]
+
     async def create_preference(
         self,
         preference: proto.CreatePreference,
@@ -1073,3 +1112,11 @@ class MemoryDBAdapter(
             raise exception.DeletePreferenceException(
                 f"failed to delete preference with id {preference.id} with error: {e}"
             ) from e
+
+    async def read_many_preferences(
+        self, preferences: list[proto.ReadPreference]
+    ) -> list[domain.Preference | None]:
+        return [
+            self._preference_collection.get(preference.id, None)
+            for preference in preferences
+        ]

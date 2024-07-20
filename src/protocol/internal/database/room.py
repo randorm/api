@@ -44,3 +44,6 @@ class RoomDatabaseProtocol(ABC):
 
     @abstractmethod
     async def delete_room(self, room: DeleteRoom) -> Room: ...
+
+    @abstractmethod
+    async def read_many_rooms(self, rooms: list[ReadRoom]) -> list[Room | None]: ...

@@ -1,12 +1,8 @@
-import os
-
 from aiohttp import web
-from dotenv import load_dotenv
 
-from src.adapter.external.auth.telegram import TelegramOauthAdapter
 from src.adapter.external.graphql.view import GRAPHQL_SCHEMA, RandormGraphQLView
-from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
 from src.app.http.routes import oauth
+from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.allocation import AllocationService
 from src.service.form_field import FormFieldService
 from src.service.participant import ParticipantService
@@ -15,28 +11,16 @@ from src.service.room import RoomService
 from src.service.user import UserService
 
 
-def init(argv):
-    load_dotenv()
-
+def build_server(
+    user_service: UserService,
+    allocation_service: AllocationService,
+    form_field_service: FormFieldService,
+    participant_service: ParticipantService,
+    preference_service: PreferenceService,
+    room_service: RoomService,
+    oauth_adapter: OauthProtocol,
+):
     app = web.Application()
-
-    secret_token = os.getenv("SECRET_TOKEN")
-    if secret_token is None:
-        raise RuntimeError("SECRET_TOKEN is not set")
-
-    jwt_secret = os.getenv("JWT_SECRET")
-    if jwt_secret is None:
-        raise RuntimeError("JWT_SECRET is not set")
-
-    repo = MemoryDBAdapter()
-    user_service = UserService(repo)
-    allocation_service = AllocationService(repo)
-    form_field_service = FormFieldService(repo)
-    participant_service = ParticipantService(repo)
-    preference_service = PreferenceService(repo)
-    room_service = RoomService(repo)
-
-    oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
 
     oauth.OAuthRouter(
         user_form_redirect_url="http://localhost:8080/user/form",

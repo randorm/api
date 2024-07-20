@@ -114,45 +114,37 @@ class RandormGraphQLView(GraphQLView):
         )
 
     async def __load_users(self, ids: list[ObjectID]) -> list[UserType]:
-        return [
-            UserType.from_pydantic(await self._user_service.read(ReadUser(_id=id)))
-            for id in ids
-        ]
+        request = [ReadUser(_id=id) for id in ids]
+        response = await self._user_service.read_many(request)
+
+        return [UserType.from_pydantic(obj) for obj in response]
 
     async def __load_allocations(self, ids: list[ObjectID]) -> list[AllocationType]:  # type: ignore
-        return [
-            domain_to_allocation(
-                await self._allocation_service.read(ReadAllocation(_id=id))
-            )
-            for id in ids
-        ]
+        request = [ReadAllocation(_id=id) for id in ids]
+        response = await self._allocation_service.read_many(request)
+
+        return [domain_to_allocation(obj) for obj in response]
 
     async def __load_form_fields(self, ids: list[ObjectID]) -> list[FormFieldType]:  # type: ignore
-        return [
-            domain_to_form_field(
-                await self._form_field_service.read(ReadFormField(_id=id))
-            )
-            for id in ids
-        ]
+        request = [ReadFormField(_id=id) for id in ids]
+        response = await self._form_field_service.read_many(request)
+
+        return [domain_to_form_field(obj) for obj in response]
 
     async def __load_participants(self, ids: list[ObjectID]) -> list[ParticipantType]:  # type: ignore
-        return [
-            domain_to_participant(
-                await self._participant_service.read(ReadParticipant(_id=id))
-            )
-            for id in ids
-        ]
+        request = [ReadParticipant(_id=id) for id in ids]
+        response = await self._participant_service.read_many(request)
+
+        return [domain_to_participant(obj) for obj in response]
 
     async def __load_preferences(self, ids: list[ObjectID]) -> list[PreferenceType]:
-        return [
-            PreferenceType.from_pydantic(
-                await self._preference_service.read(ReadPreference(_id=id))
-            )
-            for id in ids
-        ]
+        request = [ReadPreference(_id=id) for id in ids]
+        response = await self._preference_service.read_many(request)
+
+        return [PreferenceType.from_pydantic(obj) for obj in response]
 
     async def __load_rooms(self, ids: list[ObjectID]) -> list[RoomType]:
-        return [
-            RoomType.from_pydantic(await self._room_service.read(ReadRoom(_id=id)))
-            for id in ids
-        ]
+        request = [ReadRoom(_id=id) for id in ids]
+        response = await self._room_service.read_many(request)
+
+        return [RoomType.from_pydantic(obj) for obj in response]

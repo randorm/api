@@ -48,3 +48,8 @@ class PreferenceDatabaseProtocol(ABC):
     async def delete_preference(
         self, preference: DeletePreference
     ) -> domain.Preference: ...
+
+    @abstractmethod
+    async def read_many_preferences(
+        self, preferences: list[ReadPreference]
+    ) -> list[domain.Preference | None]: ...

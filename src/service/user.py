@@ -8,18 +8,18 @@ from src.service.base import BaseService
 
 
 class UserService(BaseService):
-    def __init__(self, user_repository: proto.UserDatabaseProtocol):
-        self.__user_repository = user_repository
+    def __init__(self, repo: proto.UserDatabaseProtocol):
+        self.__repo = repo
 
     async def create(self, user: proto.CreateUser) -> domain.User:
-        users = await self.__user_repository.find_users(
+        users = await self.__repo.find_users(
             proto.FindUsersByTid(telegram_id=user.telegram_id)
         )
         if len(users) > 0:
             raise service_exception.CreateUserException("user already exists")
 
         try:
-            return await self.__user_repository.create_user(user)
+            return await self.__repo.create_user(user)
         except Exception as e:
             raise service_exception.CreateUserException(
                 "service failed to create user"
@@ -27,7 +27,7 @@ class UserService(BaseService):
 
     async def exists(self, user_tid: int) -> bool:
         try:
-            users = await self.__user_repository.find_users(
+            users = await self.__repo.find_users(
                 proto.FindUsersByTid(telegram_id=user_tid)
             )
             return len(users) > 0
@@ -38,7 +38,7 @@ class UserService(BaseService):
 
     async def find_by_telegram_id(self, user_tid: int) -> domain.User:
         try:
-            users = await self.__user_repository.find_users(
+            users = await self.__repo.find_users(
                 proto.FindUsersByTid(telegram_id=user_tid)
             )
             if len(users) > 0:
@@ -54,7 +54,7 @@ class UserService(BaseService):
 
     async def read(self, user: proto.ReadUser) -> domain.User:
         try:
-            return await self.__user_repository.read_user(user)
+            return await self.__repo.read_user(user)
         except Exception as e:
             raise service_exception.ReadUserException(
                 "service failed to read user"
@@ -62,7 +62,7 @@ class UserService(BaseService):
 
     async def update(self, user: proto.UpdateUser) -> domain.User:
         try:
-            return await self.__user_repository.update_user(user)
+            return await self.__repo.update_user(user)
         except Exception as e:
             raise service_exception.UpdateUserException(
                 "service failed to update user"
@@ -70,6 +70,26 @@ class UserService(BaseService):
 
     async def delete(self, user: proto.DeleteUser) -> domain.User:
         try:
-            return await self.__user_repository.delete_user(user)
+            return await self.__repo.delete_user(user)
         except Exception as e:
             raise DeleteUserException("service failed to delete user") from e
+
+    async def read_many(self, users: list[proto.ReadUser]) -> list[domain.User]:
+        try:
+            documents = await self.__repo.read_many_users(users)
+            results = []
+            for request, response in zip(users, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadUserException(
+                        f"failed to read user {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadUserException("failed to read users") from e
+        except Exception as e:
+            raise service_exception.ReadUserException("failed to read users") from e

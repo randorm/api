@@ -41,3 +41,29 @@ class ParticipantService(BaseService):
             raise service_exception.DeleteParticipantException(
                 "service failed to delete participant"
             ) from e
+
+    async def read_many(
+        self, participants: list[proto.ReadParticipant]
+    ) -> list[domain.Participant]:
+        try:
+            documents = await self._repo.read_many_participants(participants)
+            results = []
+            for request, response in zip(participants, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadParticipantException(
+                        f"failed to read participant {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadParticipantException(
+                "failed to read participants"
+            ) from e
+        except Exception as e:
+            raise service_exception.ReadParticipantException(
+                "failed to read participants"
+            ) from e

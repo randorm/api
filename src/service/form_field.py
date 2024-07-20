@@ -41,3 +41,29 @@ class FormFieldService(BaseService):
             raise service_exception.DeleteFormFieldException(
                 "service failed to delete form field"
             ) from e
+
+    async def read_many(
+        self, form_fields: list[proto.ReadFormField]
+    ) -> list[domain.FormField]:
+        try:
+            documents = await self._repo.read_many_form_fields(form_fields)
+            results = []
+            for request, response in zip(form_fields, documents, strict=True):
+                if response is None:
+                    raise service_exception.ReadFormFieldException(
+                        f"failed to read form field {request.id}"
+                    )
+
+                results.append(response)
+
+            return results
+        except service_exception.ServiceException as e:
+            raise e
+        except ValueError as e:  # raised by zip
+            raise service_exception.ReadFormFieldException(
+                "failed to read form fields"
+            ) from e
+        except Exception as e:
+            raise service_exception.ReadFormFieldException(
+                "failed to read form fields"
+            ) from e
