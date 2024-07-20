@@ -1,7 +1,5 @@
 ![Repo Poster](./.github/poster.png)
 
-Server-side of Randorm service, written in Python.
-
 ## Features
 - 🍓 GraphQL API powered by [Strawberry GraphQL](https://github.com/strawberry-graphql/strawberry)
 - 🤖 Telegram Bot powered by [aiogram ](https://github.com/aiogram/aiogram) 
