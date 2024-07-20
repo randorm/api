@@ -22,7 +22,7 @@ class Logger(LoguruLogger):
             raw=False,
             capture=True,
             patchers=[],
-            extra={"context": context, "correlation_id": None},
+            extra={"context": context, "correlation_id": ""},
         )
         logger_format = (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|"
@@ -49,25 +49,37 @@ class Logger(LoguruLogger):
     @property
     def cor_id(self) -> str | None:
         cor_id = COR_ID.get()
-        return cor_id.hex if cor_id else None
+        return cor_id.hex if cor_id is not None else ""
 
     def trace(self, message, *args, **kwargs):
-        super().trace(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().trace(message, *args, **kwargs)
 
     def debug(self, message, *args, **kwargs):
-        super().debug(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().debug(message, *args, **kwargs)
 
     def info(self, message, *args, **kwargs):
-        super().info(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().info(message, *args, **kwargs)
 
     def warning(self, message, *args, **kwargs):
-        super().warning(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().warning(message, *args, **kwargs)
 
     def error(self, message, *args, **kwargs):
-        super().error(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().error(message, *args, **kwargs)
 
     def critical(self, message, *args, **kwargs):
-        super().critical(message, *args, correlation_id=self.cor_id, **kwargs)
+        if self.cor_id:
+            kwargs["correlation_id"] = self.cor_id
+        super().critical(message, *args, **kwargs)
 
     @contextmanager
     def activity(self, name: str, with_traceback: bool = False, capture: bool = False):

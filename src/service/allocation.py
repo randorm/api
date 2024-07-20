@@ -62,7 +62,6 @@ class AllocationService(BaseService):
                 | proto.CreateRoomedAllocation
                 | proto.CreateClosedAllocation,
             ):
-
                 if not await common.check_participants_exist(
                     allocation, self._participant_repo
                 ):
