@@ -20,8 +20,6 @@ class BaseFormField(pydantic.BaseModel):
     updated_at: datetime.datetime
     deleted_at: datetime.datetime | None = pydantic.Field(default=None)
 
-    allocation_id: ObjectID
-
     kind: FormFieldKind
     required: bool
     frozen: bool

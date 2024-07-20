@@ -49,7 +49,6 @@ class UpdateTextFormField(ExcludeFieldMixin, TextFormField):
     ex: str | None = Field(default=None)
     # exclude
     creator_id: Literal[None] = None
-    allocation_id: Literal[None] = None
 
 
 class UpdateChoiceOption(ChoiceOption):
@@ -70,7 +69,6 @@ class UpdateChoiceFormField(ExcludeFieldMixin, ChoiceFormField):
     multiple: bool | None = Field(default=None)
     # exclude
     creator_id: Literal[None] = None
-    allocation_id: Literal[None] = None
 
 
 type UpdateFormField = UpdateTextFormField | UpdateChoiceFormField

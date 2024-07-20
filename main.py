@@ -29,10 +29,27 @@ async def app():
         raise RuntimeError("JWT_SECRET is not set")
 
     user_service = UserService(repo)
-    allocation_service = AllocationService(repo)
-    form_field_service = FormFieldService(repo)
-    participant_service = ParticipantService(repo)
-    preference_service = PreferenceService(repo)
+    allocation_service = AllocationService(
+        allocation_repo=repo,
+        form_field_repo=repo,
+        participant_repo=repo,
+        user_repo=repo,
+    )
+    form_field_service = FormFieldService(
+        allocation_repo=repo,
+        form_field_repo=repo,
+        user_repo=repo,
+    )
+    participant_service = ParticipantService(
+        allocatin_repo=repo,
+        participant_repo=repo,
+        room_repo=repo,
+        user_repo=repo,
+    )
+    preference_service = PreferenceService(
+        preference_repo=repo,
+        user_repo=repo,
+    )
     room_service = RoomService(repo)
 
     oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)

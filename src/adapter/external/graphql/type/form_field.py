@@ -26,9 +26,6 @@ class BaseFormFieldType:
     updated_at: sb.auto
     deleted_at: sb.auto
 
-    allocation_id: scalar.ObjectID
-    # allocation: sb.Private[AllocationType]
-
     kind: FormFieldKindType  # type: ignore
     required: sb.auto
     frozen: sb.auto

@@ -1,18 +1,32 @@
 import src.domain.exception.service as service_exception
 import src.domain.model as domain
-import src.protocol.internal.database.room as proto
+import src.protocol.internal.database as proto
+from src.service import common
 from src.service.base import BaseService
-
-# todo: define all business logic
 
 
 class RoomService(BaseService):
-    def __init__(self, repo: proto.RoomDatabaseProtocol):
-        self._repo = repo
+    def __init__(
+        self,
+        room_repo: proto.RoomDatabaseProtocol,
+        user_repo: proto.UserDatabaseProtocol,
+    ):
+        self._room_repo = room_repo
+        self._user_repo = user_repo
 
     async def create(self, room: proto.CreateRoom) -> domain.Room:
         try:
-            return await self._repo.create_room(room)
+            if not await common.check_creator_exist(room, self._user_repo):
+                raise service_exception.CreateRoomException("creator does not exist")
+
+            if not await common.check_editors_exist(room, self._user_repo):
+                raise service_exception.CreateRoomException(
+                    "one or more editors do not exist"
+                )
+
+            return await self._room_repo.create_room(room)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.CreateRoomException(
                 "service failed to create room"
@@ -20,7 +34,7 @@ class RoomService(BaseService):
 
     async def read(self, room: proto.ReadRoom) -> domain.Room:
         try:
-            return await self._repo.read_room(room)
+            return await self._room_repo.read_room(room)
         except Exception as e:
             raise service_exception.ReadRoomException(
                 "service failed to read room"
@@ -28,7 +42,14 @@ class RoomService(BaseService):
 
     async def update(self, room: proto.UpdateRoom) -> domain.Room:
         try:
-            return await self._repo.update_room(room)
+            if room.creator_id is not None:
+                raise service_exception.UpdateRoomException(
+                    "creator can not be changed"
+                )
+
+            return await self._room_repo.update_room(room)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.UpdateRoomException(
                 "service failed to update room"
@@ -36,7 +57,7 @@ class RoomService(BaseService):
 
     async def delete(self, room: proto.DeleteRoom) -> domain.Room:
         try:
-            return await self._repo.delete_room(room)
+            return await self._room_repo.delete_room(room)
         except Exception as e:
             raise service_exception.DeleteRoomException(
                 "service failed to delete room"
@@ -44,7 +65,7 @@ class RoomService(BaseService):
 
     async def read_many(self, rooms: list[proto.ReadRoom]) -> list[domain.Room]:
         try:
-            documents = await self._repo.read_many_rooms(rooms)
+            documents = await self._room_repo.read_many_rooms(rooms)
             results = []
             for request, response in zip(rooms, documents, strict=True):
                 if response is None:

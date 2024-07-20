@@ -1,7 +1,6 @@
 import src.domain.exception.service as service_exception
 import src.domain.model as domain
 import src.protocol.internal.database as proto
-from src.protocol.internal.database.allocation import ReadAllocation
 from src.service import common
 from src.service.base import BaseService
 
@@ -21,17 +20,19 @@ class AllocationService(BaseService):
 
     async def create(self, allocation: proto.CreateAllocation) -> domain.Allocation:
         try:
-            if not common.check_creator_exist(allocation, self._user_repo):
+            if not await common.check_creator_exist(allocation, self._user_repo):
                 raise service_exception.CreateAllocationException(
                     "creator does not exist"
                 )
 
-            if not common.check_editors_exist(allocation, self._user_repo):
+            if not await common.check_editors_exist(allocation, self._user_repo):
                 raise service_exception.CreateAllocationException(
                     "one or more editors do not exist"
                 )
 
-            if not common.check_form_fields_exist(allocation, self._form_field_repo):
+            if not await common.check_form_fields_exist(
+                allocation, self._form_field_repo
+            ):
                 raise service_exception.CreateAllocationException(
                     "one or more form fields does not exist"
                 )
@@ -50,7 +51,7 @@ class AllocationService(BaseService):
                 | proto.CreateRoomedAllocation
                 | proto.CreateClosedAllocation,
             ):
-                if not common.check_participants_exist(
+                if not await common.check_participants_exist(
                     allocation, self._participant_repo
                 ):
                     raise service_exception.CreateAllocationException(
@@ -77,7 +78,7 @@ class AllocationService(BaseService):
         try:
             try:
                 current = await self._allocation_repo.read_allocation(
-                    ReadAllocation(_id=allocation.id)
+                    proto.ReadAllocation(_id=allocation.id)
                 )
             except Exception as e:
                 raise service_exception.UpdateAllocationException(
@@ -90,14 +91,15 @@ class AllocationService(BaseService):
                 )
 
             # if allocation.editors_ids is not None:
-            #     if not common.check_editors_exist(allocation, self._user_repo):  # type: ignore
+            #     if not await common.check_editors_exist(allocation, self._user_repo):  # type: ignore
             #         raise service_exception.UpdateAllocationException(
             #             "one or more editors do not exist"
             #         )
 
             if allocation.form_fields_ids is not None:
-                if not common.check_form_fields_exist(
-                    allocation, self._form_field_repo  # type: ignore
+                if not await common.check_form_fields_exist(
+                    allocation,
+                    self._form_field_repo,  # type: ignore
                 ):
                     raise service_exception.UpdateAllocationException(
                         "one or more form fields does not exist"
@@ -109,6 +111,8 @@ class AllocationService(BaseService):
                 )
 
             return await self._allocation_repo.update_allocation(allocation)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.UpdateAllocationException(
                 "failed to update allocation"

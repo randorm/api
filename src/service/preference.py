@@ -1,18 +1,54 @@
 import src.domain.exception.service as service_exception
 import src.domain.model as domain
-import src.protocol.internal.database.preference as proto
+import src.protocol.internal.database as proto
+from src.service import common
 from src.service.base import BaseService
-
-# todo: define all business logic
 
 
 class PreferenceService(BaseService):
-    def __init__(self, repo: proto.PreferenceDatabaseProtocol):
-        self._repo = repo
+    def __init__(
+        self,
+        preference_repo: proto.PreferenceDatabaseProtocol,
+        user_repo: proto.UserDatabaseProtocol,
+    ):
+        self._preference_repo = preference_repo
+        self._user_repo = user_repo
 
     async def create(self, preference: proto.CreatePreference) -> domain.Preference:
         try:
-            return await self._repo.create_preference(preference)
+            if not await common.check_user_exist(preference, self._user_repo):
+                raise service_exception.CreatePreferenceException("user does not exist")
+
+            if not await common.check_target_exist(preference, self._user_repo):
+                raise service_exception.CreatePreferenceException(
+                    "target does not exist"
+                )
+
+            results = await self._preference_repo.find_preferences(
+                proto.FindPreference(
+                    user_id=preference.user_id, target_id=preference.target_id
+                )
+            )
+
+            for result in results:
+                if result.status == domain.PreferenceStatus.APPROVED:
+                    raise service_exception.CreatePreferenceException(
+                        "target user already approved this user"
+                    )
+
+                if result.status == domain.PreferenceStatus.REJECTED:
+                    raise service_exception.CreatePreferenceException(
+                        "target user already rejected this user"
+                    )
+
+                if result.status == domain.PreferenceStatus.PENDING:
+                    raise service_exception.CreatePreferenceException(
+                        "user already has pending preference"
+                    )
+
+            return await self._preference_repo.create_preference(preference)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.CreatePreferenceException(
                 "service failed to create preference"
@@ -20,7 +56,7 @@ class PreferenceService(BaseService):
 
     async def read(self, preference: proto.ReadPreference) -> domain.Preference:
         try:
-            return await self._repo.read_preference(preference)
+            return await self._preference_repo.read_preference(preference)
         except Exception as e:
             raise service_exception.ReadPreferenceException(
                 "service failed to read preference"
@@ -28,7 +64,31 @@ class PreferenceService(BaseService):
 
     async def update(self, preference: proto.UpdatePreference) -> domain.Preference:
         try:
-            return await self._repo.update_preference(preference)
+            try:
+                current = await self._preference_repo.read_preference(
+                    proto.ReadPreference(_id=preference.id)
+                )
+            except Exception as e:
+                raise service_exception.UpdatePreferenceException(
+                    "preference does not exist"
+                ) from e
+
+            if current.user_id is not None:
+                raise service_exception.UpdatePreferenceException("can not change user")
+
+            if current.target_id is not None:
+                raise service_exception.UpdatePreferenceException(
+                    "can not change target"
+                )
+
+            if not self.__check_preference_state_change(current, preference):
+                raise service_exception.UpdatePreferenceException(
+                    "invalid state transition"
+                )
+
+            return await self._preference_repo.update_preference(preference)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.UpdatePreferenceException(
                 "service failed to update preference"
@@ -36,7 +96,7 @@ class PreferenceService(BaseService):
 
     async def delete(self, preference: proto.DeletePreference) -> domain.Preference:
         try:
-            return await self._repo.delete_preference(preference)
+            return await self._preference_repo.delete_preference(preference)
         except Exception as e:
             raise service_exception.DeletePreferenceException(
                 "service failed to delete preference"
@@ -46,7 +106,7 @@ class PreferenceService(BaseService):
         self, preferences: list[proto.ReadPreference]
     ) -> list[domain.Preference]:
         try:
-            documents = await self._repo.read_many_preferences(preferences)
+            documents = await self._preference_repo.read_many_preferences(preferences)
             results = []
             for request, response in zip(preferences, documents, strict=True):
                 if response is None:
@@ -67,3 +127,22 @@ class PreferenceService(BaseService):
             raise service_exception.ReadPreferenceException(
                 "failed to read preferences"
             ) from e
+
+    def __check_preference_state_change(
+        self, current: domain.Preference, preference: proto.UpdatePreference
+    ) -> bool:
+        if preference.status is None:
+            return True
+
+        allowed_transitions = {
+            domain.PreferenceStatus.PENDING: [
+                domain.PreferenceStatus.APPROVED,
+                domain.PreferenceStatus.REJECTED,
+            ],
+            domain.PreferenceStatus.APPROVED: [
+                domain.PreferenceStatus.REJECTED,
+            ],
+            domain.PreferenceStatus.REJECTED: [],
+        }
+
+        return preference.status in allowed_transitions[current.status]

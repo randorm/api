@@ -28,6 +28,11 @@ class DeletePreference(BaseModel):
     id: domain.ObjectID = Field(alias="_id")
 
 
+class FindPreference(BaseModel):
+    user_id: domain.ObjectID
+    target_id: domain.ObjectID
+
+
 class PreferenceDatabaseProtocol(ABC):
     @abstractmethod
     async def create_preference(
@@ -53,3 +58,8 @@ class PreferenceDatabaseProtocol(ABC):
     async def read_many_preferences(
         self, preferences: list[ReadPreference]
     ) -> list[domain.Preference | None]: ...
+
+    @abstractmethod
+    async def find_preferences(
+        self, preference: FindPreference
+    ) -> list[domain.Preference]: ...

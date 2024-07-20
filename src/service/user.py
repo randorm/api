@@ -25,10 +25,10 @@ class UserService(BaseService):
                 "service failed to create user"
             ) from e
 
-    async def exists(self, user_tid: int) -> bool:
+    async def exists(self, user_telegram_id: int) -> bool:
         try:
             users = await self.__repo.find_users(
-                proto.FindUsersByTid(telegram_id=user_tid)
+                proto.FindUsersByTid(telegram_id=user_telegram_id)
             )
             return len(users) > 0
         except Exception as e:
@@ -45,7 +45,7 @@ class UserService(BaseService):
                 return users[0]
             else:
                 raise service_exception.ReadUserException("service failed to find user")
-        except service_exception.ReadUserException as e:
+        except service_exception.ServiceException as e:
             raise e
         except Exception as e:
             raise service_exception.ReadUserException(
@@ -62,7 +62,14 @@ class UserService(BaseService):
 
     async def update(self, user: proto.UpdateUser) -> domain.User:
         try:
+            if user.telegram_id is not None:
+                raise service_exception.UpdateUserException(
+                    "telegram_id can not be changed"
+                )
+
             return await self.__repo.update_user(user)
+        except service_exception.ServiceException as e:
+            raise e
         except Exception as e:
             raise service_exception.UpdateUserException(
                 "service failed to update user"

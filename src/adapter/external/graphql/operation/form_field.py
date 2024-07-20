@@ -127,7 +127,6 @@ class FormFieldMutation:
         root: FormFieldMutation,
         info: Info[FormFieldMutation],
         creator_id: scalar.ObjectID,
-        allocation_id: scalar.ObjectID,
         question: str,
         required: bool,
         frozen: bool,
@@ -139,7 +138,6 @@ class FormFieldMutation:
         with log.activity("creating new text form field"):
             request = proto.CreateTextFormField(
                 creator_id=creator_id,
-                allocation_id=allocation_id,
                 question=question,
                 required=required,
                 frozen=frozen,
@@ -162,7 +160,6 @@ class FormFieldMutation:
         root: FormFieldMutation,
         info: Info[FormFieldMutation],
         creator_id: scalar.ObjectID,
-        allocation_id: scalar.ObjectID,
         question: str,
         required: bool,
         frozen: bool,
@@ -174,7 +171,6 @@ class FormFieldMutation:
         with log.activity("creating new choice form field"):
             request = proto.CreateChoiceFormField(
                 creator_id=creator_id,
-                allocation_id=allocation_id,
                 question=question,
                 required=required,
                 frozen=frozen,

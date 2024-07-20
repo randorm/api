@@ -3,15 +3,7 @@ from datetime import datetime
 from typing import Any, Protocol
 
 import src.domain.model as domain
-from src.protocol.internal.database.form_field import (
-    FormFieldDatabaseProtocol,
-    ReadFormField,
-)
-from src.protocol.internal.database.participant import (
-    ParticipantDatabaseProtocol,
-    ReadParticipant,
-)
-from src.protocol.internal.database.user import ReadUser, UserDatabaseProtocol
+import src.protocol.internal.database as proto
 
 
 def _any_none(data: list[Any | None]) -> bool:
@@ -30,9 +22,9 @@ class WithCreator(Protocol):
     creator_id: domain.ObjectID
 
 
-async def check_creator_exist(obj: WithCreator, db: UserDatabaseProtocol) -> bool:
+async def check_creator_exist(obj: WithCreator, db: proto.UserDatabaseProtocol) -> bool:
     try:
-        data = await db.read_many_users([ReadUser(_id=obj.creator_id)])
+        data = await db.read_many_users([proto.ReadUser(_id=obj.creator_id)])
 
         if _any_none(data):
             return False
@@ -50,10 +42,10 @@ class WithEditors(Protocol):
     editors_ids: set[domain.ObjectID]
 
 
-async def check_editors_exist(obj: WithEditors, db: UserDatabaseProtocol) -> bool:
+async def check_editors_exist(obj: WithEditors, db: proto.UserDatabaseProtocol) -> bool:
     try:
         data = await db.read_many_users(
-            [ReadUser(_id=item) for item in obj.editors_ids]
+            [proto.ReadUser(_id=item) for item in obj.editors_ids]
         )
 
         if _any_none(data):
@@ -77,11 +69,11 @@ class WithFormFields(Protocol):
 
 
 async def check_form_fields_exist(
-    obj: WithFormFields, db: FormFieldDatabaseProtocol
+    obj: WithFormFields, db: proto.FormFieldDatabaseProtocol
 ) -> bool:
     try:
         data = await db.read_many_form_fields(
-            [ReadFormField(_id=item) for item in obj.form_fields_ids]
+            [proto.ReadFormField(_id=item) for item in obj.form_fields_ids]
         )
 
         if _any_none(data):
@@ -101,11 +93,11 @@ class WithParticipants(Protocol):
 
 
 async def check_participants_exist(
-    obj: WithParticipants, db: ParticipantDatabaseProtocol
+    obj: WithParticipants, db: proto.ParticipantDatabaseProtocol
 ) -> bool:
     try:
         data = await db.read_many_participants(
-            [ReadParticipant(_id=item) for item in obj.participants_ids]
+            [proto.ReadParticipant(_id=item) for item in obj.participants_ids]
         )
 
         if any(item is None for item in data):
@@ -113,6 +105,89 @@ async def check_participants_exist(
 
         # if _any_deleted(data):
         #     return False
+
+    except Exception:
+        return False
+    else:
+        return True
+
+
+class WithAllocation(Protocol):
+    allocation_id: domain.ObjectID
+
+
+async def check_allocation_exist(
+    obj: WithAllocation, db: proto.AllocationDatabaseProtocol
+) -> bool:
+    try:
+        data = await db.read_many_allocations(
+            [proto.ReadAllocation(_id=obj.allocation_id)]
+        )
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
+
+    except Exception:
+        return False
+    else:
+        return True
+
+
+class WithUser(Protocol):
+    user_id: domain.ObjectID
+
+
+async def check_user_exist(obj: WithUser, db: proto.UserDatabaseProtocol) -> bool:
+    try:
+        data = await db.read_many_users([proto.ReadUser(_id=obj.user_id)])
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
+    except Exception:
+        return False
+    else:
+        return True
+
+
+class WithRoom(Protocol):
+    room_id: domain.ObjectID
+
+
+async def check_room_exist(obj: WithRoom, db: proto.RoomDatabaseProtocol) -> bool:
+    try:
+        data = await db.read_many_rooms([proto.ReadRoom(_id=obj.room_id)])
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
+
+    except Exception:
+        return False
+    else:
+        return True
+
+
+class WithTarget(Protocol):
+    target_id: domain.ObjectID
+
+
+async def check_target_exist(obj: WithTarget, db: proto.UserDatabaseProtocol) -> bool:
+    try:
+        data = await db.read_many_users([proto.ReadUser(_id=obj.target_id)])
+
+        if _any_none(data):
+            return False
+
+        if _any_deleted(data):
+            return False
 
     except Exception:
         return False

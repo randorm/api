@@ -1164,6 +1164,26 @@ class MongoDBAdapter(
                 f"failed to create preference with error: {e}"
             ) from e
 
+    async def find_preferences(
+        self, preference: proto.FindPreference
+    ) -> list[domain.Preference]:
+        try:
+            documents = await models.Preference.find_many(
+                {"user_id": preference.user_id, "target_id": preference.target_id}
+            ).to_list()
+
+            return [
+                domain.Preference.model_validate(document) for document in documents
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.FindPreferenceException(
+                f"failed to find preferences with error: {e}"
+            ) from e
+
     async def read_preference(
         self, preference: proto.ReadPreference
     ) -> domain.Preference:

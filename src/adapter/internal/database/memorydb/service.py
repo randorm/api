@@ -1027,6 +1027,31 @@ class MemoryDBAdapter(
                 f"failed to create preference with error: {e}"
             ) from e
 
+    async def find_preferences(
+        self,
+        preference: proto.FindPreference,
+    ) -> list[domain.Preference]:
+        try:
+            if not isinstance(preference, BaseModel):
+                raise AttributeError("preference must be a pydantic model")
+
+            documents = self._preference_collection.values()
+
+            return [
+                domain.Preference.model_validate(document)
+                for document in documents
+                if document.user_id == preference.user_id
+                and document.target_id == preference.target_id
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectPreferenceException(
+                f"failed to reflect preference type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.FindPreferenceException(
+                f"failed to find preferences with error: {e}"
+            ) from e
+
     async def read_preference(
         self,
         preference: proto.ReadPreference,

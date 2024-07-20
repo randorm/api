@@ -60,6 +60,7 @@ from src.protocol.internal.database.participant import (
 from src.protocol.internal.database.preference import (
     CreatePreference,
     DeletePreference,
+    FindPreference,
     PreferenceDatabaseProtocol,
     ReadPreference,
     UpdatePreference,
