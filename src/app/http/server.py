@@ -14,6 +14,7 @@ from src.service.user import UserService
 
 
 def build_server(
+    base_url: str,
     service_secret_key: str,
     user_service: UserService,
     answer_service: AnswerService,
@@ -27,8 +28,8 @@ def build_server(
     app = web.Application()
 
     oauth.OAuthRouter(
-        user_form_redirect_url="http://localhost:8080/user/form",
-        user_profile_redirect_url="http://localhost:8080/user/profile",
+        user_form_redirect_url=f"{base_url}/form",
+        user_profile_redirect_url=f"{base_url}/profile",
         oauth_adapter=oauth_adapter,
         service=user_service,
     ).regiter_routers(app)

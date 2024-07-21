@@ -3,6 +3,7 @@ import json
 from aiohttp import web
 from pydantic import BaseModel
 
+from src.app.http.common import CORS_HEADERS
 from src.domain.exception.auth import (
     AuthException,
     UserAlreadyExistsException,
@@ -49,8 +50,26 @@ class OAuthRouter:
                     self.login_handler,
                     name="oauth_login",
                 ),
+                web.options(
+                    "/oauth/telegram/callback",
+                    self.options_handler,
+                    name="oauth_callback_router",
+                ),
+                web.options(
+                    "/oauth/telegram/register",
+                    self.options_handler,
+                    name="oauth_register_router",
+                ),
+                web.options(
+                    "/oauth/telegram/login",
+                    self.options_handler,
+                    name="oauth_login_router",
+                ),
             ]
         )
+
+    async def options_handler(self, request: web.Request) -> web.Response:
+        return web.Response(status=200, text="OK", headers=CORS_HEADERS)
 
     async def callback_handler(self, request: web.Request) -> web.Response:
         try:

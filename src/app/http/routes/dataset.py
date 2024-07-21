@@ -1,6 +1,7 @@
 import ujson
 from aiohttp import web
 
+from src.app.http.common import CORS_HEADERS
 from src.protocol.internal.database.user import ReadUser
 from src.service.answer import AnswerService
 from src.service.participant import ParticipantService
@@ -38,8 +39,21 @@ class DatasetRouter:
                     self.participants_handler,
                     name="dataset_participants_router",
                 ),
+                web.options(
+                    "/private/dataset/option",
+                    self.options_handler,
+                    name="dataset_option_router",
+                ),
+                web.options(
+                    "/private/dataset/answer",
+                    self.options_handler,
+                    name="dataset_answer_router",
+                ),
             ]
         )
+
+    async def options_handler(self, request: web.Request) -> web.Response:
+        return web.Response(status=200, text="OK", headers=CORS_HEADERS)
 
     async def answer_handler(self, request: web.Request) -> web.Response:
         secret_key = request.headers.get("X-Secret-Key")
