@@ -18,6 +18,7 @@ from src.adapter.external.graphql.operation.preference import (
     PreferenceMutation,
     PreferenceQuery,
 )
+from src.adapter.external.graphql.operation.recommentaions import RecommendationsQuery
 from src.adapter.external.graphql.operation.room import RoomMutation, RoomQuery
 from src.adapter.external.graphql.operation.user import UserMutation, UserQuery
 
@@ -31,6 +32,7 @@ class Query(
     PreferenceQuery,
     RoomQuery,
     UserQuery,
+    RecommendationsQuery,
 ): ...
 
 
