@@ -1,5 +1,7 @@
-import json
+from collections import OrderedDict
+from urllib.parse import urlencode
 
+import ujson
 from aiohttp import web
 from pydantic import BaseModel
 
@@ -25,15 +27,26 @@ class OAuthRouter:
 
     def __init__(
         self,
-        user_form_redirect_url: str,
-        user_profile_redirect_url: str,
+        register_url: str,
+        fallback_url: str,
         oauth_adapter: OauthProtocol,
         service: UserService,
     ):
-        self._user_form_redirect_url = user_form_redirect_url
-        self._user_profile_redirect_url = user_profile_redirect_url
+        self._register_url = register_url
+        self._fallback_url = fallback_url
         self._oauth_adapter = oauth_adapter
         self._service = service
+
+        self._exclude_query_keys = [
+            "redirect_url",
+            "hash",
+            "id",
+            "auth_date",
+            "first_name",
+            "last_name",
+            "username",
+            "photo_url",
+        ]
 
     def regiter_routers(self, app: web.Application):
         app.add_routes(
@@ -84,19 +97,18 @@ class OAuthRouter:
                 return web.Response(
                     status=302,
                     headers={
-                        "Location": self._user_form_redirect_url
-                        + "?"
-                        + request.query_string
+                        "Location": self._register_url + "?" + request.query_string
                     },
                 )
             except Exception as e:
                 log.error("failed to login user with exception: {}", e)
                 return web.Response(status=403, text="Callback data is malformed")
 
+            location = self._build_location(request.query)
             return web.Response(
                 status=302,
                 headers={
-                    "Location": self._user_profile_redirect_url,
+                    "Location": location,
                     "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
                 },
             )
@@ -108,15 +120,15 @@ class OAuthRouter:
             container = await self._oauth_adapter.register(payload)
         except UserAlreadyExistsException:
             return web.Response(
-                status=409, text=json.dumps({"msg": "user already exists"})
+                status=409, text=ujson.dumps({"msg": "user already exists"})
             )
         except AuthException as e:
-            return web.Response(status=400, text=json.dumps({"msg": str(e)}))
+            return web.Response(status=400, text=ujson.dumps({"msg": str(e)}))
 
         return web.Response(
             status=200,
             headers={
-                "Location": self._user_profile_redirect_url,
+                "Location": self._build_location(request.query),
                 "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
             },
         )
@@ -127,14 +139,26 @@ class OAuthRouter:
 
             container = await self._oauth_adapter.login(payload)
         except UserNotFoundException:
-            return web.Response(status=404, text=json.dumps({"msg": "user not found"}))
+            return web.Response(status=404, text=ujson.dumps({"msg": "user not found"}))
         except AuthException as e:
-            return web.Response(status=400, text=json.dumps({"msg": str(e)}))
+            return web.Response(status=400, text=ujson.dumps({"msg": str(e)}))
 
         return web.Response(
             status=200,
             headers={
-                "Location": self._user_profile_redirect_url,
+                "Location": self._build_location(request.query),
                 "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
             },
         )
+
+    def _build_location(self, query):
+        redirect_url = query.get("redirect_url", self._fallback_url)
+
+        query_data = OrderedDict()
+        for key, value in query.items():
+            if key in self._exclude_query_keys:
+                continue
+
+            query_data[key] = value
+        location = redirect_url + "?" + urlencode(query_data)
+        return location

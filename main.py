@@ -74,7 +74,8 @@ async def app():
     oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
 
     return build_server(
-        base_url=base_url,
+        register_url=base_url + "/register",
+        fallback_url=base_url,
         service_secret_key=service_secret_key,
         user_service=user_service,
         answer_service=answer_service,
