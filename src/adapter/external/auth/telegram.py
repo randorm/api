@@ -35,22 +35,6 @@ class TgOauthLoginCallback(BaseModel):
     photo_url: str | None
     hash: str
 
-    __field_order__ = [
-        "auth_date",
-        "first_name",
-        "id",
-        "last_name",
-        "photo_url",
-        "username",
-    ]
-
-    def to_data_string(self) -> str:
-        data_string = ""
-        for field in self.__field_order__:
-            data_string += f"{field}={getattr(self, field, "") or ""}\n"
-
-        return data_string
-
     def to_telegram_ordered_dict(self) -> OrderedDict:
         data = OrderedDict(
             id=self.id,
@@ -102,10 +86,20 @@ class TelegramOauthAdapter(OauthProtocol):
         self.__secret_token = secret_token
         self.__jwt_secret = jwt_secret
         self.__service = service
+        self.__verify_keys = [
+            "auth_date",
+            "first_name",
+            "id",
+            "last_name",
+            "photo_url",
+            "username",
+        ]
 
     def _validate_hash(self, data: Any) -> bool:
         init_data = sorted(parse_qsl(urlencode(data)))
-        data_check_string = "\n".join(f"{k}={v}" for k, v in init_data if k != "hash")
+        data_check_string = "\n".join(
+            f"{k}={v}" for k, v in init_data if k in self.__verify_keys
+        )
         hash_ = data["hash"]
 
         secret_key = sha256(self.__secret_token.encode())
