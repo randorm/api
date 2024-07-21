@@ -33,7 +33,7 @@ class MongoDBAdapter(
         self._client = AsyncIOMotorClient(dsn, **client_args)
 
         await bn.init_beanie(
-            self._client.db_name,
+            self._client.randorm,
             document_models=[
                 models.ActiveParticipant,
                 models.AllocatedParticipant,
