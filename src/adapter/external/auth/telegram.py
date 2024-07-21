@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-import hashlib
 import hmac
+from collections import OrderedDict
 from datetime import datetime
+from hashlib import sha256
 from typing import Any
+from urllib.parse import parse_qsl, urlencode
 
 import jwt
 from pydantic import BaseModel, ValidationError
@@ -29,7 +31,7 @@ class TgOauthLoginCallback(BaseModel):
     auth_date: datetime
     first_name: str | None
     last_name: str | None
-    username: str
+    username: str | None
     photo_url: str | None
     hash: str
 
@@ -48,6 +50,18 @@ class TgOauthLoginCallback(BaseModel):
             data_string += f"{field}={getattr(self, field, "") or ""}\n"
 
         return data_string
+
+    def to_telegram_ordered_dict(self) -> OrderedDict:
+        data = OrderedDict(
+            id=self.id,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            username=self.username,
+            photo_url=self.photo_url,
+            auth_date=self.auth_date,
+            hash=self.hash,
+        )
+        return data
 
 
 class TgOauthRegisterCallback(TgOauthLoginCallback):
@@ -89,22 +103,18 @@ class TelegramOauthAdapter(OauthProtocol):
         self.__jwt_secret = jwt_secret
         self.__service = service
 
-    def __check_hash(
-        self, data: TgOauthRegisterCallback | TgOauthLoginCallback
-    ) -> None:
-        signing = hmac.new(
-            self.__secret_token.encode(),
-            data.to_data_string().encode(),
-            hashlib.sha256,
-        )
+    def _validate_hash(self, data: Any) -> bool:
+        init_data = sorted(parse_qsl(urlencode(data)))
+        data_check_string = "\n".join(f"{k}={v}" for k, v in init_data if k != "hash")
+        hash_ = data["hash"]
 
-        if signing.hexdigest() != data.hash:
-            log.error("callback data validation faiked: hash mismatch")
-            raise auth_exception.InvalidCredentialsException(
-                "data is malformed since the hash does not match"
-            )
+        secret_key = sha256(self.__secret_token.encode())
 
-        log.debug("callback data validation passed")
+        calculated_hash = hmac.new(
+            key=secret_key.digest(), msg=data_check_string.encode(), digestmod=sha256
+        ).hexdigest()
+
+        return calculated_hash == hash_
 
     async def register(self, data: Any) -> TgOauthContainer:
         try:
@@ -113,8 +123,11 @@ class TelegramOauthAdapter(OauthProtocol):
                 data, from_attributes=True
             )
 
-            log.debug("checking callback data hash")
-            self.__check_hash(request)
+            if not self._validate_hash(request.to_telegram_ordered_dict()):
+                log.error(
+                    "failed to parse callback data with exception: invalid aiogram hash check"
+                )
+                raise auth_exception.InvalidCredentialsException("invalid hash")
 
             log.debug(f"creating new user with telegram_id={request.id}")
             user = await self.__service.create(
@@ -143,14 +156,32 @@ class TelegramOauthAdapter(OauthProtocol):
 
     async def login(self, data: Any) -> TgOauthContainer:
         try:
-            log.debug("building callback data from custom data")
-            request = TgOauthLoginCallback.model_validate(data, from_attributes=True)
-
             log.debug("checking callback data hash")
-            self.__check_hash(request)
+            try:
+                if not self._validate_hash(data):
+                    log.error(
+                        "failed to parse callback data with exception: invalid aiogram hash check"
+                    )
+                    raise auth_exception.InvalidCredentialsException("invalid hash")
 
+                log.debug("callback data hash is valid")
+
+                webapp_data = dict(parse_qsl(urlencode(data)))
+            except ValueError as e:
+                log.error("failed to parse callback data with exception: {}", e)
+                raise auth_exception.InvalidCredentialsException("invalid hash") from e
+
+            log.debug("building callback data from custom data")
+            request = TgOauthLoginCallback.model_validate(webapp_data)
+
+            log.debug("searching user by telegram id")
             user = await self.__service.find_by_telegram_id(request.id)
-        except (ValidationError, database_exception.ReflectUserException) as e:
+        except auth_exception.AuthException as e:
+            raise e
+        except service_exception.ReadUserException as e:
+            log.error("reading user failed with service exception: {}", e)
+            raise auth_exception.UserNotFoundException("reading user failed") from e
+        except ValidationError as e:
             log.error(
                 "failed to build callback data or reflect user data to read user with exception: {}",
                 e,
@@ -158,10 +189,7 @@ class TelegramOauthAdapter(OauthProtocol):
             raise auth_exception.InvalidCredentialsException(
                 "failed to reflect user data to read user"
             ) from e
-        except service_exception.ReadUserException as e:
-            log.error("reading user failed with service exception: {}", e)
-            raise auth_exception.UserNotFoundException("reading user failed") from e
-        except auth_exception.AuthException as e:
+        except Exception as e:
             log.error("authentiocation failed with auth exception: {}", e)
             raise e
 

@@ -11,6 +11,9 @@ from src.domain.exception.auth import (
 )
 from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.user import UserService
+from src.utils.logger.logger import Logger
+
+log = Logger("oauth-router")
 
 
 class UserCheckDTO(BaseModel):
@@ -72,23 +75,31 @@ class OAuthRouter:
         return web.Response(status=200, text="OK", headers=CORS_HEADERS)
 
     async def callback_handler(self, request: web.Request) -> web.Response:
-        try:
-            payload = request.query
+        with log.activity("callback_handler"):
+            try:
+                payload = request.query
 
-            container = await self._oauth_adapter.login(payload)
-        except UserNotFoundException:
+                container = await self._oauth_adapter.login(payload)
+            except UserNotFoundException:
+                return web.Response(
+                    status=302,
+                    headers={
+                        "Location": self._user_form_redirect_url
+                        + "?"
+                        + request.query_string
+                    },
+                )
+            except Exception as e:
+                log.error("failed to login user with exception: {}", e)
+                return web.Response(status=403, text="Callback data is malformed")
+
             return web.Response(
                 status=302,
-                headers={"Location": self._user_form_redirect_url},
+                headers={
+                    "Location": self._user_profile_redirect_url,
+                    "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
+                },
             )
-
-        return web.Response(
-            status=302,
-            headers={
-                "Location": self._user_profile_redirect_url,
-                "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
-            },
-        )
 
     async def register_handler(self, request: web.Request) -> web.Response:
         try:
