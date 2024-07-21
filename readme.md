@@ -8,6 +8,9 @@
 - 🦅 Core Models powered by [pydantic](https://github.com/pydantic/pydantic)
 - 🧙‍♂️ Logging powered by [loguru](https://github.com/Delgan/loguru)
 
+## Build Status
+[![Build and public image](https://github.com/randorm/api/actions/workflows/cicd.yaml/badge.svg)](https://github.com/randorm/api/actions/workflows/cicd.yaml)
+
 ## Conventions
 - [PEP 8](https://www.python.org/dev/peps/pep-0008/)
 - [ruff formatter](https://github.com/charliermarsh/ruff)
