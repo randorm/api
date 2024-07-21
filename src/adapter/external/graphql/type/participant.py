@@ -38,19 +38,19 @@ class BaseParticipantType:
     state: ParticipantStateType  # type: ignore
 
     viewed_ids: list[scalar.ObjectID]
-    viewed: list[resolver.LazyUserType] = sb.field(
+    viewed: list[resolver.LazyParticipantType] = sb.field(
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_viewed,
     )
 
     subscription_ids: list[scalar.ObjectID]
-    subscriptions: list[resolver.LazyUserType] = sb.field(
+    subscriptions: list[resolver.LazyParticipantType] = sb.field(
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_subscriptions,
     )
 
     subscribers_ids: list[scalar.ObjectID]
-    subscribers: list[resolver.LazyUserType] = sb.field(
+    subscribers: list[resolver.LazyParticipantType] = sb.field(
         permission_classes=[DefaultPermissions],
         resolver=resolver.load_subscribers,
     )

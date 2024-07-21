@@ -142,8 +142,8 @@ class WithViewed(Protocol):
 async def load_viewed(
     root: WithViewed,
     info: sb.Info[LazyContext, WithViewed],
-) -> list[LazyUserType]:
-    return await info.context.user.loader.load_many(root.viewed_ids)
+) -> list[LazyParticipantType]:
+    return await info.context.participant.loader.load_many(root.viewed_ids)
 
 
 class WithSubscriptions(Protocol):
@@ -153,8 +153,8 @@ class WithSubscriptions(Protocol):
 async def load_subscriptions(
     root: WithSubscriptions,
     info: sb.Info[LazyContext, WithSubscriptions],
-) -> list[LazyUserType]:
-    return await info.context.user.loader.load_many(root.subscription_ids)
+) -> list[LazyParticipantType]:
+    return await info.context.participant.loader.load_many(root.subscription_ids)
 
 
 class WithSubscribers(Protocol):
@@ -164,8 +164,8 @@ class WithSubscribers(Protocol):
 async def load_subscribers(
     root: WithSubscribers,
     info: sb.Info[LazyContext, WithSubscribers],
-) -> list[LazyUserType]:
-    return await info.context.user.loader.load_many(root.subscriber_ids)
+) -> list[LazyParticipantType]:
+    return await info.context.participant.loader.load_many(root.subscriber_ids)
 
 
 class WithRoom(Protocol):
