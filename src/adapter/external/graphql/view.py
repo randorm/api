@@ -6,17 +6,17 @@ from strawberry.http import GraphQLHTTPResponse
 
 from src.adapter.external.graphql.tool.context import Context, DataContext
 from src.adapter.external.graphql.type.allocation import (
-    AllocationType,
+    BaseAllocationType,
     domain_to_allocation,
 )
 from src.adapter.external.graphql.type.form_field import (
-    AnswerType,
-    FormFieldType,
+    BaseAnswerType,
+    BaseFormFieldType,
     domain_to_answer,
     domain_to_form_field,
 )
 from src.adapter.external.graphql.type.participant import (
-    ParticipantType,
+    BaseParticipantType,
     domain_to_participant,
 )
 from src.adapter.external.graphql.type.preference import PreferenceType
@@ -131,25 +131,27 @@ class RandormGraphQLView(GraphQLView):
 
         return [UserType.from_pydantic(obj) for obj in response]
 
-    async def __load_answers(self, ids: list[ObjectID]) -> list[AnswerType]:  # type: ignore
+    async def __load_answers(self, ids: list[ObjectID]) -> list[BaseAnswerType]:
         request = [ReadAnswer(_id=id) for id in ids]
         response = await self._answer_service.read_many(request)
 
         return [domain_to_answer(obj) for obj in response]
 
-    async def __load_allocations(self, ids: list[ObjectID]) -> list[AllocationType]:  # type: ignore
+    async def __load_allocations(self, ids: list[ObjectID]) -> list[BaseAllocationType]:
         request = [ReadAllocation(_id=id) for id in ids]
         response = await self._allocation_service.read_many(request)
 
         return [domain_to_allocation(obj) for obj in response]
 
-    async def __load_form_fields(self, ids: list[ObjectID]) -> list[FormFieldType]:  # type: ignore
+    async def __load_form_fields(self, ids: list[ObjectID]) -> list[BaseFormFieldType]:
         request = [ReadFormField(_id=id) for id in ids]
         response = await self._form_field_service.read_many(request)
 
         return [domain_to_form_field(obj) for obj in response]
 
-    async def __load_participants(self, ids: list[ObjectID]) -> list[ParticipantType]:  # type: ignore
+    async def __load_participants(
+        self, ids: list[ObjectID]
+    ) -> list[BaseParticipantType]:
         request = [ReadParticipant(_id=id) for id in ids]
         response = await self._participant_service.read_many(request)
 

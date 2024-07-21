@@ -19,7 +19,7 @@ class AllocationQuery:
     @sb.field(permission_classes=[DefaultPermissions])
     async def allocation(
         root: AllocationQuery, info: Info[AllocationQuery], id: scalar.ObjectID
-    ) -> graphql.AllocationType:  # type: ignore
+    ) -> graphql.BaseAllocationType:
         with log.activity(f"loading allocation {id}"):
             return await info.context.allocation.loader.load(id)
 
@@ -186,7 +186,7 @@ class AllocationMutation:
         creator_id: scalar.ObjectID | None = None,
         editors_ids: list[scalar.ObjectID] | None = None,
         participants_ids: list[scalar.ObjectID] | None = None,
-    ) -> graphql.AllocationType:  # type: ignore
+    ) -> graphql.BaseAllocationType:
         with log.activity(f"updating allocation {id}"):
             request = proto.UpdateAllocation.model_validate(
                 {
@@ -208,7 +208,7 @@ class AllocationMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_allocation(
         root: AllocationMutation, info: Info[AllocationMutation], id: scalar.ObjectID
-    ) -> graphql.AllocationType:  # type: ignore
+    ) -> graphql.BaseAllocationType:
         with log.activity(f"deleting allocation {id}"):
             data = await info.context.allocation.service.delete(
                 proto.DeleteAllocation(_id=id)

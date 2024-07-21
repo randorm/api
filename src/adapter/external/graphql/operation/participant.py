@@ -17,7 +17,7 @@ class ParticipantQuery:
     @sb.field(permission_classes=[DefaultPermissions])
     async def participant(
         root: ParticipantQuery, info: Info[ParticipantQuery], id: scalar.ObjectID
-    ) -> graphql.ParticipantType:  # type: ignore
+    ) -> graphql.BaseParticipantType:
         with log.activity(f"loading participant {id}"):
             return await info.context.participant.loader.load(id)
 
@@ -124,7 +124,7 @@ class ParticipantMutation:
         viewed_ids: list[scalar.ObjectID] | None = None,
         subscription_ids: list[scalar.ObjectID] | None = None,
         subscribers_ids: list[scalar.ObjectID] | None = None,
-    ) -> graphql.ParticipantType:  # type: ignore
+    ) -> graphql.BaseParticipantType:
         with log.activity(f"updating participant {id}"):
             request = proto.UpdateParticipant(
                 _id=id,
@@ -142,7 +142,7 @@ class ParticipantMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_participant(
         root: ParticipantMutation, info: Info[ParticipantMutation], id: scalar.ObjectID
-    ) -> graphql.ParticipantType:  # type: ignore
+    ) -> graphql.BaseParticipantType:
         with log.activity(f"deleting participant {id}"):
             data = await info.context.participant.service.delete(
                 proto.DeleteParticipant(_id=id)

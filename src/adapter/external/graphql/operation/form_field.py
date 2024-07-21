@@ -93,7 +93,7 @@ class ChoiceOptionInput: ...
 
 def choice_option_to_domain_list(
     options: Iterable[ChoiceOptionInput],
-) -> list[domain.ChoiceOption]:  # type: ignore
+) -> list[domain.ChoiceOption]:
     return [
         domain.ChoiceOption.model_validate(option, from_attributes=True)
         for option in options
@@ -118,7 +118,7 @@ class FormFieldQuery:
     @sb.field(permission_classes=[DefaultPermissions])
     async def form_field(
         root: FormFieldQuery, info: Info[FormFieldQuery], id: scalar.ObjectID
-    ) -> graphql.FormFieldType:  # type: ignore
+    ) -> graphql.BaseFormFieldType:
         with log.activity(f"loading form field {id}"):
             return await info.context.form_field.loader.load(id)
 
@@ -128,7 +128,7 @@ class AnswerQuery:
     @sb.field(permission_classes=[DefaultPermissions])
     async def answer(
         root: AnswerQuery, info: Info[AnswerQuery], id: scalar.ObjectID
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.BaseAnswerType:
         with log.activity(f"loading answer {id}"):
             return await info.context.answer.loader.load(id)
 
@@ -274,7 +274,7 @@ class FormFieldMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_form_field(
         root: FormFieldMutation, info: Info[FormFieldMutation], id: scalar.ObjectID
-    ) -> graphql.FormFieldType:  # type: ignore
+    ) -> graphql.BaseFormFieldType:
         with log.activity(f"deleting form field {id}"):
             data = await info.context.form_field.service.delete(
                 proto.DeleteFormField(_id=id)
@@ -294,7 +294,7 @@ class AnswerMutation:
         form_field_id: scalar.ObjectID,
         text: str,
         text_entities: list[FormatEntityInput] | None = None,
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.TextAnswerType:
         with log.activity("creating new text answer"):
             request = proto.CreateTextAnswer(
                 respondent_id=respondent_id,
@@ -318,7 +318,7 @@ class AnswerMutation:
         respondent_id: scalar.ObjectID,
         form_field_id: scalar.ObjectID,
         option_indexes: list[int],
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.ChoiceAnswerType:
         with log.activity("creating new choice answer"):
             request = proto.CreateChoiceAnswer(
                 respondent_id=respondent_id,
@@ -337,7 +337,7 @@ class AnswerMutation:
         id: scalar.ObjectID,
         text: str | None = None,
         text_entities: list[FormatEntityInput] | None = None,
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.TextAnswerType:
         with log.activity(f"updating text answer {id}"):
             request = proto.UpdateTextAnswer(
                 _id=id,
@@ -360,7 +360,7 @@ class AnswerMutation:
         info: Info[AnswerMutation],
         id: scalar.ObjectID,
         option_indexes: list[int] | None = None,
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.ChoiceAnswerType:
         with log.activity(f"updating choice answer {id}"):
             request = proto.UpdateChoiceAnswer(
                 _id=id,
@@ -375,7 +375,7 @@ class AnswerMutation:
     @sb.mutation(permission_classes=[DefaultPermissions])
     async def delete_answer(
         root: AnswerMutation, info: Info[AnswerMutation], id: scalar.ObjectID
-    ) -> graphql.AnswerType:  # type: ignore
+    ) -> graphql.BaseAnswerType:
         with log.activity(f"deleting answer {id}"):
             data = await info.context.answer.service.delete(proto.DeleteAnswer(_id=id))
             info.context.answer.loader.clear(id)

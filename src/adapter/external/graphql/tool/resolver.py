@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from src.adapter.external.graphql.tool.context import Context
     from src.adapter.external.graphql.type.allocation import AllocationType
     from src.adapter.external.graphql.type.form_field import (
+        AnswerType,
         ChoiceOptionType,
         FormFieldType,
     )
@@ -48,6 +49,11 @@ LazyParticipantType = Annotated[
 
 LazyChoiceOptionType = Annotated[
     "ChoiceOptionType",  # type: ignore
+    sb.lazy(module_path="src.adapter.external.graphql.type.form_field"),
+]
+
+LazyAnswerType = Annotated[
+    "AnswerType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.form_field"),
 ]
 
@@ -200,3 +206,15 @@ async def load_options(
         selected.append(form_field.options[option_idx])
 
     return selected
+
+
+class WithID(Protocol):
+    id: scalar.ObjectID  # should be used only for participant type
+
+
+async def load_participant_answers(
+    root: WithID, info: sb.Info[LazyContext, WithID]
+) -> list[LazyAnswerType]:
+    answers = await info.context.answer.service.read_all()
+    selected = [answer.id for answer in answers if answer.respondent_id == root.id]
+    return await info.context.answer.loader.load_many(selected)

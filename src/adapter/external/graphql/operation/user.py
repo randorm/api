@@ -23,7 +23,7 @@ class UserQuery:
     @sb.field(permission_classes=[DefaultPermissions])
     async def user(
         root: UserQuery, info: Info[UserQuery], id: scalar.ObjectID
-    ) -> UserType:  # type: ignore
+    ) -> UserType:
         with log.activity(f"loading user {id}"):
             return await info.context.user.loader.load(id)
 
@@ -34,7 +34,7 @@ class UserMutation:
     async def new_user(
         root: UserMutation,
         info: Info[UserMutation],
-        telegram_id: int,
+        telegram_id: scalar.BigInt,
         first_name: str,
         language_code: LanguageCodeType,  # type: ignore
         gender: GenderType,  # type: ignore

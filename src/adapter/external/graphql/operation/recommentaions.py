@@ -7,7 +7,7 @@ import strawberry as sb
 import src.domain.model as domain
 from src.adapter.external.graphql import scalar
 from src.adapter.external.graphql.tool.context import Info
-from src.adapter.external.graphql.type.participant import ParticipantType
+from src.adapter.external.graphql.type.participant import BaseParticipantType
 
 
 @sb.type
@@ -18,7 +18,7 @@ class RecommendationsQuery:
         info: Info[RecommendationsQuery],
         user_id: scalar.ObjectID,
         allocation_id: scalar.ObjectID,
-    ) -> list[ParticipantType]:  # type: ignore
+    ) -> list[BaseParticipantType]:
         participants = await info.context.participant.service.read_all()
 
         selected = [

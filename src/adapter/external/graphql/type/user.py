@@ -21,7 +21,7 @@ class ProfileType:
 @sb.experimental.pydantic.type(model=User)
 class UserType:
     id: scalar.ObjectID = sb.field(name="id")
-    telegram_id: sb.auto
+    telegram_id: scalar.BigInt = sb.field(name="telegramId")
     created_at: sb.auto
     updated_at: sb.auto
     deleted_at: sb.auto

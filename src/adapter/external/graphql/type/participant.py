@@ -55,6 +55,11 @@ class BaseParticipantType:
         resolver=resolver.load_subscribers,
     )
 
+    answers: list[resolver.LazyAnswerType] = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_participant_answers,
+    )
+
 
 @sb.experimental.pydantic.type(model=CreatingParticipant)
 class CreatingParticipantType(BaseParticipantType):
