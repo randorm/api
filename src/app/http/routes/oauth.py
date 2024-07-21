@@ -40,12 +40,12 @@ class OAuthRouter:
                     self.callback_handler,
                     name="oauth_callback",
                 ),
-                web.get(
+                web.post(
                     "/oauth/telegram/register",
                     self.register_handler,
                     name="oauth_register",
                 ),
-                web.get(
+                web.post(
                     "/oauth/telegram/login",
                     self.login_handler,
                     name="oauth_login",
@@ -78,7 +78,8 @@ class OAuthRouter:
             container = await self._oauth_adapter.login(payload)
         except UserNotFoundException:
             return web.Response(
-                status=302, headers={"Location": self._user_form_redirect_url}
+                status=302,
+                headers={"Location": self._user_form_redirect_url},
             )
 
         return web.Response(
