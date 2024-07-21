@@ -542,6 +542,19 @@ class MemoryDBAdapter(
     ) -> list[domain.Answer | None]:
         return [self._answer_collection.get(answer.id, None) for answer in answers]
 
+    async def read_all_answers(self) -> list[domain.Answer]:
+        try:
+            answers = self._answer_collection.values()
+            return [domain.AnswerResolver.validate_python(answer) for answer in answers]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadAnswerException(
+                f"failed to read all answers with error: {e}"
+            ) from e
+
     async def create_user(
         self,
         user: proto.CreateUser,
@@ -988,6 +1001,22 @@ class MemoryDBAdapter(
             self._participant_collection.get(participant.id, None)
             for participant in participants
         ]
+
+    async def read_all_participants(self) -> list[domain.Participant]:
+        try:
+            participants = self._participant_collection.values()
+            return [
+                domain.ParticipantResolver.validate_python(participant)
+                for participant in participants
+            ]
+        except (ValidationError, AttributeError) as e:
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            raise exception.ReadParticipantException(
+                f"failed to read all participants with error: {e}"
+            ) from e
 
     async def create_preference(
         self,

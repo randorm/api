@@ -169,6 +169,16 @@ class ParticipantService(BaseService):
                 "failed to read participants"
             ) from e
 
+    async def read_all(self) -> list[domain.Participant]:
+        try:
+            log.debug("reading all participants")
+            return await self._participant_repo.read_all_participants()
+        except Exception as e:
+            log.error("failed to read all participants with error: {}", e)
+            raise service_exception.ReadParticipantException(
+                "service failed to read all participants"
+            ) from e
+
     def __check_participant_state_change(
         self, current: domain.Participant, participant: proto.UpdateParticipant
     ) -> bool:

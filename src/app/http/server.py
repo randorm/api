@@ -2,7 +2,7 @@ from aiohttp import web
 
 from src.adapter.external.graphql.schema import SCHEMA
 from src.adapter.external.graphql.view import RandormGraphQLView
-from src.app.http.routes import oauth
+from src.app.http.routes import dataset, oauth
 from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.allocation import AllocationService
 from src.service.answer import AnswerService
@@ -14,6 +14,7 @@ from src.service.user import UserService
 
 
 def build_server(
+    service_secret_key: str,
     user_service: UserService,
     answer_service: AnswerService,
     allocation_service: AllocationService,
@@ -30,6 +31,13 @@ def build_server(
         user_profile_redirect_url="http://localhost:8080/user/profile",
         oauth_adapter=oauth_adapter,
         service=user_service,
+    ).regiter_routers(app)
+
+    dataset.DatasetRouter(
+        secret_key=service_secret_key,
+        answer_service=answer_service,
+        user_service=user_service,
+        participant_service=participant_service,
     ).regiter_routers(app)
 
     app.router.add_route(

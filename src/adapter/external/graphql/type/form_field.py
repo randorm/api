@@ -110,7 +110,7 @@ class ChoiceAnswerType(BaseAnswerType):
     kind: FormFieldKindType = sb.field(default=FormFieldKindType.CHOICE)  # type: ignore
 
     option_indexes: list[int]
-    options: sb.Private[list[ChoiceOptionType]]
+    options: list[ChoiceOptionType] = sb.field(resolver=resolver.load_options)
 
 
 AnswerType = sb.union("AnswerType", types=(TextAnswerType, ChoiceAnswerType))

@@ -165,3 +165,6 @@ class FormFieldDatabaseProtocol(ABC):
     async def read_many_answers(
         self, answers: list[ReadAnswer]
     ) -> list[Answer | None]: ...
+
+    @abstractmethod
+    async def read_all_answers(self) -> list[Answer]: ...

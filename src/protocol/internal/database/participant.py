@@ -79,3 +79,6 @@ class ParticipantDatabaseProtocol(ABC):
     async def read_many_participants(
         self, participants: list[ReadParticipant]
     ) -> list[domain.Participant | None]: ...
+
+    @abstractmethod
+    async def read_all_participants(self) -> list[domain.Participant]: ...

@@ -25,10 +25,7 @@ class MongoDBAdapter(
 ):
     _client: AsyncIOMotorClient
 
-    def __init__(self):
-        raise ValueError(
-            "MongoDBAdapter should be initialized with MongoDBAdapter.create method"
-        )
+    def __init__(self): ...
 
     @classmethod
     async def create(cls, dsn: str, **client_args: Any):
@@ -778,6 +775,28 @@ class MongoDBAdapter(
                 f"failed to read answers with ids {ids} with error: {e}"
             ) from e
 
+    async def read_all_answers(self) -> list[domain.Answer]:
+        try:
+            log.debug("reading all answers")
+            documents = await models.AnswerDocument.find_many(
+                {}, with_children=True
+            ).to_list()
+            log.info(f"read {len(documents)} answers")
+            return [
+                domain.AnswerResolver.validate_python(document)
+                for document in documents
+            ]
+        except (ValidationError, AttributeError) as e:
+            log.error("failed to reflect answer type with error: {}", e)
+            raise exception.ReflectAnswerException(
+                f"failed to reflect answer type with error: {e}"
+            ) from e
+        except Exception as e:
+            log.error("failed to read all answers with error: {}", e)
+            raise exception.ReadAnswerException(
+                f"failed to read all answers with error: {e}"
+            ) from e
+
     async def create_user(
         self,
         user: proto.CreateUser,
@@ -1414,6 +1433,29 @@ class MongoDBAdapter(
             log.error("failed to read participants with ids {} with error: {}", ids, e)
             raise exception.ReadParticipantException(
                 f"failed to read participants with ids {ids} with error: {e}"
+            ) from e
+
+    async def read_all_participants(self) -> list[domain.Participant]:
+        try:
+            log.debug("reading all participants")
+            documents = await models.ParticipantDocument.find_many(
+                {}, with_children=True
+            ).to_list()
+
+            log.info(f"read {len(documents)} participants")
+            return [
+                domain.ParticipantResolver.validate_python(document)
+                for document in documents
+            ]
+        except (ValidationError, AttributeError) as e:
+            log.error("failed to reflect participant type with error: {}", e)
+            raise exception.ReflectParticipantException(
+                f"failed to reflect participant type with error: {e}"
+            ) from e
+        except Exception as e:
+            log.error("failed to read all participants with error: {}", e)
+            raise exception.ReadParticipantException(
+                f"failed to read all participants with error: {e}"
             ) from e
 
     async def create_preference(

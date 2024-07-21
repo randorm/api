@@ -7,10 +7,14 @@ from src.adapter.external.graphql import scalar
 if TYPE_CHECKING:
     from src.adapter.external.graphql.tool.context import Context
     from src.adapter.external.graphql.type.allocation import AllocationType
-    from src.adapter.external.graphql.type.form_field import FormFieldType
+    from src.adapter.external.graphql.type.form_field import (
+        ChoiceOptionType,
+        FormFieldType,
+    )
     from src.adapter.external.graphql.type.participant import ParticipantType
     from src.adapter.external.graphql.type.room import RoomType
     from src.adapter.external.graphql.type.user import UserType
+
 
 LazyFormFieldType = Annotated[
     "FormFieldType",  # type: ignore
@@ -40,6 +44,11 @@ LazyRoomType = Annotated[
 LazyParticipantType = Annotated[
     "ParticipantType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.participant"),
+]
+
+LazyChoiceOptionType = Annotated[
+    "ChoiceOptionType",  # type: ignore
+    sb.lazy(module_path="src.adapter.external.graphql.type.form_field"),
 ]
 
 
@@ -173,3 +182,21 @@ async def load_target(
     info: sb.Info[LazyContext, WithTarget],
 ) -> LazyUserType:
     return await info.context.user.loader.load(root.target_id)
+
+
+class WithOptions(Protocol):
+    form_field_id: scalar.ObjectID
+    option_indexes: list[scalar.ObjectID]
+
+
+async def load_options(
+    root: WithOptions,
+    info: sb.Info[LazyContext, WithOptions],
+) -> list[LazyChoiceOptionType]:
+    form_field = await info.context.form_field.loader.load(root.form_field_id)
+
+    selected = []
+    for option_idx in root.option_indexes:
+        selected.append(form_field.options[option_idx])
+
+    return selected

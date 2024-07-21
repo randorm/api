@@ -94,7 +94,10 @@ class ChoiceOptionInput: ...
 def choice_option_to_domain_list(
     options: Iterable[ChoiceOptionInput],
 ) -> list[domain.ChoiceOption]:  # type: ignore
-    return [domain.ChoiceOption.model_validate(option) for option in options]
+    return [
+        domain.ChoiceOption.model_validate(option, from_attributes=True)
+        for option in options
+    ]
 
 
 @sb.experimental.pydantic.input(model=proto.UpdateChoiceOption, all_fields=True)

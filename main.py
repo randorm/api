@@ -4,7 +4,9 @@ import rich
 from dotenv import load_dotenv
 
 from src.adapter.external.auth.telegram import TelegramOauthAdapter
-from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
+
+# from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
+from src.adapter.internal.database.mongodb.service import MongoDBAdapter
 from src.app.http.server import build_server
 from src.service.allocation import AllocationService
 from src.service.answer import AnswerService
@@ -18,8 +20,8 @@ from src.service.user import UserService
 async def app():
     load_dotenv()
 
-    # repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
-    repo = MemoryDBAdapter()
+    repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
+    # repo = MemoryDBAdapter()
 
     secret_token = os.getenv("SECRET_TOKEN")
     if secret_token is None:
@@ -29,7 +31,12 @@ async def app():
     if jwt_secret is None:
         raise RuntimeError("JWT_SECRET is not set")
 
+    service_secret_key = os.getenv("SERVICE_SECRET_KEY")
+    if service_secret_key is None:
+        raise RuntimeError("SERVICE_SECRET_KEY is not set")
+
     user_service = UserService(repo)
+
     allocation_service = AllocationService(
         allocation_repo=repo,
         form_field_repo=repo,
@@ -63,6 +70,7 @@ async def app():
     oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
 
     return build_server(
+        service_secret_key,
         user_service,
         answer_service,
         allocation_service,

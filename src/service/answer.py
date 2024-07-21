@@ -18,6 +18,7 @@ class AnswerService:
 
     async def create(self, answer: proto.CreateAnswer) -> domain.Answer:
         try:
+            # todo: check dublicates
             log.debug("checking answer respondent existence")
 
             log.debug("checking answer form field existence")
@@ -162,6 +163,16 @@ class AnswerService:
         except Exception as e:
             log.error("failed to read answers with error: {}", e)
             raise service_exception.ReadAnswerException("failed to read answers") from e
+
+    async def read_all(self) -> list[domain.Answer]:
+        try:
+            log.debug("reading all answers")
+            return await self._form_field_repo.read_all_answers()
+        except Exception as e:
+            log.error("failed to read all answers with error: {}", e)
+            raise service_exception.ReadAnswerException(
+                "service failed to read all answers"
+            ) from e
 
     def __check_choice_answer(
         self,
