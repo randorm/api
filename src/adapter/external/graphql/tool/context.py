@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import aiohttp.web as web
 import strawberry as sb
 from strawberry.dataloader import DataLoader
 
@@ -27,6 +28,10 @@ class DataContext[LoaderType, ServiceType]:
 
 @dataclass
 class Context:
+    user_id: scalar.ObjectID | None
+    telegram_id: int | None
+    request: web.Request
+
     answer: DataContext[AnswerType, answer.AnswerService]  # type: ignore
     allocation: DataContext[AllocationType, AllocationService]  # type: ignore
     form_field: DataContext[FormFieldType, FormFieldService]  # type: ignore

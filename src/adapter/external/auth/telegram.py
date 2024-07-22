@@ -79,12 +79,12 @@ class TgOauthContainer(BaseModel, OAuthContainer):
 
 class TelegramOauthAdapter(OauthProtocol):
     __secret_token: str
-    __jwt_secret: str
+    _jwt_secret: str
     __service: UserService
 
     def __init__(self, secret_token: str, jwt_secret: str, service: UserService):
         self.__secret_token = secret_token
-        self.__jwt_secret = jwt_secret
+        self._jwt_secret = jwt_secret
         self.__service = service
         self.__verify_keys = [
             "auth_date",
@@ -145,7 +145,7 @@ class TelegramOauthAdapter(OauthProtocol):
             raise e
 
         return TgOauthContainer.construct(
-            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self.__jwt_secret
+            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self._jwt_secret
         )
 
     async def login(self, data: Any) -> TgOauthContainer:
@@ -188,7 +188,7 @@ class TelegramOauthAdapter(OauthProtocol):
             raise e
 
         return TgOauthContainer.construct(
-            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self.__jwt_secret
+            TgOauthDTO(id=user.id, telegram_id=user.telegram_id), self._jwt_secret
         )
 
     async def retrieve_user(self, data: TgOauthContainer) -> User:
@@ -202,7 +202,7 @@ class TelegramOauthAdapter(OauthProtocol):
 
             try:
                 log.debug("building dto from container")
-                dto = data.to_dto(self.__jwt_secret)
+                dto = data.to_dto(self._jwt_secret)
             except Exception as e:
                 log.error("failed to build dto from container with exception: {}", e)
                 raise auth_exception.InvalidCredentialsException(

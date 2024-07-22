@@ -53,6 +53,7 @@ def build_server(
         path="/graphql",
         handler=RandormGraphQLView(
             schema=SCHEMA,
+            oauth_adapter=oauth_adapter,
             user_service=user_service,
             allocation_service=allocation_service,
             form_field_service=form_field_service,

@@ -4,6 +4,7 @@ from src.adapter.external.graphql.operation.allocation import (
     AllocationMutation,
     AllocationQuery,
 )
+from src.adapter.external.graphql.operation.feed import FeedMutation
 from src.adapter.external.graphql.operation.form_field import (
     AnswerMutation,
     AnswerQuery,
@@ -45,6 +46,7 @@ class Mutation(
     PreferenceMutation,
     RoomMutation,
     UserMutation,
+    FeedMutation,
 ): ...
 
 

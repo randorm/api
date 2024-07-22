@@ -4,6 +4,7 @@ from strawberry.aiohttp.views import GraphQLView
 from strawberry.dataloader import DataLoader, DefaultCache
 from strawberry.http import GraphQLHTTPResponse
 
+from src.adapter.external.auth.telegram import TgOauthContainer
 from src.adapter.external.graphql.tool.context import Context, DataContext
 from src.adapter.external.graphql.type.allocation import (
     BaseAllocationType,
@@ -23,6 +24,7 @@ from src.adapter.external.graphql.type.preference import PreferenceType
 from src.adapter.external.graphql.type.room import RoomType
 from src.adapter.external.graphql.type.user import UserType
 from src.domain.model.scalar.object_id import ObjectID
+from src.protocol.external.auth.oauth import OauthProtocol
 from src.protocol.internal.database.allocation import ReadAllocation
 from src.protocol.internal.database.form_field import ReadAnswer, ReadFormField
 from src.protocol.internal.database.participant import ReadParticipant
@@ -36,6 +38,9 @@ from src.service.participant import ParticipantService
 from src.service.preference import PreferenceService
 from src.service.room import RoomService
 from src.service.user import UserService
+from src.utils.logger.logger import Logger
+
+log = Logger("graphql-view")
 
 
 class CustomDefaultCache[K, T](DefaultCache[K, T]):
@@ -48,6 +53,7 @@ class RandormGraphQLView(GraphQLView):
     def __init__(
         self,
         schema: sb.Schema,
+        oauth_adapter: OauthProtocol,
         user_service: UserService,
         allocation_service: AllocationService,
         form_field_service: FormFieldService,
@@ -56,6 +62,7 @@ class RandormGraphQLView(GraphQLView):
         preference_service: PreferenceService,
         room_service: RoomService,
     ):
+        self._oauth_adapter = oauth_adapter
         self._user_service = user_service
         self._allocation_service = allocation_service
         self._form_field_service = form_field_service
@@ -66,7 +73,21 @@ class RandormGraphQLView(GraphQLView):
         super().__init__(schema, debug=False)
 
     async def get_context(self, request, response):
+        token = request.headers.get("Authorization")
+        if not token:
+            token = request.cookies.get("AccessToken")
+
+        if token:
+            log.debug(f"token {token}")
+            dto = TgOauthContainer(jwt=token).to_dto(self._oauth_adapter._jwt_secret)  # type: ignore
+            log.debug(dto)
+        else:
+            dto = None
+
         return Context(
+            user_id=dto.id if dto else None,
+            telegram_id=dto.telegram_id if dto else None,
+            request=request,
             user=DataContext(
                 loader=DataLoader(
                     load_fn=self.__load_users,

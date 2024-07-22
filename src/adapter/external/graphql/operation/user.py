@@ -27,6 +27,13 @@ class UserQuery:
         with log.activity(f"loading user {id}"):
             return await info.context.user.loader.load(id)
 
+    @sb.field(permission_classes=[DefaultPermissions])
+    async def me(root: UserQuery, info: Info[UserQuery]) -> UserType:
+        with log.activity("loading user"):
+            if info.context.user_id is None:
+                raise Exception("User is not authenticated")
+            return await info.context.user.loader.load(info.context.user_id)
+
 
 @sb.type
 class UserMutation:
