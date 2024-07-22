@@ -20,9 +20,6 @@ from src.service.user import UserService
 async def app():
     load_dotenv()
 
-    repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
-    # repo = MemoryDBAdapter()
-
     telegram_token = os.getenv("TELEGRAM_TOKEN")
     if telegram_token is None:
         raise RuntimeError("TELEGRAM_TOKEN is not set")
@@ -47,10 +44,15 @@ async def app():
     if redis_dsn is None:
         raise RuntimeError("REDIS_DSN is not set")
 
+    mongo_dsn = os.getenv("MONGO_DSN")
+    if mongo_dsn is None:
+        raise RuntimeError("MONGO_DSN is not set")
+
     telegram_webhook_url = os.getenv("TELEGRAM_WEBHOOK_URL")
     if telegram_webhook_url is None:
         raise RuntimeError("TELEGRAM_WEBHOOK_URL is not set")
 
+    repo = await MongoDBAdapter.create(mongo_dsn)
     user_service = UserService(repo)
 
     allocation_service = AllocationService(
