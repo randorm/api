@@ -25,6 +25,7 @@ redis = { extras = ["hiredis"], version = "^5.0.7" }
 strawberry-graphql = { extras = ["debug-server"], version = "^0.236.0" }
 gunicorn = "^22.0.0"
 ujson = "^5.10.0"
+aiogram = "^3.10.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"     # formatter

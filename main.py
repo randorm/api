@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 from src.adapter.external.auth.telegram import TelegramOauthAdapter
 
-# from src.adapter.internal.database.mongodb.service import MongoDBAdapter
-from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
+# from src.adapter.internal.database.memorydb.service import MemoryDBAdapter
+from src.adapter.internal.database.mongodb.service import MongoDBAdapter
 from src.app.http.server import build_server
 from src.service.allocation import AllocationService
 from src.service.answer import AnswerService
@@ -20,12 +20,16 @@ from src.service.user import UserService
 async def app():
     load_dotenv()
 
-    # repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
-    repo = MemoryDBAdapter()
+    repo = await MongoDBAdapter.create("mongodb://localhost:27017/randorm")
+    # repo = MemoryDBAdapter()
 
-    secret_token = os.getenv("SECRET_TOKEN")
-    if secret_token is None:
-        raise RuntimeError("SECRET_TOKEN is not set")
+    telegram_token = os.getenv("TELEGRAM_TOKEN")
+    if telegram_token is None:
+        raise RuntimeError("TELEGRAM_TOKEN is not set")
+
+    telegram_secret = os.getenv("TELEGRAM_SECRET")
+    if telegram_secret is None:
+        raise RuntimeError("TELEGRAM_SECRET is not set")
 
     jwt_secret = os.getenv("JWT_SECRET")
     if jwt_secret is None:
@@ -38,6 +42,14 @@ async def app():
     base_url = os.getenv("BASE_URL")
     if base_url is None:
         raise RuntimeError("BASE_URL is not set")
+
+    redis_dsn = os.getenv("REDIS_DSN")
+    if redis_dsn is None:
+        raise RuntimeError("REDIS_DSN is not set")
+
+    telegram_webhook_url = os.getenv("TELEGRAM_WEBHOOK_URL")
+    if telegram_webhook_url is None:
+        raise RuntimeError("TELEGRAM_WEBHOOK_URL is not set")
 
     user_service = UserService(repo)
 
@@ -71,9 +83,13 @@ async def app():
         participant_repo=repo,
     )
 
-    oauth_adapter = TelegramOauthAdapter(secret_token, jwt_secret, user_service)
+    oauth_adapter = TelegramOauthAdapter(telegram_token, jwt_secret, user_service)
 
     return build_server(
+        telegram_token=telegram_token,
+        telegram_secret=telegram_secret,
+        webhook_url=telegram_webhook_url,
+        redis_dsn=redis_dsn,
         register_url=base_url + "/register",
         fallback_url=base_url,
         service_secret_key=service_secret_key,

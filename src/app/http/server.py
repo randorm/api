@@ -3,6 +3,8 @@ from aiohttp import web
 from src.adapter.external.graphql.schema import SCHEMA
 from src.adapter.external.graphql.view import RandormGraphQLView
 from src.app.http.routes import dataset, oauth
+from src.app.http.routes.telegram import TelegramRouter
+from src.app.http.telegram.bot import Telegram
 from src.protocol.external.auth.oauth import OauthProtocol
 from src.service.allocation import AllocationService
 from src.service.answer import AnswerService
@@ -16,7 +18,11 @@ from src.service.user import UserService
 def build_server(
     register_url: str,
     fallback_url: str,
+    webhook_url: str,
     service_secret_key: str,
+    telegram_token: str,
+    telegram_secret: str,
+    redis_dsn: str,
     user_service: UserService,
     answer_service: AnswerService,
     allocation_service: AllocationService,
@@ -43,18 +49,38 @@ def build_server(
     ).regiter_routers(app)
 
     app.router.add_route(
-        "*",
-        "/graphql",
-        RandormGraphQLView(
-            SCHEMA,
-            user_service,
-            allocation_service,
-            form_field_service,
-            answer_service,
-            participant_service,
-            preference_service,
-            room_service,
+        method="*",
+        path="/graphql",
+        handler=RandormGraphQLView(
+            schema=SCHEMA,
+            user_service=user_service,
+            allocation_service=allocation_service,
+            form_field_service=form_field_service,
+            answer_service=answer_service,
+            participant_service=participant_service,
+            preference_service=preference_service,
+            room_service=room_service,
         ),
     )
+
+    tg = Telegram(
+        token=telegram_token,
+        secret=telegram_secret,
+        redis_dsn=redis_dsn,
+        webhook_url=webhook_url,
+        user_service=user_service,
+        answer_service=answer_service,
+        allocation_service=allocation_service,
+        form_field_service=form_field_service,
+        participant_service=participant_service,
+        preference_service=preference_service,
+        room_service=room_service,
+    )
+
+    TelegramRouter(
+        tg.bot,
+        tg.dispatcher,
+        telegram_secret,
+    ).regiter_routers(app)
 
     return app
