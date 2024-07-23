@@ -88,8 +88,13 @@ class BaseAnswerType:
     updated_at: sb.auto
     deleted_at: sb.auto
 
-    form_field_id: scalar.ObjectID
     kind: FormFieldKindType  # type: ignore
+
+    form_field_id: scalar.ObjectID
+    form_field: resolver.LazyFormFieldType = sb.field(
+        permission_classes=[DefaultPermissions],
+        resolver=resolver.load_form_field,
+    )
 
     respondent_id: scalar.ObjectID
     respondent: resolver.LazyParticipantType = sb.field(

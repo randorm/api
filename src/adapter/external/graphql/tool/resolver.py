@@ -6,19 +6,23 @@ from src.adapter.external.graphql import scalar
 
 if TYPE_CHECKING:
     from src.adapter.external.graphql.tool.context import Context
-    from src.adapter.external.graphql.type.allocation import AllocationType
-    from src.adapter.external.graphql.type.form_field import (
-        AnswerType,
-        ChoiceOptionType,
-        FormFieldType,
+    from src.adapter.external.graphql.type.allocation import (
+        BaseAllocationType,
     )
-    from src.adapter.external.graphql.type.participant import ParticipantType
+    from src.adapter.external.graphql.type.form_field import (
+        BaseAnswerType,
+        BaseFormFieldType,
+        ChoiceOptionType,
+    )
+    from src.adapter.external.graphql.type.participant import (
+        BaseParticipantType,
+    )
     from src.adapter.external.graphql.type.room import RoomType
     from src.adapter.external.graphql.type.user import UserType
 
 
 LazyFormFieldType = Annotated[
-    "FormFieldType",  # type: ignore
+    "BaseFormFieldType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.form_field"),
 ]
 
@@ -33,7 +37,7 @@ LazyUserType = Annotated[
 ]
 
 LazyAllocationType = Annotated[
-    "AllocationType",  # type: ignore
+    "BaseAllocationType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.allocation"),
 ]
 
@@ -43,7 +47,7 @@ LazyRoomType = Annotated[
 ]
 
 LazyParticipantType = Annotated[
-    "ParticipantType",  # type: ignore
+    "BaseParticipantType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.participant"),
 ]
 
@@ -53,7 +57,7 @@ LazyChoiceOptionType = Annotated[
 ]
 
 LazyAnswerType = Annotated[
-    "AnswerType",  # type: ignore
+    "BaseAnswerType",  # type: ignore
     sb.lazy(module_path="src.adapter.external.graphql.type.form_field"),
 ]
 
@@ -218,3 +222,14 @@ async def load_participant_answers(
     answers = await info.context.answer.service.read_all()
     selected = [answer.id for answer in answers if answer.respondent_id == root.id]
     return await info.context.answer.loader.load_many(selected)
+
+
+class WithFormFieldId(Protocol):
+    form_field_id: scalar.ObjectID
+
+
+async def load_form_field(
+    root: WithFormFieldId,
+    info: sb.Info[LazyContext, WithFormFieldId],
+) -> LazyFormFieldType:
+    return await info.context.form_field.loader.load(root.form_field_id)
