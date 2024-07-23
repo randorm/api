@@ -145,10 +145,8 @@ class OAuthRouter:
 
         return web.Response(
             status=200,
-            headers={
-                "Location": self._build_location(request.query),
-                "Set-Cookie": f"AccessToken={container.to_string()}; HttpOnly",
-            },
+            text=ujson.dumps({"accessToken": container.to_string()}),
+            headers={"Content-Type": "application/json"},
         )
 
     def _build_location(self, query):
