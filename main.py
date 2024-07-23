@@ -22,17 +22,20 @@ log = Logger("main")
 
 
 async def notify_start():
-    version = os.getenv("APP_VERSION", "dev")
-    if version == "dev":
+    version = os.getenv("APP_VERSION", None)
+    log.info(f"version: {version}")
+    if version is None or version == "dev":
         return
 
     token = os.getenv("STATUS_TELEGRAM_BOT_TOKEN")
     if token is None:
         return
+    log.info("status token is present")
 
     chat = os.getenv("STATUS_CHAT_ID")
     if chat is None:
         return
+    log.info("status chat id is present")
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
@@ -48,6 +51,8 @@ async def notify_start():
                 resp.raise_for_status()
     except Exception as e:
         log.error("failed to notify about start: {}", e)
+    else:
+        log.info("successfully notified about start")
 
 
 async def app():

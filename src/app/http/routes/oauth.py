@@ -135,7 +135,7 @@ class OAuthRouter:
 
     async def login_handler(self, request: web.Request) -> web.Response:
         try:
-            payload = await request.json()
+            payload = request.query
 
             container = await self._oauth_adapter.login(payload)
         except UserNotFoundException:
