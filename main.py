@@ -1,5 +1,6 @@
 import os
 
+import aiohttp
 import rich
 from dotenv import load_dotenv
 
@@ -15,6 +16,38 @@ from src.service.participant import ParticipantService
 from src.service.preference import PreferenceService
 from src.service.room import RoomService
 from src.service.user import UserService
+from src.utils.logger.logger import Logger
+
+log = Logger("main")
+
+
+async def notify_start():
+    version = os.getenv("APP_VERSION", "dev")
+    if version == "dev":
+        return
+
+    token = os.getenv("STATUS_TELEGRAM_BOT_TOKEN")
+    if token is None:
+        return
+
+    chat = os.getenv("STATUS_CHAT_ID")
+    if chat is None:
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url,
+                data={
+                    "chat_id": chat,
+                    "text": f"🚀 API version <{version}> is online!",
+                },
+            ) as resp:
+                resp.raise_for_status()
+    except Exception as e:
+        log.error("failed to notify about start: {}", e)
 
 
 async def app():
@@ -86,6 +119,8 @@ async def app():
     )
 
     oauth_adapter = TelegramOauthAdapter(telegram_token, jwt_secret, user_service)
+
+    await notify_start()
 
     return build_server(
         telegram_token=telegram_token,
