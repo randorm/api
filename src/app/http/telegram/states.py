@@ -21,3 +21,5 @@ class States(StatesGroup):
 
     ask_gender = State()
     edit_gender = State()
+
+    confirm_registration = State()
